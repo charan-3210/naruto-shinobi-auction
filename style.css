@@ -1,0 +1,193 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0f0c;
+  color: white;
+}
+
+header {
+  text-align: center;
+  padding: 25px 15px;
+  background: linear-gradient(135deg, #151515, #251300);
+  border-bottom: 2px solid #ff9800;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+header p {
+  margin: 8px 0 0;
+  color: #bbb;
+}
+
+main {
+  width: 95%;
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+.card {
+  background: #171717;
+  border: 1px solid #333;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.35);
+}
+
+.card h2,
+.card h3 {
+  margin-top: 0;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
+  font-size: 16px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #ff9800;
+  color: black;
+}
+
+button:active {
+  transform: scale(.97);
+}
+
+button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.bid-card {
+  text-align: center;
+}
+
+#currentBid {
+  color: #ff9800;
+  font-size: 38px;
+}
+
+.character-card {
+  text-align: center;
+}
+
+.auction-label {
+  color: #ff4444;
+  font-weight: bold;
+}
+
+.character-image {
+  width: 150px;
+  height: 150px;
+  margin: 20px auto;
+  border-radius: 50%;
+  background: #242424;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 65px;
+  border: 3px solid #ff9800;
+}
+
+#characterName {
+  font-size: 32px;
+}
+
+#characterInfo {
+  color: #aaa;
+  font-size: 17px;
+}
+
+.bid-buttons {
+  margin-top: 20px;
+}
+
+.bid-buttons button {
+  min-width: 120px;
+}
+
+.sold {
+  background: #e53935;
+  color: white;
+}
+
+.next {
+  background: #2196f3;
+  color: white;
+}
+
+#gameMessage {
+  min-height: 25px;
+  color: #ffcc66;
+  font-weight: bold;
+}
+
+.team {
+  background: #222;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  border-left: 4px solid #ff9800;
+}
+
+.team-name {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.history-item {
+  padding: 12px;
+  border-bottom: 1px solid #333;
+}
+
+#joinMessage {
+  color: #ffcc66;
+}
+
+@media (max-width: 650px) {
+
+  .top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  header h1 {
+    font-size: 23px;
+  }
+
+  #characterName {
+    font-size: 25px;
+  }
+
+  .bid-buttons button {
+    width: 100%;
+    margin: 5px 0;
+  }
+
+}
