@@ -20,83 +20,31 @@ import {
 
 
 // =====================================================
-// FIREBASE
+// FIREBASE CONFIG
 // =====================================================
 
 const firebaseConfig = {
-
   apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
-
-  authDomain:
-    "naruto-shinobi-auction.firebaseapp.com",
-
-  databaseURL:
-    "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
-
-  projectId:
-    "naruto-shinobi-auction",
-
-  storageBucket:
-    "naruto-shinobi-auction.firebasestorage.app",
-
-  messagingSenderId:
-    "187952563869",
-
-  appId:
-    "1:187952563869:web:839ac2add9ae0f5835f674",
-
-  measurementId:
-    "G-N3QGHDB240"
+  authDomain: "naruto-shinobi-auction.firebaseapp.com",
+  databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
+  projectId: "naruto-shinobi-auction",
+  storageBucket: "naruto-shinobi-auction.firebasestorage.app",
+  messagingSenderId: "187952563869",
+  appId: "1:187952563869:web:839ac2add9ae0f5835f674",
+  measurementId: "G-N3QGHDB240"
 };
 
 
-// Start Firebase
-
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getDatabase(app);
-
-const auth =
-  getAuth(app);
-
-
 // =====================================================
-// VARIABLES
+// FIREBASE START
 // =====================================================
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 let user = null;
-
 let myTeamId = null;
-
-
-// =====================================================
-// GAME SETTINGS
-// =====================================================
-
-// Money is stored in LAKHS.
-//
-// 100 Lakhs = 1 Crore
-//
-// Starting budget:
-// 2000 Lakhs = ₹20 Cr
-
-const STARTING_BUDGET = 2000;
-
-const MAX_PLAYERS = 4;
-
-const STARTING_BID = 100;
-
-// ₹1 Cr → ₹10 Cr
-// Increase by ₹50 Lakhs
-
-const SMALL_INCREMENT = 50;
-
-// Above ₹10 Cr
-// Increase by ₹1 Cr
-
-const BIG_INCREMENT = 100;
 
 
 // =====================================================
@@ -169,24 +117,45 @@ const characters = [
 
 
 // =====================================================
-// AUTHENTICATION
+// AUCTION RULES
+// =====================================================
+
+// Money is stored in LAKHS.
+//
+// ₹1 Cr  = 100 Lakhs
+// ₹10 Cr = 1000 Lakhs
+// ₹20 Cr = 2000 Lakhs
+
+const STARTING_BUDGET = 2000;
+
+const MAX_PLAYERS = 4;
+
+const STARTING_BID = 100;
+
+// From ₹1 Cr to ₹10 Cr:
+// increase by ₹50 Lakhs
+
+const SMALL_INCREMENT = 50;
+
+// After ₹10 Cr:
+// increase by ₹1 Cr
+
+const BIG_INCREMENT = 100;
+
+
+// =====================================================
+// LOGIN
 // =====================================================
 
 signInAnonymously(auth)
-  .catch(error => {
+  .catch((error) => {
 
-    console.error(error);
-
-    const message =
-      document.getElementById("joinMessage");
-
-    message.textContent =
-      "Firebase login failed.";
+    console.error("Firebase login error:", error);
 
   });
 
 
-onAuthStateChanged(auth, currentUser => {
+onAuthStateChanged(auth, (currentUser) => {
 
   if (currentUser) {
 
@@ -198,30 +167,27 @@ onAuthStateChanged(auth, currentUser => {
 
 
 // =====================================================
-// JOIN
+// JOIN AUCTION
 // =====================================================
 
 window.joinAuction = async function () {
 
-  const input =
-    document.getElementById("teamName");
+  const name =
+    document.getElementById("teamName")
+      .value
+      .trim();
 
   const message =
     document.getElementById("joinMessage");
 
-  const name =
-    input.value.trim();
-
-
   if (!name) {
 
     message.textContent =
-      "❌ Enter a team name.";
+      "❌ Enter your team name.";
 
     return;
 
   }
-
 
   if (!user) {
 
@@ -232,54 +198,64 @@ window.joinAuction = async function () {
 
   }
 
-
   myTeamId = user.uid;
 
+  const teamRef =
+    ref(db, "teams/" + myTeamId);
 
-  try {
+  const snapshot =
+    await get(teamRef);
 
-    const teamRef =
-      ref(db, "teams/" + myTeamId);
+  if (!snapshot.exists()) {
 
-    const snapshot =
-      await get(teamRef);
+    await set(teamRef, {
 
+      name: name,
 
-    if (!snapshot.exists()) {
+      budget: STARTING_BUDGET,
 
-      await set(teamRef, {
+      players: [],
 
-        name: name,
+      joinedAt: Date.now()
 
-        budget: STARTING_BUDGET,
-
-        players: [],
-
-        joinedAt: Date.now()
-
-      });
-
-    }
-
-
-    document.getElementById("joinScreen")
-      .style.display = "none";
-
-    document.getElementById("gameScreen")
-      .style.display = "block";
-
-
-    startRealtimeListeners();
-
-
-  } catch (error) {
-
-    console.error(error);
-
-    message.textContent =
-      "❌ Could not join auction.";
+    });
 
   }
+
+  else {
+
+    // Existing team
+    // Keep its current budget and players.
+
+    const existingTeam =
+      snapshot.val();
+
+    document.getElementById("teamName")
+      .value =
+      existingTeam.name || name;
+
+  }
+
+
+  document.getElementById("joinScreen")
+    .style.display = "none";
+
+  document.getElementById("gameScreen")
+    .style.display = "block";
+
+
+  const teamSnapshot =
+    await get(teamRef);
+
+  const team =
+    teamSnapshot.val();
+
+  document.getElementById("myTeam")
+    .textContent =
+    team.name;
+
+
+  startRealtimeListeners();
 
 };
 
@@ -290,16 +266,12 @@ window.joinAuction = async function () {
 
 function startRealtimeListeners() {
 
-
-  // AUCTION
-
   onValue(
     ref(db, "auction"),
-    snapshot => {
+    (snapshot) => {
 
       const auction =
         snapshot.val();
-
 
       if (!auction) {
 
@@ -309,18 +281,15 @@ function startRealtimeListeners() {
 
       }
 
-
       displayAuction(auction);
 
     }
   );
 
 
-  // TEAMS
-
   onValue(
     ref(db, "teams"),
-    snapshot => {
+    (snapshot) => {
 
       displayTeams(
         snapshot.val() || {}
@@ -330,11 +299,9 @@ function startRealtimeListeners() {
   );
 
 
-  // HISTORY
-
   onValue(
     ref(db, "history"),
-    snapshot => {
+    (snapshot) => {
 
       displayHistory(
         snapshot.val() || {}
@@ -355,35 +322,26 @@ async function createAuction() {
   const auctionRef =
     ref(db, "auction");
 
+  const snapshot =
+    await get(auctionRef);
 
-  const result =
-    await runTransaction(
-      auctionRef,
-      current => {
+  if (snapshot.exists()) {
+    return;
+  }
 
-        if (current !== null) {
+  await set(auctionRef, {
 
-          return;
+    characterIndex: 0,
 
-        }
+    currentBid: STARTING_BID,
 
+    highestBidder: null,
 
-        return {
+    highestBidderName: null,
 
-          characterIndex: 0,
+    status: "OPEN"
 
-          currentBid: STARTING_BID,
-
-          highestBidder: null,
-
-          highestBidderName: null,
-
-          status: "OPEN"
-
-        };
-
-      }
-    );
+  });
 
 }
 
@@ -395,96 +353,93 @@ async function createAuction() {
 function displayAuction(auction) {
 
   const index =
-    auction.characterIndex;
+    Number(auction.characterIndex || 0);
+
+  const character =
+    characters[index];
 
 
-  if (
-    index === undefined ||
-    index >= characters.length
-  ) {
+  if (!character) {
 
-    document.getElementById(
-      "characterName"
-    ).textContent =
-      "🏆 AUCTION FINISHED";
+    document.getElementById("characterName")
+      .textContent =
+      "🏆 Auction Finished";
 
-    document.getElementById(
-      "characterInfo"
-    ).textContent =
-      "All shinobi have been auctioned.";
+    document.getElementById("characterInfo")
+      .textContent =
+      "All characters have been auctioned.";
 
-    disableButtons();
+    document.getElementById("currentBid")
+      .textContent =
+      "₹0";
 
     return;
 
   }
 
 
-  const character =
-    characters[index];
-
-
-  document.getElementById(
-    "characterName"
-  ).textContent =
+  document.getElementById("characterName")
+    .textContent =
     character.name;
 
 
-  document.getElementById(
-    "characterInfo"
-  ).textContent =
+  document.getElementById("characterInfo")
+    .textContent =
     character.info;
 
 
-  document.getElementById(
-    "currentBid"
-  ).textContent =
+  document.getElementById("currentBid")
+    .textContent =
     formatMoney(
-      auction.currentBid
+      Number(auction.currentBid || 0)
     );
 
 
-  document.getElementById(
-    "highestBidder"
-  ).textContent =
+  if (auction.highestBidderName) {
 
-    auction.highestBidderName
-
-      ? "🔥 Highest bidder: " +
-        auction.highestBidderName
-
-      : "No bids yet";
-
-
-  if (auction.status === "SOLD") {
-
-    document.getElementById(
-      "gameMessage"
-    ).textContent =
-      "🔨 SOLD to " +
+    document.getElementById("highestBidder")
+      .textContent =
+      "Highest bidder: " +
       auction.highestBidderName;
 
   }
 
+  else {
 
-  if (auction.status === "OPEN") {
-
-    document.getElementById(
-      "gameMessage"
-    ).textContent =
-      "Auction is LIVE!";
+    document.getElementById("highestBidder")
+      .textContent =
+      "No bids yet";
 
   }
 
 
-  if (auction.status === "FINISHED") {
+  if (auction.status === "SOLD") {
 
-    document.getElementById(
-      "gameMessage"
-    ).textContent =
-      "🏆 Auction completed!";
+    if (auction.currentBid === 0) {
 
-    disableButtons();
+      document.getElementById("gameMessage")
+        .textContent =
+        "🎁 FREE to " +
+        auction.highestBidderName;
+
+    }
+
+    else {
+
+      document.getElementById("gameMessage")
+        .textContent =
+        "🔨 SOLD to " +
+        auction.highestBidderName;
+
+    }
+
+  }
+
+  else if (auction.status === "FINISHED") {
+
+    document.getElementById("gameMessage")
+      .textContent =
+      "🏆 Auction Finished!";
 
   }
 
@@ -507,15 +462,12 @@ window.placeBid = async function () {
   const auctionSnapshot =
     await get(ref(db, "auction"));
 
-
   const auction =
     auctionSnapshot.val();
 
 
-  if (
-    !auction ||
-    auction.status !== "OPEN"
-  ) {
+  if (!auction ||
+      auction.status !== "OPEN") {
 
     showMessage(
       "❌ Auction is not open."
@@ -530,7 +482,6 @@ window.placeBid = async function () {
     await get(
       ref(db, "teams/" + myTeamId)
     );
-
 
   const team =
     teamSnapshot.val();
@@ -547,14 +498,14 @@ window.placeBid = async function () {
     team.players || [];
 
 
-  // Maximum 4 players
+  // =========================================
+  // MAX 4 CHARACTERS
+  // =========================================
 
-  if (
-    players.length >= MAX_PLAYERS
-  ) {
+  if (players.length >= MAX_PLAYERS) {
 
     showMessage(
-      "❌ You already have 4 players!"
+      "❌ You already have 4 characters!"
     );
 
     return;
@@ -562,46 +513,44 @@ window.placeBid = async function () {
   }
 
 
-  let newBid;
+  // =========================================
+  // ₹0 TEAM CANNOT BID
+  // =========================================
 
+  if (Number(team.budget) <= 0) {
 
-  // FIRST BID = ₹1 Cr
+    showMessage(
+      "🎁 You have ₹0. The next character will be FREE for you."
+    );
 
-  if (!auction.highestBidder) {
-
-    newBid =
-      STARTING_BID;
-
-  }
-
-  // ₹1 Cr up to ₹10 Cr
-  // + ₹50 Lakhs
-
-  else if (
-    auction.currentBid < 1000
-  ) {
-
-    newBid =
-      auction.currentBid +
-      SMALL_INCREMENT;
-
-  }
-
-  // Above ₹10 Cr
-  // + ₹1 Cr
-
-  else {
-
-    newBid =
-      auction.currentBid +
-      BIG_INCREMENT;
+    return;
 
   }
 
 
-  // Cannot bid more than budget
+  // =========================================
+  // CALCULATE NEXT BID
+  // =========================================
 
-  if (newBid > team.budget) {
+  const currentBid =
+    Number(auction.currentBid);
+
+
+  const increment =
+    currentBid < 1000
+      ? SMALL_INCREMENT
+      : BIG_INCREMENT;
+
+
+  const newBid =
+    currentBid + increment;
+
+
+  // =========================================
+  // NOT ENOUGH MONEY
+  // =========================================
+
+  if (newBid > Number(team.budget)) {
 
     showMessage(
       "❌ Not enough budget!"
@@ -612,6 +561,10 @@ window.placeBid = async function () {
   }
 
 
+  // =========================================
+  // FIREBASE TRANSACTION
+  // =========================================
+
   const auctionRef =
     ref(db, "auction");
 
@@ -619,56 +572,23 @@ window.placeBid = async function () {
   const result =
     await runTransaction(
       auctionRef,
-      current => {
+      (current) => {
 
         if (!current) {
-
-          return;
-
+          return current;
         }
 
 
+        if (current.status !== "OPEN") {
+          return;
+        }
+
+
+        // Someone else bid first
         if (
-          current.status !== "OPEN"
+          Number(current.currentBid) !==
+          currentBid
         ) {
-
-          return;
-
-        }
-
-
-        // Recalculate using
-        // current Firebase value
-
-        let bid;
-
-
-        if (!current.highestBidder) {
-
-          bid = STARTING_BID;
-
-        }
-
-        else if (
-          current.currentBid < 1000
-        ) {
-
-          bid =
-            current.currentBid +
-            SMALL_INCREMENT;
-
-        }
-
-        else {
-
-          bid =
-            current.currentBid +
-            BIG_INCREMENT;
-
-        }
-
-
-        if (bid > team.budget) {
 
           return;
 
@@ -679,7 +599,7 @@ window.placeBid = async function () {
 
           ...current,
 
-          currentBid: bid,
+          currentBid: newBid,
 
           highestBidder: myTeamId,
 
@@ -694,7 +614,7 @@ window.placeBid = async function () {
   if (!result.committed) {
 
     showMessage(
-      "⚠️ Bid failed. Try again."
+      "⚠️ Someone else bid first. Try again."
     );
 
     return;
@@ -711,18 +631,13 @@ window.placeBid = async function () {
 
 
 // =====================================================
-// SOLD
+// SELL PLAYER
 // =====================================================
 
 window.sellPlayer = async function () {
 
-  const auctionRef =
-    ref(db, "auction");
-
-
   const auctionSnapshot =
-    await get(auctionRef);
-
+    await get(ref(db, "auction"));
 
   const auction =
     auctionSnapshot.val();
@@ -735,12 +650,10 @@ window.sellPlayer = async function () {
   }
 
 
-  if (
-    auction.status !== "OPEN"
-  ) {
+  if (auction.status !== "OPEN") {
 
     showMessage(
-      "Auction is not open."
+      "❌ Auction is not open."
     );
 
     return;
@@ -759,9 +672,19 @@ window.sellPlayer = async function () {
   }
 
 
+  await finalizeSale(auction);
+
+};
+
+
+// =====================================================
+// FINALIZE SALE
+// =====================================================
+
+async function finalizeSale(auction) {
+
   const winnerId =
     auction.highestBidder;
-
 
   const winnerRef =
     ref(db, "teams/" + winnerId);
@@ -770,12 +693,28 @@ window.sellPlayer = async function () {
   const winnerSnapshot =
     await get(winnerRef);
 
-
   const winner =
     winnerSnapshot.val();
 
 
   if (!winner) {
+
+    showMessage(
+      "❌ Winner not found."
+    );
+
+    return;
+
+  }
+
+
+  const character =
+    characters[
+      Number(auction.characterIndex)
+    ];
+
+
+  if (!character) {
 
     return;
 
@@ -786,12 +725,10 @@ window.sellPlayer = async function () {
     winner.players || [];
 
 
-  if (
-    players.length >= MAX_PLAYERS
-  ) {
+  if (players.length >= MAX_PLAYERS) {
 
     showMessage(
-      "❌ Winner already has 4 players."
+      "❌ Winner already has 4 characters."
     );
 
     return;
@@ -799,29 +736,45 @@ window.sellPlayer = async function () {
   }
 
 
-  const character =
-    characters[
-      auction.characterIndex
-    ];
+  const price =
+    Number(auction.currentBid || 0);
 
 
-  // Add player
+  // =========================================
+  // CHECK MONEY
+  // =========================================
+
+  if (price > Number(winner.budget)) {
+
+    showMessage(
+      "❌ Winner does not have enough money."
+    );
+
+    return;
+
+  }
+
+
+  // =========================================
+  // ADD CHARACTER
+  // =========================================
 
   players.push({
 
     name: character.name,
 
-    price: auction.currentBid
+    price: price
 
   });
 
 
-  // Deduct money
-
   const newBudget =
-    winner.budget -
-    auction.currentBid;
+    Number(winner.budget) - price;
 
+
+  // =========================================
+  // UPDATE TEAM
+  // =========================================
 
   await update(
     winnerRef,
@@ -835,10 +788,12 @@ window.sellPlayer = async function () {
   );
 
 
-  // Mark SOLD
+  // =========================================
+  // MARK SOLD
+  // =========================================
 
   await update(
-    auctionRef,
+    ref(db, "auction"),
     {
 
       status: "SOLD"
@@ -847,12 +802,19 @@ window.sellPlayer = async function () {
   );
 
 
-  // History
+  // =========================================
+  // HISTORY
+  // =========================================
 
   await set(
     ref(
       db,
-      "history/" + Date.now()
+      "history/" +
+      Date.now() +
+      "_" +
+      Math.random()
+        .toString(36)
+        .slice(2)
     ),
     {
 
@@ -860,22 +822,119 @@ window.sellPlayer = async function () {
 
       team: winner.name,
 
-      price: auction.currentBid,
+      price: price,
 
-      time: Date.now()
+      time: Date.now(),
+
+      free: price === 0
 
     }
   );
 
 
-  showMessage(
-    "🔨 " +
-    character.name +
-    " SOLD to " +
-    winner.name
-  );
+  if (price === 0) {
 
-};
+    showMessage(
+      "🎁 " +
+      character.name +
+      " given FREE to " +
+      winner.name
+    );
+
+  }
+
+  else {
+
+    showMessage(
+      "🔨 " +
+      character.name +
+      " SOLD to " +
+      winner.name
+    );
+
+  }
+
+}
+
+
+// =====================================================
+// FIND TEAM ELIGIBLE FOR FREE CHARACTER
+// =====================================================
+
+async function findFreeTeam() {
+
+  const snapshot =
+    await get(ref(db, "teams"));
+
+  const teams =
+    snapshot.val() || {};
+
+
+  const eligible =
+    Object.entries(teams)
+
+      .filter(([id, team]) => {
+
+        const budget =
+          Number(team.budget || 0);
+
+        const players =
+          team.players || [];
+
+
+        return (
+          budget <= 0 &&
+          players.length < MAX_PLAYERS
+        );
+
+      })
+
+      .sort((a, b) => {
+
+        const teamA = a[1];
+        const teamB = b[1];
+
+
+        // Team with fewer characters gets priority
+        const playersA =
+          (teamA.players || []).length;
+
+        const playersB =
+          (teamB.players || []).length;
+
+
+        if (playersA !== playersB) {
+
+          return playersA - playersB;
+
+        }
+
+
+        // If equal, earlier joined team gets priority
+        return (
+          Number(teamA.joinedAt || 0) -
+          Number(teamB.joinedAt || 0)
+        );
+
+      });
+
+
+  if (eligible.length === 0) {
+
+    return null;
+
+  }
+
+
+  return {
+
+    id: eligible[0][0],
+
+    team: eligible[0][1]
+
+  };
+
+}
 
 
 // =====================================================
@@ -903,15 +962,14 @@ window.nextPlayer = async function () {
   }
 
 
-  // NEXT should normally happen
-  // after SOLD
+  // =========================================
+  // CURRENT CHARACTER MUST BE SOLD
+  // =========================================
 
-  if (
-    auction.status !== "SOLD"
-  ) {
+  if (auction.status !== "SOLD") {
 
     showMessage(
-      "❌ Sell the current player first."
+      "❌ Sell the current character first."
     );
 
     return;
@@ -920,21 +978,20 @@ window.nextPlayer = async function () {
 
 
   const nextIndex =
-    auction.characterIndex + 1;
+    Number(auction.characterIndex) + 1;
 
 
-  // Finished
+  // =========================================
+  // AUCTION FINISHED
+  // =========================================
 
-  if (
-    nextIndex >= characters.length
-  ) {
+  if (nextIndex >= characters.length) {
 
     await update(
       auctionRef,
       {
 
-        characterIndex:
-          nextIndex,
+        characterIndex: nextIndex,
 
         currentBid: 0,
 
@@ -947,33 +1004,261 @@ window.nextPlayer = async function () {
       }
     );
 
+
+    showMessage(
+      "🏆 Auction Finished!"
+    );
+
     return;
 
   }
 
 
-  // New player
+  // =========================================
+  // MOVE TO NEXT CHARACTER
+  // =========================================
 
   await update(
     auctionRef,
     {
 
-      characterIndex:
-        nextIndex,
+      characterIndex: nextIndex,
 
-      currentBid:
-        STARTING_BID,
+      currentBid: STARTING_BID,
 
-      highestBidder:
-        null,
+      highestBidder: null,
 
-      highestBidderName:
-        null,
+      highestBidderName: null,
 
-      status:
-        "OPEN"
+      status: "OPEN"
 
     }
+  );
+
+
+  // =========================================
+  // CHECK FOR ₹0 TEAM
+  // =========================================
+
+  const freeTeam =
+    await findFreeTeam();
+
+
+  if (!freeTeam) {
+
+    return;
+
+  }
+
+
+  // =========================================
+  // GIVE NEXT CHARACTER FREE
+  // =========================================
+
+  const freeAuctionSnapshot =
+    await get(auctionRef);
+
+
+  const freeAuction =
+    freeAuctionSnapshot.val();
+
+
+  // Make sure nobody has bid
+  if (
+    !freeAuction ||
+    freeAuction.status !== "OPEN" ||
+    freeAuction.highestBidder
+  ) {
+
+    return;
+
+  }
+
+
+  // =========================================
+  // CLAIM FREE CHARACTER SAFELY
+  // =========================================
+
+  const claimResult =
+    await runTransaction(
+      auctionRef,
+      (current) => {
+
+        if (!current) {
+          return;
+        }
+
+
+        if (
+          current.status !== "OPEN"
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          current.highestBidder
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          Number(current.characterIndex) !==
+          nextIndex
+        ) {
+
+          return;
+
+        }
+
+
+        return {
+
+          ...current,
+
+          currentBid: 0,
+
+          highestBidder:
+            freeTeam.id,
+
+          highestBidderName:
+            freeTeam.team.name,
+
+          status: "SOLD",
+
+          freeCharacter: true
+
+        };
+
+      }
+    );
+
+
+  if (!claimResult.committed) {
+
+    return;
+
+  }
+
+
+  // =========================================
+  // ADD FREE CHARACTER TO TEAM
+  // =========================================
+
+  const teamRef =
+    ref(
+      db,
+      "teams/" +
+      freeTeam.id
+    );
+
+
+  const latestTeamSnapshot =
+    await get(teamRef);
+
+
+  const latestTeam =
+    latestTeamSnapshot.val();
+
+
+  if (!latestTeam) {
+    return;
+  }
+
+
+  const latestPlayers =
+    latestTeam.players || [];
+
+
+  if (
+    latestPlayers.length >=
+    MAX_PLAYERS
+  ) {
+
+    return;
+
+  }
+
+
+  // Make sure character hasn't already
+  // been added
+  const alreadyHasCharacter =
+    latestPlayers.some(
+      p =>
+        p.name ===
+        characters[nextIndex].name
+    );
+
+
+  if (alreadyHasCharacter) {
+
+    return;
+
+  }
+
+
+  latestPlayers.push({
+
+    name:
+      characters[nextIndex].name,
+
+    price: 0
+
+  });
+
+
+  await update(
+    teamRef,
+    {
+
+      budget: 0,
+
+      players: latestPlayers
+
+    }
+  );
+
+
+  // =========================================
+  // ADD FREE CHARACTER TO HISTORY
+  // =========================================
+
+  await set(
+    ref(
+      db,
+      "history/free_" +
+      nextIndex +
+      "_" +
+      Date.now()
+    ),
+    {
+
+      character:
+        characters[nextIndex].name,
+
+      team:
+        latestTeam.name,
+
+      price: 0,
+
+      time: Date.now(),
+
+      free: true
+
+    }
+  );
+
+
+  showMessage(
+    "🎁 " +
+    characters[nextIndex].name +
+    " goes FREE to " +
+    latestTeam.name
   );
 
 };
@@ -993,10 +1278,6 @@ function displayTeams(teams) {
 
 
   Object.values(teams)
-    .sort(
-      (a, b) =>
-        a.joinedAt - b.joinedAt
-    )
     .forEach(team => {
 
       const div =
@@ -1014,7 +1295,7 @@ function displayTeams(teams) {
       div.innerHTML = `
 
         <div class="team-name">
-          🏆 ${escapeHTML(team.name)}
+          ${escapeHTML(team.name)}
         </div>
 
         <div>
@@ -1026,30 +1307,22 @@ function displayTeams(teams) {
 
         <div>
           Players:
-          <b>
-            ${players.length} / 4
-          </b>
+          ${players.length} / 4
         </div>
-
-        <br>
 
         ${
           players.length
+            ? players.map(
+                p => `
+                  <div>
+                    ${escapeHTML(p.name)}
+                    —
+                    ${formatMoney(p.price)}
+                  </div>
+                `
+              ).join("")
 
-          ? players.map(
-              player => `
-
-                <div>
-                  ⚔️
-                  ${escapeHTML(player.name)}
-                  —
-                  ${formatMoney(player.price)}
-                </div>
-
-              `
-            ).join("")
-
-          : "<div>No players yet</div>"
+            : "<div>No players</div>"
         }
 
       `;
@@ -1060,7 +1333,9 @@ function displayTeams(teams) {
     });
 
 
-  // YOUR TEAM
+  // =========================================
+  // UPDATE MY TEAM
+  // =========================================
 
   if (
     myTeamId &&
@@ -1071,21 +1346,20 @@ function displayTeams(teams) {
       teams[myTeamId];
 
 
-    document.getElementById(
-      "myTeam"
-    ).textContent =
+    document.getElementById("myTeam")
+      .textContent =
       myTeam.name;
 
 
-    document.getElementById(
-      "myBudget"
-    ).textContent =
-      formatMoney(myTeam.budget);
+    document.getElementById("myBudget")
+      .textContent =
+      formatMoney(
+        Number(myTeam.budget)
+      );
 
 
-    document.getElementById(
-      "myPlayers"
-    ).textContent =
+    document.getElementById("myPlayers")
+      .textContent =
       `${(myTeam.players || []).length} / 4`;
 
   }
@@ -1100,9 +1374,7 @@ function displayTeams(teams) {
 function displayHistory(history) {
 
   const container =
-    document.getElementById(
-      "history"
-    );
+    document.getElementById("history");
 
 
   container.innerHTML = "";
@@ -1112,18 +1384,9 @@ function displayHistory(history) {
     Object.values(history)
       .sort(
         (a, b) =>
-          b.time - a.time
+          Number(b.time || 0) -
+          Number(a.time || 0)
       );
-
-
-  if (!entries.length) {
-
-    container.innerHTML =
-      "<p>No players sold yet.</p>";
-
-    return;
-
-  }
 
 
   entries.forEach(item => {
@@ -1136,27 +1399,47 @@ function displayHistory(history) {
       "history-item";
 
 
-    div.innerHTML = `
+    if (Number(item.price) === 0) {
 
-      🔨
+      div.innerHTML = `
 
-      <b>
-        ${escapeHTML(item.character)}
-      </b>
+        🎁 <b>
+          ${escapeHTML(item.character)}
+        </b>
 
-      sold to
+        went FREE to
 
-      <b>
-        ${escapeHTML(item.team)}
-      </b>
+        <b>
+          ${escapeHTML(item.team)}
+        </b>
 
-      for
+      `;
 
-      <b>
-        ${formatMoney(item.price)}
-      </b>
+    }
 
-    `;
+    else {
+
+      div.innerHTML = `
+
+        🔨 <b>
+          ${escapeHTML(item.character)}
+        </b>
+
+        sold to
+
+        <b>
+          ${escapeHTML(item.team)}
+        </b>
+
+        for
+
+        <b>
+          ${formatMoney(item.price)}
+        </b>
+
+      `;
+
+    }
 
 
     container.appendChild(div);
@@ -1167,23 +1450,25 @@ function displayHistory(history) {
 
 
 // =====================================================
-// MONEY
+// MONEY FORMAT
 // =====================================================
 
 function formatMoney(lakhs) {
 
-  if (lakhs >= 100) {
+  const amount =
+    Number(lakhs || 0);
+
+
+  if (amount >= 100) {
 
     const crore =
-      lakhs / 100;
+      amount / 100;
 
 
     return "₹" +
       (
         Number.isInteger(crore)
-
           ? crore
-
           : crore.toFixed(2)
       ) +
       " Cr";
@@ -1192,7 +1477,7 @@ function formatMoney(lakhs) {
 
 
   return "₹" +
-    lakhs +
+    amount +
     " L";
 
 }
@@ -1204,39 +1489,24 @@ function formatMoney(lakhs) {
 
 function showMessage(message) {
 
-  document.getElementById(
-    "gameMessage"
-  ).textContent =
-    message;
+  const element =
+    document.getElementById(
+      "gameMessage"
+    );
+
+
+  if (element) {
+
+    element.textContent =
+      message;
+
+  }
 
 }
 
 
 // =====================================================
-// DISABLE BUTTONS
-// =====================================================
-
-function disableButtons() {
-
-  document.getElementById(
-    "bidButton"
-  ).disabled = true;
-
-
-  document.getElementById(
-    "soldButton"
-  ).disabled = true;
-
-
-  document.getElementById(
-    "nextButton"
-  ).disabled = true;
-
-}
-
-
-// =====================================================
-// SECURITY: HTML ESCAPE
+// SECURITY
 // =====================================================
 
 function escapeHTML(text) {
