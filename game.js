@@ -24,27 +24,14 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-
-  apiKey: "PASTE_YOUR_API_KEY_HERE",
-
-  authDomain:
-    "naruto-shinobi-auction.firebaseapp.com",
-
-  databaseURL:
-    "PASTE_YOUR_DATABASE_URL_HERE",
-
-  projectId:
-    "naruto-shinobi-auction",
-
-  storageBucket:
-    "PASTE_YOUR_STORAGE_BUCKET_HERE",
-
-  messagingSenderId:
-    "PASTE_YOUR_MESSAGING_SENDER_ID_HERE",
-
-  appId:
-    "PASTE_YOUR_APP_ID_HERE"
-
+  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
+  authDomain: "naruto-shinobi-auction.firebaseapp.com",
+  databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
+  projectId: "naruto-shinobi-auction",
+  storageBucket: "naruto-shinobi-auction.firebasestorage.app",
+  messagingSenderId: "187952563869",
+  appId: "1:187952563869:web:839ac2add9ae0f5835f674",
+  measurementId: "G-N3QGHDB240"
 };
 
 
