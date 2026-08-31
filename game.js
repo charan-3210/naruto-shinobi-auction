@@ -1539,3 +1539,109 @@ function escapeHTML(text) {
     );
 
 }
+// =====================================================
+// RESTART AUCTION
+// =====================================================
+
+window.restartAuction = async function () {
+
+  const message =
+    document.getElementById("restartMessage");
+
+  const confirmRestart =
+    confirm(
+      "⚠️ Restart the entire auction?\n\n" +
+      "All teams, characters, budgets and history " +
+      "will be reset."
+    );
+
+  if (!confirmRestart) {
+    return;
+  }
+
+  try {
+
+    // Reset auction
+    await set(
+      ref(db, "auction"),
+      {
+        characterIndex: 0,
+        currentBid: STARTING_BID,
+        highestBidder: null,
+        highestBidderName: null,
+        status: "OPEN"
+      }
+    );
+
+
+    // Reset all teams
+    const teamsSnapshot =
+      await get(ref(db, "teams"));
+
+    const teams =
+      teamsSnapshot.val() || {};
+
+
+    const updates = {};
+
+
+    Object.keys(teams).forEach(teamId => {
+
+      updates[
+        "teams/" + teamId + "/budget"
+      ] = STARTING_BUDGET;
+
+      updates[
+        "teams/" + teamId + "/players"
+      ] = [];
+
+    });
+
+
+    if (Object.keys(updates).length > 0) {
+
+      await update(
+        ref(db),
+        updates
+      );
+
+    }
+
+
+    // Delete auction history
+    await set(
+      ref(db, "history"),
+      null
+    );
+
+
+    if (message) {
+
+      message.textContent =
+        "✅ Auction restarted!";
+
+    }
+
+    showMessage(
+      "🔄 Auction restarted!"
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Restart error:",
+      error
+    );
+
+    if (message) {
+
+      message.textContent =
+        "❌ Restart failed.";
+
+    }
+
+  }
+
+};
