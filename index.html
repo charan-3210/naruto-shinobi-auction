@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Naruto Shinobi Auction</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <h1>🍥 Naruto Shinobi Auction</h1>
+  <p>Build the strongest Shinobi team!</p>
+</header>
+
+<main>
+
+  <!-- JOIN -->
+  <section id="joinScreen" class="card">
+
+    <h2>⚔️ Join Auction</h2>
+
+    <input
+      id="teamName"
+      type="text"
+      placeholder="Enter your team name"
+      maxlength="20"
+    >
+
+    <button onclick="joinAuction()">
+      JOIN AUCTION
+    </button>
+
+    <p id="joinMessage"></p>
+
+  </section>
+
+
+  <!-- GAME -->
+  <section id="gameScreen" style="display:none">
+
+    <!-- YOUR TEAM -->
+    <div class="top-grid">
+
+      <div class="card">
+
+        <h3>👤 Your Team</h3>
+
+        <h2 id="myTeam">-</h2>
+
+        <p>
+          Budget:
+          <b id="myBudget">₹20 Cr</b>
+        </p>
+
+        <p>
+          Players:
+          <b id="myPlayers">0 / 4</b>
+        </p>
+
+      </div>
+
+
+      <!-- CURRENT BID -->
+      <div class="card bid-card">
+
+        <h3>🔥 CURRENT BID</h3>
+
+        <h1 id="currentBid">₹1 Cr</h1>
+
+        <p id="highestBidder">
+          No bids yet
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- CHARACTER -->
+    <div class="card character-card">
+
+      <p class="auction-label">
+        🔴 LIVE AUCTION
+      </p>
+
+      <h2>⚔️ Current Shinobi</h2>
+
+      <div id="characterImage"
+           class="character-image">
+        🍥
+      </div>
+
+      <h1 id="characterName">
+        Waiting...
+      </h1>
+
+      <p id="characterInfo">
+        Waiting for the auction...
+      </p>
+
+
+      <div class="bid-buttons">
+
+        <button
+          id="bidButton"
+          onclick="placeBid()">
+          🔥 BID
+        </button>
+
+        <button
+          id="soldButton"
+          class="sold"
+          onclick="sellPlayer()">
+          🔨 SOLD
+        </button>
+
+        <button
+          id="nextButton"
+          class="next"
+          onclick="nextPlayer()">
+          ➡️ NEXT
+        </button>
+
+      </div>
+
+      <p id="gameMessage"></p>
+
+    </div>
+
+
+    <!-- TEAMS -->
+    <div class="card">
+
+      <h2>🏆 Teams</h2>
+
+      <div id="teams"></div>
+
+    </div>
+
+
+    <!-- HISTORY -->
+    <div class="card">
+
+      <h2>📜 Auction History</h2>
+
+      <div id="history"></div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script type="module" src="game.js"></script>
+
+</body>
+</html>
