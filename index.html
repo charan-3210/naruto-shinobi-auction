@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naruto Shinobi Auction</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header>
+    <h1>🍥 Naruto Shinobi Auction</h1>
+    <p>Build the strongest Shinobi team!</p>
+  </header>
+
+  <main>
+
+    <!-- JOIN -->
+    <section id="joinScreen" class="card">
+      <h2>Join Auction</h2>
+
+      <input id="teamName" placeholder="Enter team name">
+
+      <button onclick="joinAuction()">
+        JOIN AUCTION
+      </button>
+
+      <p id="joinMessage"></p>
+    </section>
+
+
+    <!-- GAME -->
+    <section id="gameScreen" style="display:none">
+
+      <div class="top-grid">
+
+        <div class="card">
+          <h3>👤 Your Team</h3>
+          <h2 id="myTeam">-</h2>
+          <p>Budget: <b id="myBudget">₹20 Cr</b></p>
+          <p>Players: <b id="myPlayers">0 / 4</b></p>
+        </div>
+
+        <div class="card">
+          <h3>🔥 Current Bid</h3>
+          <h1 id="currentBid">₹1 Cr</h1>
+          <p id="highestBidder">No bids yet</p>
+        </div>
+
+      </div>
+
+
+      <div class="card character-card">
+
+        <h2>⚔️ Current Shinobi</h2>
+
+        <div id="characterImage" class="character-image">
+          🍥
+        </div>
+
+        <h1 id="characterName">Waiting...</h1>
+
+        <p id="characterInfo">
+          Waiting for the auctioneer...
+        </p>
+
+        <div class="bid-buttons">
+
+          <button onclick="placeBid()">
+            🔥 BID
+          </button>
+
+          <button class="sold" onclick="sellPlayer()">
+            🔨 SOLD
+          </button>
+
+          <button class="next" onclick="nextPlayer()">
+            ➡️ NEXT
+          </button>
+
+        </div>
+
+        <p id="gameMessage"></p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h2>🏆 Teams</h2>
+
+        <div id="teams"></div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h2>📜 Auction History</h2>
+
+        <div id="history"></div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script type="module" src="game.js"></script>
+
+</body>
+</html>
