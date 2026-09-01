@@ -24,20 +24,6 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  /*
-   * IMPORTANT:
-   * Keep YOUR REAL Firebase config here.
-   *
-   * Copy it from:
-   * Firebase Console
-   * → Project Settings
-   * → General
-   * → Your Apps
-   * → Web App
-   * → Config
-   */
-
-  const firebaseConfig = {
   apiKey: "AIzaSyB4PSLZ0VhVGGtfZ1hcluOWsTbvJDxxxTg",
   authDomain: "naruto-shinobi-auction.firebaseapp.com",
   databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
@@ -61,6 +47,8 @@ let user = null;
 let myTeamId = null;
 let listenersStarted = false;
 let timerInterval = null;
+let finishingAuction = false;
+let movingNext = false;
 
 
 // =====================================================
@@ -149,7 +137,7 @@ const characters = [
 
   {
     name: "Kinshiki Otsutsuki",
-    info: "Divine Weapons • Ōtsutsuki Warrior",
+    info: "Divine Weapons • Otsutsuki Warrior",
     power: 90,
     attack: 95,
     defense: 90,
@@ -497,11 +485,7 @@ function shuffleCharacters() {
 
   const list = [...characters];
 
-  for (
-    let i = list.length - 1;
-    i > 0;
-    i--
-  ) {
+  for (let i = list.length - 1; i > 0; i--) {
 
     const j =
       Math.floor(
@@ -519,12 +503,11 @@ function shuffleCharacters() {
   }
 
   return list;
-
 }
 
 
 // =====================================================
-// LOGIN
+// AUTH
 // =====================================================
 
 signInAnonymously(auth)
@@ -569,8 +552,7 @@ onAuthStateChanged(
 // JOIN
 // =====================================================
 
-window.joinAuction =
-async function () {
+window.joinAuction = async function () {
 
   const input =
     document.getElementById(
@@ -582,7 +564,8 @@ async function () {
       "joinMessage"
     );
 
-  if (!input) return;
+  if (!input || !message)
+    return;
 
   const name =
     input.value.trim();
@@ -593,7 +576,6 @@ async function () {
       "❌ Enter your team name.";
 
     return;
-
   }
 
   if (!user) {
@@ -602,87 +584,106 @@ async function () {
       "⏳ Connecting to Firebase...";
 
     return;
+  }
+
+  myTeamId = user.uid;
+
+  try {
+
+    const teamRef =
+      ref(
+        db,
+        "teams/" +
+        myTeamId
+      );
+
+    const snapshot =
+      await get(teamRef);
+
+    if (!snapshot.exists()) {
+
+      await set(
+        teamRef,
+        {
+
+          name: name,
+
+          budget:
+            STARTING_BUDGET,
+
+          players: [],
+
+          joinedAt:
+            Date.now()
+
+        }
+      );
+
+    } else {
+
+      await update(
+        teamRef,
+        {
+          name: name
+        }
+      );
+
+    }
+
+    document
+      .getElementById(
+        "joinScreen"
+      )
+      .style.display =
+        "none";
+
+    document
+      .getElementById(
+        "gameScreen"
+      )
+      .style.display =
+        "block";
+
+    document
+      .getElementById(
+        "myTeam"
+      )
+      .textContent =
+        name;
+
+    startRealtimeListeners();
 
   }
 
-  myTeamId =
-    user.uid;
+  catch (error) {
 
-  const teamRef =
-    ref(
-      db,
-      "teams/" +
-      myTeamId
+    console.error(
+      "Join error:",
+      error
     );
 
-  const snapshot =
-    await get(teamRef);
-
-  if (!snapshot.exists()) {
-
-    await set(
-      teamRef,
-      {
-
-        name: name,
-
-        budget:
-          STARTING_BUDGET,
-
-        players: [],
-
-        joinedAt:
-          Date.now()
-
-      }
-    );
+    message.textContent =
+      "❌ Could not join: " +
+      error.message;
 
   }
-
-  else {
-
-    await update(
-      teamRef,
-      {
-        name: name
-      }
-    );
-
-  }
-
-  document
-    .getElementById(
-      "joinScreen"
-    )
-    .style.display =
-      "none";
-
-  document
-    .getElementById(
-      "gameScreen"
-    ).style.display =
-      "block";
-
-  document
-    .getElementById(
-      "myTeam"
-    ).textContent =
-      name;
-
-  startRealtimeListeners();
 
 };
 
 
 // =====================================================
-// LISTENERS
+// REALTIME LISTENERS
 // =====================================================
 
 function startRealtimeListeners() {
 
-  if (listenersStarted) return;
+  if (listenersStarted)
+    return;
 
   listenersStarted = true;
+
+
+  // AUCTION
 
   onValue(
     ref(db, "auction"),
@@ -710,6 +711,9 @@ function startRealtimeListeners() {
     }
   );
 
+
+  // TEAMS
+
   onValue(
     ref(db, "teams"),
     snapshot => {
@@ -720,6 +724,9 @@ function startRealtimeListeners() {
 
     }
   );
+
+
+  // HISTORY
 
   onValue(
     ref(db, "history"),
@@ -736,7 +743,7 @@ function startRealtimeListeners() {
 
 
 // =====================================================
-// CREATE AUCTION
+// CREATE FIRST AUCTION
 // =====================================================
 
 async function createAuction() {
@@ -745,14 +752,18 @@ async function createAuction() {
     ref(db, "auction");
 
   const snapshot =
-    await get(auctionRef);
+    await get(
+      auctionRef
+    );
 
-  if (snapshot.exists()) return;
+  if (snapshot.exists())
+    return;
 
   const order =
     shuffleCharacters()
       .map(
-        c => c.name
+        character =>
+          character.name
       );
 
   await set(
@@ -801,26 +812,22 @@ function getCurrentCharacter(
     )
   ) {
 
+    const index =
+      Number(
+        auction.characterIndex || 0
+      );
+
     const name =
-      auction.characterOrder[
-        Number(
-          auction.characterIndex || 0
-        )
-      ];
+      auction.characterOrder[index];
 
     return characters.find(
-      c =>
-        c.name === name
+      character =>
+        character.name === name
     );
 
   }
 
-  return characters[
-    Number(
-      auction?.characterIndex || 0
-    )
-  ];
-
+  return null;
 }
 
 
@@ -857,6 +864,11 @@ function displayAuction(
       "highestBidder"
     );
 
+  const bidButton =
+    document.querySelector(
+      ".bid-button"
+    );
+
 
   if (!character) {
 
@@ -872,10 +884,13 @@ function displayAuction(
       bidElement.textContent =
         "₹0";
 
+    if (bidButton)
+      bidButton.disabled =
+        true;
+
     stopCountdown();
 
     return;
-
   }
 
 
@@ -883,9 +898,11 @@ function displayAuction(
     nameElement.textContent =
       character.name;
 
+
   if (infoElement)
     infoElement.textContent =
       character.info;
+
 
   if (bidElement)
     bidElement.textContent =
@@ -894,6 +911,7 @@ function displayAuction(
           auction.currentBid || 0
         )
       );
+
 
   if (bidderElement) {
 
@@ -906,14 +924,24 @@ function displayAuction(
   }
 
 
+  if (bidButton) {
+
+    bidButton.disabled =
+      auction.status !== "OPEN";
+
+  }
+
+
   if (
     auction.status ===
     "SOLD"
   ) {
 
     showMessage(
-      "🏆 WON by " +
-      auction.highestBidderName
+      "🏆 " +
+      auction.highestBidderName +
+      " won " +
+      character.name
     );
 
   }
@@ -925,7 +953,9 @@ function displayAuction(
   ) {
 
     showMessage(
-      "⏭️ No bids — character skipped"
+      "⏭️ No bids — " +
+      character.name +
+      " skipped"
     );
 
   }
@@ -960,7 +990,9 @@ function startCountdown(
       "auctionTimer"
     );
 
-  if (!timer) return;
+  if (!timer)
+    return;
+
 
   if (
     auction.status !==
@@ -971,7 +1003,6 @@ function startCountdown(
       "⏱️ —";
 
     return;
-
   }
 
 
@@ -1014,14 +1045,19 @@ function startCountdown(
 
   tick();
 
+
   timerInterval =
     setInterval(
       tick,
-      250
+      200
     );
 
 }
 
+
+// =====================================================
+// STOP TIMER
+// =====================================================
 
 function stopCountdown() {
 
@@ -1043,10 +1079,6 @@ function stopCountdown() {
 // AUTOMATIC FINISH
 // =====================================================
 
-let finishingAuction =
-  false;
-
-
 async function automaticallyFinishAuction() {
 
   if (finishingAuction)
@@ -1055,49 +1087,62 @@ async function automaticallyFinishAuction() {
   finishingAuction =
     true;
 
-
   try {
 
     const auctionRef =
-      ref(db, "auction");
-
-
-    const snapshot =
-      await get(
-        auctionRef
+      ref(
+        db,
+        "auction"
       );
 
 
+    /*
+     * IMPORTANT:
+     * Transaction changes OPEN → FINALIZING.
+     *
+     * Only ONE phone can successfully
+     * claim the auction.
+     */
+
+    const result =
+      await runTransaction(
+        auctionRef,
+        current => {
+
+          if (!current)
+            return;
+
+          if (
+            current.status !==
+            "OPEN"
+          )
+            return;
+
+          if (
+            Date.now() <
+            Number(
+              current.endTime || 0
+            )
+          )
+            return;
+
+          return {
+            ...current,
+            status:
+              "FINALIZING"
+          };
+
+        }
+      );
+
+
+    if (!result.committed)
+      return;
+
+
     const auction =
-      snapshot.val();
+      result.snapshot.val();
 
-
-    if (
-      !auction ||
-      auction.status !==
-      "OPEN"
-    ) {
-
-      return;
-
-    }
-
-
-    if (
-      Date.now() <
-      Number(
-        auction.endTime || 0
-      )
-    ) {
-
-      return;
-
-    }
-
-
-    // -----------------------------------------
-    // SOMEONE BID
-    // -----------------------------------------
 
     if (
       auction.highestBidder
@@ -1107,18 +1152,13 @@ async function automaticallyFinishAuction() {
         auction
       );
 
-      return;
+    } else {
+
+      await finishWithoutBid(
+        auction
+      );
 
     }
-
-
-    // -----------------------------------------
-    // NO BID
-    // -----------------------------------------
-
-    await finishWithoutBid(
-      auction
-    );
 
   }
 
@@ -1151,7 +1191,6 @@ async function finalizeSale(
 
   const winnerId =
     auction.highestBidder;
-
 
   const character =
     getCurrentCharacter(
@@ -1186,27 +1225,11 @@ async function finalizeSale(
 
 
   const players =
-    winner.players || [];
-
-
-  if (
-    players.length >=
-    MAX_PLAYERS
-  ) {
-
-    showMessage(
-      "❌ Winner already has 4 characters."
-    );
-
-    return;
-
-  }
-
-
-  const price =
-    Number(
-      auction.currentBid || 0
-    );
+    Array.isArray(
+      winner.players
+    )
+      ? winner.players
+      : [];
 
 
   const budget =
@@ -1215,23 +1238,55 @@ async function finalizeSale(
     );
 
 
+  const price =
+    Number(
+      auction.currentBid || 0
+    );
+
+
+  if (
+    players.length >=
+    MAX_PLAYERS
+  ) {
+
+    await update(
+      ref(db, "auction"),
+      {
+        status:
+          "SKIPPED"
+      }
+    );
+
+    setTimeout(
+      nextCharacter,
+      1000
+    );
+
+    return;
+  }
+
+
   if (
     price >
     budget
   ) {
 
-    showMessage(
-      "❌ Winner cannot afford this bid."
+    await update(
+      ref(db, "auction"),
+      {
+        status:
+          "SKIPPED"
+      }
+    );
+
+    setTimeout(
+      nextCharacter,
+      1000
     );
 
     return;
-
   }
 
-
-  // -----------------------------------------
-  // Add player
-  // -----------------------------------------
 
   players.push({
 
@@ -1243,10 +1298,6 @@ async function finalizeSale(
 
   });
 
-
-  // -----------------------------------------
-  // Update team
-  // -----------------------------------------
 
   await update(
     winnerRef,
@@ -1262,10 +1313,6 @@ async function finalizeSale(
   );
 
 
-  // -----------------------------------------
-  // Mark SOLD
-  // -----------------------------------------
-
   await update(
     ref(db, "auction"),
     {
@@ -1276,10 +1323,6 @@ async function finalizeSale(
     }
   );
 
-
-  // -----------------------------------------
-  // History
-  // -----------------------------------------
 
   await set(
     ref(
@@ -1322,17 +1365,13 @@ async function finalizeSale(
   );
 
 
-  // -----------------------------------------
-  // Automatically next
-  // -----------------------------------------
+  /*
+   * Automatically go to next character.
+   */
 
   setTimeout(
-    () => {
-
-      nextCharacter();
-
-    },
-    1500
+    nextCharacter,
+    1200
   );
 
 }
@@ -1356,158 +1395,29 @@ async function finishWithoutBid(
     return;
 
 
-  // -----------------------------------------
-  // Find ₹0 team
-  // -----------------------------------------
-
-  const freeTeam =
-    await findFreeTeam();
-
-
-  // -----------------------------------------
-  // Give free character if possible
-  // -----------------------------------------
-
-  if (freeTeam) {
-
-    const teamRef =
-      ref(
-        db,
-        "teams/" +
-        freeTeam.id
-      );
-
-
-    const snapshot =
-      await get(
-        teamRef
-      );
-
-
-    const team =
-      snapshot.val();
-
-
-    if (team) {
-
-      const players =
-        team.players || [];
-
-
-      if (
-        players.length <
-        MAX_PLAYERS
-      ) {
-
-        players.push({
-
-          name:
-            character.name,
-
-          price:
-            0
-
-        });
-
-
-        await update(
-          teamRef,
-          {
-
-            budget:
-              0,
-
-            players:
-              players
-
-          }
-        );
-
-
-        await update(
-          ref(db, "auction"),
-          {
-
-            status:
-              "SOLD",
-
-            highestBidder:
-              freeTeam.id,
-
-            highestBidderName:
-              team.name,
-
-            currentBid:
-              0
-
-          }
-        );
-
-
-        await set(
-          ref(
-            db,
-            "history/free_" +
-            Date.now()
-          ),
-          {
-
-            character:
-              character.name,
-
-            team:
-              team.name,
-
-            price:
-              0,
-
-            time:
-              Date.now(),
-
-            free:
-              true
-
-          }
-        );
-
-
-        showMessage(
-          "🎁 " +
-          character.name +
-          " FREE to " +
-          team.name
-        );
-
-
-        setTimeout(
-          () => {
-
-            nextCharacter();
-
-          },
-          1500
-        );
-
-
-        return;
-
-      }
-
-    }
-
-  }
-
-
-  // -----------------------------------------
-  // Nobody eligible → SKIP
-  // -----------------------------------------
+  /*
+   * IMPORTANT:
+   * No free player.
+   *
+   * If nobody bids for 10 seconds,
+   * the character is simply skipped.
+   */
 
   await update(
     ref(db, "auction"),
     {
 
       status:
-        "SKIPPED"
+        "SKIPPED",
+
+      currentBid:
+        STARTING_BID,
+
+      highestBidder:
+        null,
+
+      highestBidderName:
+        null
 
     }
   );
@@ -1521,111 +1431,9 @@ async function finishWithoutBid(
 
 
   setTimeout(
-    () => {
-
-      nextCharacter();
-
-    },
-    1200
+    nextCharacter,
+    1000
   );
-
-}
-
-
-// =====================================================
-// FIND FREE TEAM
-// =====================================================
-
-async function findFreeTeam() {
-
-  const snapshot =
-    await get(
-      ref(db, "teams")
-    );
-
-
-  const teams =
-    snapshot.val() || {};
-
-
-  const eligible =
-    Object.entries(
-      teams
-    )
-      .filter(
-        ([id, team]) => {
-
-          return (
-            Number(
-              team.budget || 0
-            ) <= 0 &&
-            (team.players || [])
-              .length <
-              MAX_PLAYERS
-          );
-
-        }
-      )
-      .sort(
-        (a, b) => {
-
-          const countA =
-            (
-              a[1].players ||
-              []
-            ).length;
-
-          const countB =
-            (
-              b[1].players ||
-              []
-            ).length;
-
-
-          if (
-            countA !==
-            countB
-          ) {
-
-            return (
-              countA -
-              countB
-            );
-
-          }
-
-
-          return (
-            Number(
-              a[1].joinedAt || 0
-            ) -
-            Number(
-              b[1].joinedAt || 0
-            )
-          );
-
-        }
-      );
-
-
-  if (
-    eligible.length === 0
-  ) {
-
-    return null;
-
-  }
-
-
-  return {
-
-    id:
-      eligible[0][0],
-
-    team:
-      eligible[0][1]
-
-  };
 
 }
 
@@ -1636,116 +1444,149 @@ async function findFreeTeam() {
 
 async function nextCharacter() {
 
-  const auctionRef =
-    ref(db, "auction");
-
-
-  const snapshot =
-    await get(
-      auctionRef
-    );
-
-
-  const auction =
-    snapshot.val();
-
-
-  if (!auction)
+  if (movingNext)
     return;
 
-
-  if (
-    auction.status !==
-      "SOLD" &&
-    auction.status !==
-      "SKIPPED"
-  ) {
-
-    return;
-
-  }
+  movingNext =
+    true;
 
 
-  const nextIndex =
-    Number(
-      auction.characterIndex
-    ) + 1;
+  try {
+
+    const auctionRef =
+      ref(
+        db,
+        "auction"
+      );
 
 
-  const order =
-    auction.characterOrder ||
-    [];
+    const result =
+      await runTransaction(
+        auctionRef,
+        current => {
+
+          if (!current)
+            return;
+
+          if (
+            current.status !==
+              "SOLD" &&
+            current.status !==
+              "SKIPPED"
+          )
+            return;
 
 
-  if (
-    nextIndex >=
-    order.length
-  ) {
+          const nextIndex =
+            Number(
+              current.characterIndex || 0
+            ) + 1;
 
-    await update(
-      auctionRef,
-      {
 
-        characterIndex:
-          nextIndex,
+          const order =
+            current.characterOrder ||
+            [];
 
-        currentBid:
-          0,
 
-        highestBidder:
-          null,
+          if (
+            nextIndex >=
+            order.length
+          ) {
 
-        highestBidderName:
-          null,
+            return {
 
-        status:
-          "FINISHED",
+              ...current,
 
-        endTime:
-          0
+              characterIndex:
+                nextIndex,
+
+              currentBid:
+                0,
+
+              highestBidder:
+                null,
+
+              highestBidderName:
+                null,
+
+              status:
+                "FINISHED",
+
+              endTime:
+                0
+
+            };
+
+          }
+
+
+          return {
+
+            ...current,
+
+            characterIndex:
+              nextIndex,
+
+            currentBid:
+              STARTING_BID,
+
+            highestBidder:
+              null,
+
+            highestBidderName:
+              null,
+
+            status:
+              "OPEN",
+
+            endTime:
+              Date.now() +
+              AUCTION_SECONDS * 1000
+
+          };
+
+        }
+      );
+
+
+    if (
+      result.committed
+    ) {
+
+      const newAuction =
+        result.snapshot.val();
+
+
+      if (
+        newAuction.status ===
+        "FINISHED"
+      ) {
+
+        showMessage(
+          "🏆 AUCTION FINISHED!"
+        );
 
       }
-    );
 
-
-    stopCountdown();
-
-
-    showMessage(
-      "🏆 AUCTION FINISHED!"
-    );
-
-
-    return;
+    }
 
   }
 
+  catch (error) {
 
-  await update(
-    auctionRef,
-    {
+    console.error(
+      "Next character error:",
+      error
+    );
 
-      characterIndex:
-        nextIndex,
+  }
 
-      currentBid:
-        STARTING_BID,
+  finally {
 
-      highestBidder:
-        null,
+    movingNext =
+      false;
 
-      highestBidderName:
-        null,
-
-      status:
-        "OPEN",
-
-      endTime:
-        Date.now() +
-        AUCTION_SECONDS * 1000
-
-    }
-  );
+  }
 
 }
 
@@ -1770,7 +1611,10 @@ async function () {
 
   const auctionSnapshot =
     await get(
-      ref(db, "auction")
+      ref(
+        db,
+        "auction"
+      )
     );
 
 
@@ -1781,7 +1625,7 @@ async function () {
   if (
     !auction ||
     auction.status !==
-      "OPEN"
+    "OPEN"
   ) {
 
     showMessage(
@@ -1826,7 +1670,11 @@ async function () {
 
 
   const players =
-    team.players || [];
+    Array.isArray(
+      team.players
+    )
+      ? team.players
+      : [];
 
 
   if (
@@ -1854,7 +1702,7 @@ async function () {
   ) {
 
     showMessage(
-      "🎁 You have ₹0. You cannot bid. You may receive a free skipped character."
+      "❌ Your budget is ₹0. You cannot bid."
     );
 
     return;
@@ -1867,6 +1715,14 @@ async function () {
       auction.currentBid || 0
     );
 
+
+  /*
+   * ₹1 Cr → ₹1.5 Cr → ₹2 Cr...
+   * Up to ₹10 Cr in 50L increments.
+   *
+   * After ₹10 Cr:
+   * increase by ₹1 Cr.
+   */
 
   const increment =
     currentBid < 1000
@@ -1885,7 +1741,7 @@ async function () {
   ) {
 
     showMessage(
-      "❌ Not enough budget."
+      "❌ Not enough budget for this bid."
     );
 
     return;
@@ -1894,8 +1750,16 @@ async function () {
 
 
   const auctionRef =
-    ref(db, "auction");
+    ref(
+      db,
+      "auction"
+    );
 
+
+  /*
+   * Transaction prevents two phones
+   * from making the same bid at once.
+   */
 
   const result =
     await runTransaction(
@@ -1922,10 +1786,10 @@ async function () {
         if (
           Number(
             current.currentBid || 0
-          ) !== currentBid
+          ) !==
+          currentBid
         )
           return;
-
 
         return {
 
@@ -1939,6 +1803,11 @@ async function () {
 
           highestBidderName:
             team.name,
+
+          /*
+           * Every successful bid
+           * resets the 10 second timer.
+           */
 
           endTime:
             Date.now() +
@@ -1955,7 +1824,7 @@ async function () {
   ) {
 
     showMessage(
-      "⚠️ Another bid happened first. Try again."
+      "⚠️ Another player bid first."
     );
 
     return;
@@ -1964,7 +1833,7 @@ async function () {
 
 
   showMessage(
-    "🔥 Bid: " +
+    "🔥 " +
     formatMoney(newBid) +
     " • Timer reset to 10s"
   );
@@ -1973,7 +1842,7 @@ async function () {
 
 
 // =====================================================
-// RESTART / NEW GAME
+// START NEW GAME
 // =====================================================
 
 window.restartAuction =
@@ -1981,10 +1850,10 @@ async function () {
 
   const confirmed =
     confirm(
-      "⚠️ START A NEW GAME?\n\n" +
-      "All teams will keep their names,\n" +
-      "but all players, budgets and history\n" +
-      "will be completely reset."
+      "⚠️ START NEW GAME?\n\n" +
+      "All players and auction history " +
+      "will be erased.\n\n" +
+      "Every team gets ₹20 Cr again."
     );
 
 
@@ -1993,6 +1862,10 @@ async function () {
 
 
   try {
+
+    /*
+     * Get current teams.
+     */
 
     const teamsSnapshot =
       await get(
@@ -2008,6 +1881,10 @@ async function () {
     const updates =
       {};
 
+
+    /*
+     * Reset every team.
+     */
 
     Object.keys(
       teams
@@ -2033,59 +1910,60 @@ async function () {
     );
 
 
-    if (
-      Object.keys(updates)
-        .length
-    ) {
+    /*
+     * Clear old history.
+     */
 
-      await update(
-        ref(db),
-        updates
-      );
+    updates["history"] =
+      null;
 
-    }
 
+    /*
+     * New random character order.
+     */
 
     const newOrder =
       shuffleCharacters()
         .map(
-          c => c.name
+          character =>
+            character.name
         );
 
 
-    await set(
-      ref(db, "history"),
-      null
-    );
+    /*
+     * New auction.
+     */
+
+    updates["auction"] = {
+
+      characterIndex:
+        0,
+
+      characterOrder:
+        newOrder,
+
+      currentBid:
+        STARTING_BID,
+
+      highestBidder:
+        null,
+
+      highestBidderName:
+        null,
+
+      status:
+        "OPEN",
+
+      endTime:
+        Date.now() +
+        AUCTION_SECONDS * 1000
+
+    };
 
 
-    await set(
-      ref(db, "auction"),
-      {
-
-        characterIndex:
-          0,
-
-        characterOrder:
-          newOrder,
-
-        currentBid:
-          STARTING_BID,
-
-        highestBidder:
-          null,
-
-        highestBidderName:
-          null,
-
-        status:
-          "OPEN",
-
-        endTime:
-          Date.now() +
-          AUCTION_SECONDS * 1000
-
-      }
+    await update(
+      ref(db),
+      updates
     );
 
 
@@ -2095,7 +1973,6 @@ async function () {
     showMessage(
       "🔄 NEW GAME STARTED!"
     );
-
 
   }
 
@@ -2118,7 +1995,7 @@ async function () {
 
 
 // =====================================================
-// TEAM POWER
+// CHARACTER SCORE
 // =====================================================
 
 function calculateCharacterScore(
@@ -2150,12 +2027,20 @@ function calculateCharacterScore(
 }
 
 
+// =====================================================
+// TEAM SCORE
+// =====================================================
+
 function calculateTeamScore(
   team
 ) {
 
   const players =
-    team.players || [];
+    Array.isArray(
+      team.players
+    )
+      ? team.players
+      : [];
 
 
   if (
@@ -2239,7 +2124,8 @@ function displayTeams(
             id,
 
           name:
-            team.name,
+            team.name ||
+            "Unnamed Team",
 
           budget:
             Number(
@@ -2247,7 +2133,11 @@ function displayTeams(
             ),
 
           players:
-            team.players || [],
+            Array.isArray(
+              team.players
+            )
+              ? team.players
+              : [],
 
           score:
             calculateTeamScore(
@@ -2283,17 +2173,20 @@ function displayTeams(
       if (
         index === 0
       )
-        medal = "🥇";
+        medal =
+          "🥇";
 
       else if (
         index === 1
       )
-        medal = "🥈";
+        medal =
+          "🥈";
 
       else if (
         index === 2
       )
-        medal = "🥉";
+        medal =
+          "🥉";
 
 
       div.innerHTML = `
@@ -2360,6 +2253,10 @@ function displayTeams(
     }
   );
 
+
+  /*
+   * Update MY TEAM display.
+   */
 
   if (
     myTeamId &&
@@ -2431,88 +2328,74 @@ function displayHistory(
     "";
 
 
-  Object.values(history)
-    .sort(
-      (a, b) =>
-        Number(b.time || 0) -
-        Number(a.time || 0)
+  const items =
+    Object.values(
+      history
     )
-    .forEach(
-      item => {
-
-        const div =
-          document.createElement(
-            "div"
-          );
+      .sort(
+        (a, b) =>
+          Number(b.time || 0) -
+          Number(a.time || 0)
+      );
 
 
-        div.className =
-          "history-item";
+  if (
+    items.length === 0
+  ) {
+
+    container.innerHTML =
+      "No history yet.";
+
+    return;
+
+  }
 
 
-        if (
-          Number(
-            item.price
-          ) === 0
-        ) {
+  items.forEach(
+    item => {
 
-          div.innerHTML = `
-
-            🎁
-            <b>
-              ${escapeHTML(
-                item.character
-              )}
-            </b>
-
-            → FREE →
-
-            <b>
-              ${escapeHTML(
-                item.team
-              )}
-            </b>
-
-          `;
-
-        }
-
-        else {
-
-          div.innerHTML = `
-
-            🔨
-            <b>
-              ${escapeHTML(
-                item.character
-              )}
-            </b>
-
-            →
-
-            <b>
-              ${escapeHTML(
-                item.team
-              )}
-            </b>
-
-            →
-
-            ${formatMoney(
-              item.price
-            )}
-
-          `;
-
-        }
-
-
-        container.appendChild(
-          div
+      const div =
+        document.createElement(
+          "div"
         );
 
-      }
-    );
+
+      div.className =
+        "history-item";
+
+
+      div.innerHTML = `
+
+        🔨
+        <b>
+          ${escapeHTML(
+            item.character
+          )}
+        </b>
+
+        →
+
+        <b>
+          ${escapeHTML(
+            item.team
+          )}
+        </b>
+
+        →
+
+        ${formatMoney(
+          item.price
+        )}
+
+      `;
+
+
+      container.appendChild(
+        div
+      );
+
+    }
+  );
 
 }
 
@@ -2623,17 +2506,3 @@ function escapeHTML(
     );
 
 }
-
-
-// =====================================================
-// GLOBAL FUNCTIONS
-// =====================================================
-
-window.placeBid =
-  window.placeBid;
-
-window.joinAuction =
-  window.joinAuction;
-
-window.restartAuction =
-  window.restartAuction;
