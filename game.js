@@ -22,9 +22,9 @@ import {
 // =====================================================
 // FIREBASE CONFIG
 // =====================================================
-
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyB4PSLZ0VhVGGtfZ1hcluOWsTbvJDxxxTg",
+  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
   authDomain: "naruto-shinobi-auction.firebaseapp.com",
   databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
   projectId: "naruto-shinobi-auction",
@@ -33,6 +33,7 @@ const firebaseConfig = {
   appId: "1:187952563869:web:839ac2add9ae0f5835f674",
   measurementId: "G-N3QGHDB240"
 };
+
 
 
 // =====================================================
