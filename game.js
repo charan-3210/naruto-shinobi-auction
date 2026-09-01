@@ -1652,3 +1652,122 @@ window.restartAuction = async function () {
   }
 
 };
+// =====================================================
+// RESTART AUCTION
+// =====================================================
+
+window.restartAuction = async function () {
+
+  const confirmed = confirm(
+    "⚠️ RESTART AUCTION?\n\n" +
+    "This will reset:\n" +
+    "• All team budgets to ₹20 Cr\n" +
+    "• All characters\n" +
+    "• Current auction\n" +
+    "• Auction history\n\n" +
+    "Continue?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    // -----------------------------------------
+    // RESET AUCTION
+    // -----------------------------------------
+
+    await set(ref(db, "auction"), {
+
+      characterIndex: 0,
+
+      currentBid: STARTING_BID,
+
+      highestBidder: null,
+
+      highestBidderName: null,
+
+      status: "OPEN"
+
+    });
+
+
+    // -----------------------------------------
+    // GET ALL TEAMS
+    // -----------------------------------------
+
+    const teamsSnapshot =
+      await get(ref(db, "teams"));
+
+    const teams =
+      teamsSnapshot.val() || {};
+
+
+    // -----------------------------------------
+    // RESET EVERY TEAM
+    // -----------------------------------------
+
+    const updates = {};
+
+    for (const teamId of Object.keys(teams)) {
+
+      updates[`teams/${teamId}/budget`] =
+        STARTING_BUDGET;
+
+      updates[`teams/${teamId}/players`] =
+        [];
+
+    }
+
+
+    if (Object.keys(updates).length > 0) {
+
+      await update(
+        ref(db),
+        updates
+      );
+
+    }
+
+
+    // -----------------------------------------
+    // DELETE HISTORY
+    // -----------------------------------------
+
+    await set(
+      ref(db, "history"),
+      null
+    );
+
+
+    // -----------------------------------------
+    // SUCCESS
+    // -----------------------------------------
+
+    alert(
+      "✅ AUCTION RESTARTED!\n\n" +
+      "All teams have ₹20 Cr.\n" +
+      "All characters have been removed.\n" +
+      "Auction starts from Naruto."
+    );
+
+
+    // Reload page
+    location.reload();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "RESTART ERROR:",
+      error
+    );
+
+    alert(
+      "❌ Restart failed.\n\n" +
+      error.message
+    );
+
+  }
+
+};
