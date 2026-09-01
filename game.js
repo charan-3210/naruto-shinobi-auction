@@ -24,7 +24,7 @@ import {
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
+  apiKey: "AIzaSyB4PSLZ0VhVGGtfZ1hcluOWsTbvJDxxxTg",
   authDomain: "naruto-shinobi-auction.firebaseapp.com",
   databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
   projectId: "naruto-shinobi-auction",
@@ -45,72 +45,416 @@ const auth = getAuth(app);
 
 let user = null;
 let myTeamId = null;
+let listenersStarted = false;
 
 
 // =====================================================
-// CHARACTERS
+// CHARACTER DATABASE
 // =====================================================
 
 const characters = [
 
+  // =========================
+  // OTSUTSUKI
+  // =========================
+
+  {
+    name: "Kaguya Otsutsuki",
+    info: "Rabbit Goddess • Rinne Sharingan • Ten Tails",
+    power: 100,
+    attack: 100,
+    defense: 100,
+    speed: 90,
+    hax: 100,
+    intelligence: 90,
+    synergy: 95
+  },
+
+  {
+    name: "Hagoromo Otsutsuki",
+    info: "Sage of Six Paths • Rinnegan",
+    power: 99,
+    attack: 98,
+    defense: 99,
+    speed: 90,
+    hax: 99,
+    intelligence: 100,
+    synergy: 95
+  },
+
+  {
+    name: "Isshiki Otsutsuki",
+    info: "Sukunahikona • Daikokuten",
+    power: 99,
+    attack: 100,
+    defense: 96,
+    speed: 100,
+    hax: 100,
+    intelligence: 98,
+    synergy: 90
+  },
+
+  {
+    name: "Momoshiki Otsutsuki",
+    info: "Rinnegan • Chakra Absorption",
+    power: 96,
+    attack: 96,
+    defense: 90,
+    speed: 95,
+    hax: 98,
+    intelligence: 90,
+    synergy: 90
+  },
+
+  {
+    name: "Kinshiki Otsutsuki",
+    info: "Divine Weapons • Ōtsutsuki Warrior",
+    power: 90,
+    attack: 95,
+    defense: 90,
+    speed: 88,
+    hax: 82,
+    intelligence: 80,
+    synergy: 85
+  },
+
+  {
+    name: "Toneri Otsutsuki",
+    info: "Tenseigan • Moon",
+    power: 91,
+    attack: 92,
+    defense: 88,
+    speed: 90,
+    hax: 95,
+    intelligence: 85,
+    synergy: 85
+  },
+
+  {
+    name: "Hamura Otsutsuki",
+    info: "Byakugan • Six Paths Power",
+    power: 96,
+    attack: 94,
+    defense: 95,
+    speed: 90,
+    hax: 95,
+    intelligence: 95,
+    synergy: 92
+  },
+
+  {
+    name: "Indra Otsutsuki",
+    info: "Mangekyo Sharingan • Powerful Chakra",
+    power: 94,
+    attack: 95,
+    defense: 88,
+    speed: 92,
+    hax: 95,
+    intelligence: 96,
+    synergy: 90
+  },
+
+  {
+    name: "Ashura Otsutsuki",
+    info: "Six Paths Chakra • Powerful Life Force",
+    power: 94,
+    attack: 93,
+    defense: 96,
+    speed: 85,
+    hax: 90,
+    intelligence: 88,
+    synergy: 92
+  },
+
+
+  // =========================
+  // TOP TIER
+  // =========================
+
+  {
+    name: "Madara Uchiha",
+    info: "Ten Tails Jinchuriki • Rinne Sharingan",
+    power: 98,
+    attack: 98,
+    defense: 97,
+    speed: 94,
+    hax: 99,
+    intelligence: 98,
+    synergy: 95
+  },
+
   {
     name: "Naruto Uzumaki",
-    info: "Seventh Hokage • Jinchuriki"
+    info: "Six Paths Sage Mode • Seventh Hokage",
+    power: 97,
+    attack: 97,
+    defense: 96,
+    speed: 98,
+    hax: 95,
+    intelligence: 92,
+    synergy: 98
   },
 
   {
     name: "Sasuke Uchiha",
-    info: "Sharingan • Rinnegan"
-  },
-
-  {
-    name: "Madara Uchiha",
-    info: "Legendary Uchiha • Ten Tails"
-  },
-
-  {
-    name: "Itachi Uchiha",
-    info: "Mangekyo Sharingan • Akatsuki"
-  },
-
-  {
-    name: "Minato Namikaze",
-    info: "Yellow Flash • Fourth Hokage"
+    info: "Rinnegan • Eternal Mangekyo Sharingan",
+    power: 96,
+    attack: 95,
+    defense: 90,
+    speed: 98,
+    hax: 99,
+    intelligence: 98,
+    synergy: 95
   },
 
   {
     name: "Hashirama Senju",
-    info: "First Hokage • Wood Style"
+    info: "First Hokage • Sage Mode • Wood Style",
+    power: 94,
+    attack: 94,
+    defense: 98,
+    speed: 86,
+    hax: 94,
+    intelligence: 92,
+    synergy: 96
   },
 
   {
     name: "Might Guy",
-    info: "Eight Gates • Taijutsu Master"
+    info: "Eight Gates • Taijutsu Master",
+    power: 95,
+    attack: 100,
+    defense: 80,
+    speed: 100,
+    hax: 70,
+    intelligence: 82,
+    synergy: 85
   },
 
   {
-    name: "Kakashi Hatake",
-    info: "Copy Ninja • Sharingan"
-  },
-
-  {
-    name: "Pain",
-    info: "Six Paths • Rinnegan"
+    name: "Minato Namikaze",
+    info: "Yellow Flash • Flying Raijin",
+    power: 92,
+    attack: 90,
+    defense: 85,
+    speed: 100,
+    hax: 96,
+    intelligence: 99,
+    synergy: 98
   },
 
   {
     name: "Obito Uchiha",
-    info: "Kamui • Sharingan"
+    info: "Ten Tails • Kamui • Sharingan",
+    power: 94,
+    attack: 94,
+    defense: 93,
+    speed: 94,
+    hax: 100,
+    intelligence: 94,
+    synergy: 92
+  },
+
+  {
+    name: "Itachi Uchiha",
+    info: "Mangekyo Sharingan • Genjutsu",
+    power: 90,
+    attack: 88,
+    defense: 82,
+    speed: 90,
+    hax: 98,
+    intelligence: 100,
+    synergy: 94
+  },
+
+
+  // =========================
+  // KAGE / SANNIN
+  // =========================
+
+  {
+    name: "Tobirama Senju",
+    info: "Second Hokage • Flying Raijin",
+    power: 88,
+    attack: 87,
+    defense: 85,
+    speed: 96,
+    hax: 92,
+    intelligence: 99,
+    synergy: 96
+  },
+
+  {
+    name: "Hiruzen Sarutobi",
+    info: "Third Hokage • Professor",
+    power: 85,
+    attack: 84,
+    defense: 84,
+    speed: 82,
+    hax: 85,
+    intelligence: 98,
+    synergy: 92
   },
 
   {
     name: "Jiraiya",
-    info: "Legendary Sannin • Sage Mode"
+    info: "Legendary Sannin • Sage Mode",
+    power: 86,
+    attack: 85,
+    defense: 87,
+    speed: 82,
+    hax: 88,
+    intelligence: 92,
+    synergy: 95
   },
 
   {
     name: "Orochimaru",
-    info: "Legendary Sannin • Forbidden Jutsu"
+    info: "Legendary Sannin • Forbidden Jutsu",
+    power: 87,
+    attack: 82,
+    defense: 92,
+    speed: 80,
+    hax: 94,
+    intelligence: 98,
+    synergy: 90
+  },
+
+  {
+    name: "Pain",
+    info: "Six Paths • Rinnegan",
+    power: 89,
+    attack: 91,
+    defense: 90,
+    speed: 82,
+    hax: 96,
+    intelligence: 92,
+    synergy: 95
+  },
+
+  {
+    name: "Kakashi Hatake",
+    info: "Copy Ninja • Sharingan",
+    power: 84,
+    attack: 82,
+    defense: 80,
+    speed: 88,
+    hax: 90,
+    intelligence: 98,
+    synergy: 96
+  },
+
+  {
+    name: "Gaara",
+    info: "Fifth Kazekage • Sand Manipulation",
+    power: 80,
+    attack: 80,
+    defense: 94,
+    speed: 72,
+    hax: 82,
+    intelligence: 88,
+    synergy: 92
+  },
+
+  {
+    name: "Killer B",
+    info: "Eight Tails Jinchuriki • Seven Swords",
+    power: 86,
+    attack: 90,
+    defense: 90,
+    speed: 85,
+    hax: 84,
+    intelligence: 82,
+    synergy: 88
+  },
+
+
+  // =========================
+  // AKATSUKI
+  // =========================
+
+  {
+    name: "Nagato",
+    info: "Rinnegan • Six Paths",
+    power: 90,
+    attack: 92,
+    defense: 90,
+    speed: 75,
+    hax: 97,
+    intelligence: 94,
+    synergy: 93
+  },
+
+  {
+    name: "Kisame Hoshigaki",
+    info: "Samehada • Monster of the Mist",
+    power: 78,
+    attack: 85,
+    defense: 90,
+    speed: 72,
+    hax: 80,
+    intelligence: 80,
+    synergy: 86
+  },
+
+  {
+    name: "Deidara",
+    info: "Explosive Clay • C4",
+    power: 78,
+    attack: 90,
+    defense: 70,
+    speed: 80,
+    hax: 88,
+    intelligence: 84,
+    synergy: 82
+  },
+
+  {
+    name: "Sasori",
+    info: "Puppet Master • Third Kazekage",
+    power: 76,
+    attack: 82,
+    defense: 78,
+    speed: 72,
+    hax: 88,
+    intelligence: 90,
+    synergy: 86
+  },
+
+  {
+    name: "Kakuzu",
+    info: "Five Hearts • Earth Grudge",
+    power: 77,
+    attack: 84,
+    defense: 91,
+    speed: 70,
+    hax: 82,
+    intelligence: 84,
+    synergy: 82
+  },
+
+  {
+    name: "Konan",
+    info: "Paper Ninjutsu • Akatsuki",
+    power: 70,
+    attack: 75,
+    defense: 72,
+    speed: 78,
+    hax: 84,
+    intelligence: 86,
+    synergy: 88
+  },
+
+  {
+    name: "Hidan",
+    info: "Immortality • Jashin Ritual",
+    power: 65,
+    attack: 76,
+    defense: 88,
+    speed: 65,
+    hax: 80,
+    intelligence: 60,
+    synergy: 70
   }
 
 ];
@@ -120,72 +464,114 @@ const characters = [
 // AUCTION RULES
 // =====================================================
 
-// Money is stored in LAKHS.
-//
-// ₹1 Cr  = 100 Lakhs
-// ₹10 Cr = 1000 Lakhs
-// ₹20 Cr = 2000 Lakhs
-
 const STARTING_BUDGET = 2000;
-
 const MAX_PLAYERS = 4;
-
 const STARTING_BID = 100;
-
-// From ₹1 Cr to ₹10 Cr:
-// increase by ₹50 Lakhs
-
 const SMALL_INCREMENT = 50;
-
-// After ₹10 Cr:
-// increase by ₹1 Cr
-
 const BIG_INCREMENT = 100;
+
+
+// =====================================================
+// SHUFFLE
+// =====================================================
+
+function shuffleCharacters() {
+
+  const shuffled = [...characters];
+
+  for (
+    let i = shuffled.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        Math.random() * (i + 1)
+      );
+
+    [
+      shuffled[i],
+      shuffled[j]
+    ] = [
+      shuffled[j],
+      shuffled[i]
+    ];
+
+  }
+
+  return shuffled;
+
+}
 
 
 // =====================================================
 // LOGIN
 // =====================================================
+
 signInAnonymously(auth)
   .then(() => {
-    console.log("Firebase login successful");
-  })
-  .catch((error) => {
-    console.error("Firebase login error:", error);
 
-    const message = document.getElementById("joinMessage");
+    console.log(
+      "Firebase login successful"
+    );
+
+  })
+  .catch(error => {
+
+    console.error(
+      "Firebase login error:",
+      error
+    );
+
+    const message =
+      document.getElementById(
+        "joinMessage"
+      );
 
     if (message) {
+
       message.textContent =
-        "❌ Firebase error: " + error.code;
+        "❌ Firebase error: " +
+        error.code;
+
     }
+
   });
 
 
-onAuthStateChanged(auth, (currentUser) => {
+onAuthStateChanged(
+  auth,
+  currentUser => {
 
-  if (currentUser) {
+    if (currentUser) {
 
-    user = currentUser;
+      user = currentUser;
+
+    }
 
   }
-
-});
+);
 
 
 // =====================================================
 // JOIN AUCTION
 // =====================================================
 
-window.joinAuction = async function () {
+window.joinAuction =
+async function () {
 
   const name =
-    document.getElementById("teamName")
+    document
+      .getElementById("teamName")
       .value
       .trim();
 
   const message =
-    document.getElementById("joinMessage");
+    document.getElementById(
+      "joinMessage"
+    );
+
 
   if (!name) {
 
@@ -196,6 +582,7 @@ window.joinAuction = async function () {
 
   }
 
+
   if (!user) {
 
     message.textContent =
@@ -205,49 +592,52 @@ window.joinAuction = async function () {
 
   }
 
-  myTeamId = user.uid;
+
+  myTeamId =
+    user.uid;
+
 
   const teamRef =
-    ref(db, "teams/" + myTeamId);
+    ref(
+      db,
+      "teams/" +
+      myTeamId
+    );
+
 
   const snapshot =
     await get(teamRef);
 
+
   if (!snapshot.exists()) {
 
-    await set(teamRef, {
+    await set(
+      teamRef,
+      {
 
-      name: name,
+        name: name,
 
-      budget: STARTING_BUDGET,
+        budget:
+          STARTING_BUDGET,
 
-      players: [],
+        players: [],
 
-      joinedAt: Date.now()
+        joinedAt:
+          Date.now()
 
-    });
-
-  }
-
-  else {
-
-    // Existing team
-    // Keep its current budget and players.
-
-    const existingTeam =
-      snapshot.val();
-
-    document.getElementById("teamName")
-      .value =
-      existingTeam.name || name;
+      }
+    );
 
   }
 
 
-  document.getElementById("joinScreen")
+  document
+    .getElementById("joinScreen")
     .style.display = "none";
 
-  document.getElementById("gameScreen")
+
+  document
+    .getElementById("gameScreen")
     .style.display = "block";
 
 
@@ -257,9 +647,11 @@ window.joinAuction = async function () {
   const team =
     teamSnapshot.val();
 
-  document.getElementById("myTeam")
+
+  document
+    .getElementById("myTeam")
     .textContent =
-    team.name;
+      team.name;
 
 
   startRealtimeListeners();
@@ -273,12 +665,18 @@ window.joinAuction = async function () {
 
 function startRealtimeListeners() {
 
+  if (listenersStarted) return;
+
+  listenersStarted = true;
+
+
   onValue(
     ref(db, "auction"),
-    (snapshot) => {
+    snapshot => {
 
       const auction =
         snapshot.val();
+
 
       if (!auction) {
 
@@ -288,7 +686,10 @@ function startRealtimeListeners() {
 
       }
 
-      displayAuction(auction);
+
+      displayAuction(
+        auction
+      );
 
     }
   );
@@ -296,7 +697,7 @@ function startRealtimeListeners() {
 
   onValue(
     ref(db, "teams"),
-    (snapshot) => {
+    snapshot => {
 
       displayTeams(
         snapshot.val() || {}
@@ -308,7 +709,7 @@ function startRealtimeListeners() {
 
   onValue(
     ref(db, "history"),
-    (snapshot) => {
+    snapshot => {
 
       displayHistory(
         snapshot.val() || {}
@@ -329,26 +730,82 @@ async function createAuction() {
   const auctionRef =
     ref(db, "auction");
 
+
   const snapshot =
-    await get(auctionRef);
+    await get(
+      auctionRef
+    );
+
 
   if (snapshot.exists()) {
+
     return;
+
   }
 
-  await set(auctionRef, {
 
-    characterIndex: 0,
+  await set(
+    auctionRef,
+    {
 
-    currentBid: STARTING_BID,
+      characterIndex: 0,
 
-    highestBidder: null,
+      currentBid:
+        STARTING_BID,
 
-    highestBidderName: null,
+      highestBidder: null,
 
-    status: "OPEN"
+      highestBidderName: null,
 
-  });
+      status: "OPEN",
+
+      characterOrder:
+        shuffleCharacters()
+          .map(c => c.name)
+
+    }
+  );
+
+}
+
+
+// =====================================================
+// GET CURRENT CHARACTER
+// =====================================================
+
+function getCurrentCharacter(
+  auction
+) {
+
+  const order =
+    auction.characterOrder;
+
+
+  if (
+    !order ||
+    !Array.isArray(order)
+  ) {
+
+    return characters[
+      Number(
+        auction.characterIndex || 0
+      )
+    ];
+
+  }
+
+
+  const name =
+    order[
+      Number(
+        auction.characterIndex || 0
+      )
+    ];
+
+
+  return characters.find(
+    c => c.name === name
+  );
 
 }
 
@@ -357,96 +814,110 @@ async function createAuction() {
 // DISPLAY AUCTION
 // =====================================================
 
-function displayAuction(auction) {
-
-  const index =
-    Number(auction.characterIndex || 0);
+function displayAuction(
+  auction
+) {
 
   const character =
-    characters[index];
+    getCurrentCharacter(
+      auction
+    );
 
 
   if (!character) {
 
-    document.getElementById("characterName")
+    document
+      .getElementById(
+        "characterName"
+      )
       .textContent =
-      "🏆 Auction Finished";
+        "🏆 Auction Finished";
 
-    document.getElementById("characterInfo")
+    document
+      .getElementById(
+        "characterInfo"
+      )
       .textContent =
-      "All characters have been auctioned.";
-
-    document.getElementById("currentBid")
-      .textContent =
-      "₹0";
+        "All characters have been auctioned.";
 
     return;
 
   }
 
 
-  document.getElementById("characterName")
+  document
+    .getElementById(
+      "characterName"
+    )
     .textContent =
-    character.name;
+      character.name;
 
 
-  document.getElementById("characterInfo")
+  document
+    .getElementById(
+      "characterInfo"
+    )
     .textContent =
-    character.info;
+      character.info;
 
 
-  document.getElementById("currentBid")
+  document
+    .getElementById(
+      "currentBid"
+    )
     .textContent =
-    formatMoney(
-      Number(auction.currentBid || 0)
-    );
+      formatMoney(
+        Number(
+          auction.currentBid || 0
+        )
+      );
 
 
-  if (auction.highestBidderName) {
-
-    document.getElementById("highestBidder")
-      .textContent =
-      "Highest bidder: " +
-      auction.highestBidderName;
-
-  }
-
-  else {
-
-    document.getElementById("highestBidder")
-      .textContent =
-      "No bids yet";
-
-  }
+  document
+    .getElementById(
+      "highestBidder"
+    )
+    .textContent =
+      auction.highestBidderName
+        ? "Highest bidder: " +
+          auction.highestBidderName
+        : "No bids yet";
 
 
-  if (auction.status === "SOLD") {
+  if (
+    auction.status === "SOLD"
+  ) {
 
-    if (auction.currentBid === 0) {
+    if (
+      Number(auction.currentBid) === 0
+    ) {
 
-      document.getElementById("gameMessage")
-        .textContent =
+      showMessage(
         "🎁 FREE to " +
-        auction.highestBidderName;
+        auction.highestBidderName
+      );
 
     }
 
     else {
 
-      document.getElementById("gameMessage")
-        .textContent =
+      showMessage(
         "🔨 SOLD to " +
-        auction.highestBidderName;
+        auction.highestBidderName
+      );
 
     }
 
   }
 
-  else if (auction.status === "FINISHED") {
 
-    document.getElementById("gameMessage")
-      .textContent =
-      "🏆 Auction Finished!";
+  if (
+    auction.status === "FINISHED"
+  ) {
+
+    showMessage(
+      "🏆 Auction Finished!"
+    );
 
   }
 
@@ -457,7 +928,8 @@ function displayAuction(auction) {
 // BID
 // =====================================================
 
-window.placeBid = async function () {
+window.placeBid =
+async function () {
 
   if (!myTeamId) {
 
@@ -467,14 +939,19 @@ window.placeBid = async function () {
 
 
   const auctionSnapshot =
-    await get(ref(db, "auction"));
+    await get(
+      ref(db, "auction")
+    );
+
 
   const auction =
     auctionSnapshot.val();
 
 
-  if (!auction ||
-      auction.status !== "OPEN") {
+  if (
+    !auction ||
+    auction.status !== "OPEN"
+  ) {
 
     showMessage(
       "❌ Auction is not open."
@@ -487,29 +964,29 @@ window.placeBid = async function () {
 
   const teamSnapshot =
     await get(
-      ref(db, "teams/" + myTeamId)
+      ref(
+        db,
+        "teams/" +
+        myTeamId
+      )
     );
+
 
   const team =
     teamSnapshot.val();
 
 
-  if (!team) {
-
-    return;
-
-  }
+  if (!team) return;
 
 
   const players =
     team.players || [];
 
 
-  // =========================================
-  // MAX 4 CHARACTERS
-  // =========================================
-
-  if (players.length >= MAX_PLAYERS) {
+  if (
+    players.length >=
+    MAX_PLAYERS
+  ) {
 
     showMessage(
       "❌ You already have 4 characters!"
@@ -520,14 +997,13 @@ window.placeBid = async function () {
   }
 
 
-  // =========================================
-  // ₹0 TEAM CANNOT BID
-  // =========================================
-
-  if (Number(team.budget) <= 0) {
+  if (
+    Number(team.budget) <= 0
+  ) {
 
     showMessage(
-      "🎁 You have ₹0. The next character will be FREE for you."
+      "🎁 You have ₹0. " +
+      "The next character will be FREE for you."
     );
 
     return;
@@ -535,12 +1011,10 @@ window.placeBid = async function () {
   }
 
 
-  // =========================================
-  // CALCULATE NEXT BID
-  // =========================================
-
   const currentBid =
-    Number(auction.currentBid);
+    Number(
+      auction.currentBid
+    );
 
 
   const increment =
@@ -553,11 +1027,10 @@ window.placeBid = async function () {
     currentBid + increment;
 
 
-  // =========================================
-  // NOT ENOUGH MONEY
-  // =========================================
-
-  if (newBid > Number(team.budget)) {
+  if (
+    newBid >
+    Number(team.budget)
+  ) {
 
     showMessage(
       "❌ Not enough budget!"
@@ -568,33 +1041,27 @@ window.placeBid = async function () {
   }
 
 
-  // =========================================
-  // FIREBASE TRANSACTION
-  // =========================================
-
-  const auctionRef =
-    ref(db, "auction");
-
-
   const result =
     await runTransaction(
-      auctionRef,
-      (current) => {
+      ref(db, "auction"),
+      current => {
 
-        if (!current) {
-          return current;
-        }
+        if (!current) return;
 
-
-        if (current.status !== "OPEN") {
-          return;
-        }
-
-
-        // Someone else bid first
         if (
-          Number(current.currentBid) !==
-          currentBid
+          current.status !==
+          "OPEN"
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          Number(
+            current.currentBid
+          ) !== currentBid
         ) {
 
           return;
@@ -606,11 +1073,14 @@ window.placeBid = async function () {
 
           ...current,
 
-          currentBid: newBid,
+          currentBid:
+            newBid,
 
-          highestBidder: myTeamId,
+          highestBidder:
+            myTeamId,
 
-          highestBidderName: team.name
+          highestBidderName:
+            team.name
 
         };
 
@@ -641,23 +1111,23 @@ window.placeBid = async function () {
 // SELL PLAYER
 // =====================================================
 
-window.sellPlayer = async function () {
+window.sellPlayer =
+async function () {
 
-  const auctionSnapshot =
-    await get(ref(db, "auction"));
+  const snapshot =
+    await get(
+      ref(db, "auction")
+    );
+
 
   const auction =
-    auctionSnapshot.val();
+    snapshot.val();
 
 
-  if (!auction) {
-
-    return;
-
-  }
-
-
-  if (auction.status !== "OPEN") {
+  if (
+    !auction ||
+    auction.status !== "OPEN"
+  ) {
 
     showMessage(
       "❌ Auction is not open."
@@ -668,7 +1138,9 @@ window.sellPlayer = async function () {
   }
 
 
-  if (!auction.highestBidder) {
+  if (
+    !auction.highestBidder
+  ) {
 
     showMessage(
       "❌ No bidder."
@@ -679,7 +1151,9 @@ window.sellPlayer = async function () {
   }
 
 
-  await finalizeSale(auction);
+  await finalizeSale(
+    auction
+  );
 
 };
 
@@ -688,51 +1162,52 @@ window.sellPlayer = async function () {
 // FINALIZE SALE
 // =====================================================
 
-async function finalizeSale(auction) {
+async function finalizeSale(
+  auction
+) {
 
   const winnerId =
     auction.highestBidder;
 
+
   const winnerRef =
-    ref(db, "teams/" + winnerId);
-
-
-  const winnerSnapshot =
-    await get(winnerRef);
-
-  const winner =
-    winnerSnapshot.val();
-
-
-  if (!winner) {
-
-    showMessage(
-      "❌ Winner not found."
+    ref(
+      db,
+      "teams/" +
+      winnerId
     );
 
-    return;
 
-  }
+  const snapshot =
+    await get(
+      winnerRef
+    );
+
+
+  const winner =
+    snapshot.val();
+
+
+  if (!winner) return;
 
 
   const character =
-    characters[
-      Number(auction.characterIndex)
-    ];
+    getCurrentCharacter(
+      auction
+    );
 
 
-  if (!character) {
-
-    return;
-
-  }
+  if (!character) return;
 
 
   const players =
     winner.players || [];
 
 
-  if (players.length >= MAX_PLAYERS) {
+  if (
+    players.length >=
+    MAX_PLAYERS
+  ) {
 
     showMessage(
       "❌ Winner already has 4 characters."
@@ -744,14 +1219,15 @@ async function finalizeSale(auction) {
 
 
   const price =
-    Number(auction.currentBid || 0);
+    Number(
+      auction.currentBid || 0
+    );
 
 
-  // =========================================
-  // CHECK MONEY
-  // =========================================
-
-  if (price > Number(winner.budget)) {
+  if (
+    price >
+    Number(winner.budget)
+  ) {
 
     showMessage(
       "❌ Winner does not have enough money."
@@ -762,42 +1238,30 @@ async function finalizeSale(auction) {
   }
 
 
-  // =========================================
-  // ADD CHARACTER
-  // =========================================
-
   players.push({
 
-    name: character.name,
+    name:
+      character.name,
 
     price: price
 
   });
 
 
-  const newBudget =
-    Number(winner.budget) - price;
-
-
-  // =========================================
-  // UPDATE TEAM
-  // =========================================
-
   await update(
     winnerRef,
     {
 
-      budget: newBudget,
+      budget:
+        Number(winner.budget) -
+        price,
 
-      players: players
+      players:
+        players
 
     }
   );
 
-
-  // =========================================
-  // MARK SOLD
-  // =========================================
 
   await update(
     ref(db, "auction"),
@@ -808,10 +1272,6 @@ async function finalizeSale(auction) {
     }
   );
 
-
-  // =========================================
-  // HISTORY
-  // =========================================
 
   await set(
     ref(
@@ -825,53 +1285,51 @@ async function finalizeSale(auction) {
     ),
     {
 
-      character: character.name,
+      character:
+        character.name,
 
-      team: winner.name,
+      team:
+        winner.name,
 
-      price: price,
+      price:
+        price,
 
-      time: Date.now(),
+      time:
+        Date.now(),
 
-      free: price === 0
+      free:
+        price === 0
 
     }
   );
 
 
-  if (price === 0) {
-
-    showMessage(
-      "🎁 " +
-      character.name +
-      " given FREE to " +
-      winner.name
-    );
-
-  }
-
-  else {
-
-    showMessage(
-      "🔨 " +
-      character.name +
-      " SOLD to " +
-      winner.name
-    );
-
-  }
+  showMessage(
+    price === 0
+      ? "🎁 " +
+        character.name +
+        " FREE to " +
+        winner.name
+      : "🔨 " +
+        character.name +
+        " SOLD to " +
+        winner.name
+  );
 
 }
 
 
 // =====================================================
-// FIND TEAM ELIGIBLE FOR FREE CHARACTER
+// FREE CHARACTER
 // =====================================================
 
 async function findFreeTeam() {
 
   const snapshot =
-    await get(ref(db, "teams"));
+    await get(
+      ref(db, "teams")
+    );
+
 
   const teams =
     snapshot.val() || {};
@@ -880,53 +1338,60 @@ async function findFreeTeam() {
   const eligible =
     Object.entries(teams)
 
-      .filter(([id, team]) => {
+      .filter(
+        ([id, team]) => {
 
-        const budget =
-          Number(team.budget || 0);
-
-        const players =
-          team.players || [];
-
-
-        return (
-          budget <= 0 &&
-          players.length < MAX_PLAYERS
-        );
-
-      })
-
-      .sort((a, b) => {
-
-        const teamA = a[1];
-        const teamB = b[1];
-
-
-        // Team with fewer characters gets priority
-        const playersA =
-          (teamA.players || []).length;
-
-        const playersB =
-          (teamB.players || []).length;
-
-
-        if (playersA !== playersB) {
-
-          return playersA - playersB;
+          return (
+            Number(
+              team.budget || 0
+            ) <= 0 &&
+            (team.players || [])
+              .length < MAX_PLAYERS
+          );
 
         }
+      )
+
+      .sort(
+        (a, b) => {
+
+          const playersA =
+            (a[1].players || [])
+              .length;
+
+          const playersB =
+            (b[1].players || [])
+              .length;
 
 
-        // If equal, earlier joined team gets priority
-        return (
-          Number(teamA.joinedAt || 0) -
-          Number(teamB.joinedAt || 0)
-        );
+          if (
+            playersA !== playersB
+          ) {
 
-      });
+            return (
+              playersA -
+              playersB
+            );
+
+          }
 
 
-  if (eligible.length === 0) {
+          return (
+            Number(
+              a[1].joinedAt || 0
+            ) -
+            Number(
+              b[1].joinedAt || 0
+            )
+          );
+
+        }
+      );
+
+
+  if (
+    eligible.length === 0
+  ) {
 
     return null;
 
@@ -935,9 +1400,11 @@ async function findFreeTeam() {
 
   return {
 
-    id: eligible[0][0],
+    id:
+      eligible[0][0],
 
-    team: eligible[0][1]
+    team:
+      eligible[0][1]
 
   };
 
@@ -948,32 +1415,30 @@ async function findFreeTeam() {
 // NEXT PLAYER
 // =====================================================
 
-window.nextPlayer = async function () {
+window.nextPlayer =
+async function () {
 
   const auctionRef =
     ref(db, "auction");
 
 
   const snapshot =
-    await get(auctionRef);
+    await get(
+      auctionRef
+    );
 
 
   const auction =
     snapshot.val();
 
 
-  if (!auction) {
-
-    return;
-
-  }
+  if (!auction) return;
 
 
-  // =========================================
-  // CURRENT CHARACTER MUST BE SOLD
-  // =========================================
-
-  if (auction.status !== "SOLD") {
+  if (
+    auction.status !==
+    "SOLD"
+  ) {
 
     showMessage(
       "❌ Sell the current character first."
@@ -985,28 +1450,34 @@ window.nextPlayer = async function () {
 
 
   const nextIndex =
-    Number(auction.characterIndex) + 1;
+    Number(
+      auction.characterIndex
+    ) + 1;
 
 
-  // =========================================
-  // AUCTION FINISHED
-  // =========================================
-
-  if (nextIndex >= characters.length) {
+  if (
+    nextIndex >=
+    auction.characterOrder.length
+  ) {
 
     await update(
       auctionRef,
       {
 
-        characterIndex: nextIndex,
+        characterIndex:
+          nextIndex,
 
-        currentBid: 0,
+        currentBid:
+          0,
 
-        highestBidder: null,
+        highestBidder:
+          null,
 
-        highestBidderName: null,
+        highestBidderName:
+          null,
 
-        status: "FINISHED"
+        status:
+          "FINISHED"
 
       }
     );
@@ -1021,56 +1492,57 @@ window.nextPlayer = async function () {
   }
 
 
-  // =========================================
-  // MOVE TO NEXT CHARACTER
-  // =========================================
+  // -----------------------------------------
+  // NEXT CHARACTER
+  // -----------------------------------------
 
   await update(
     auctionRef,
     {
 
-      characterIndex: nextIndex,
+      characterIndex:
+        nextIndex,
 
-      currentBid: STARTING_BID,
+      currentBid:
+        STARTING_BID,
 
-      highestBidder: null,
+      highestBidder:
+        null,
 
-      highestBidderName: null,
+      highestBidderName:
+        null,
 
-      status: "OPEN"
+      status:
+        "OPEN",
+
+      freeCharacter:
+        false
 
     }
   );
 
 
-  // =========================================
-  // CHECK FOR ₹0 TEAM
-  // =========================================
+  // -----------------------------------------
+  // FREE CHARACTER
+  // -----------------------------------------
 
   const freeTeam =
     await findFreeTeam();
 
 
-  if (!freeTeam) {
-
-    return;
-
-  }
+  if (!freeTeam) return;
 
 
-  // =========================================
-  // GIVE NEXT CHARACTER FREE
-  // =========================================
-
-  const freeAuctionSnapshot =
-    await get(auctionRef);
+  const freeSnapshot =
+    await get(
+      auctionRef
+    );
 
 
   const freeAuction =
-    freeAuctionSnapshot.val();
+    freeSnapshot.val();
 
 
-  // Make sure nobody has bid
   if (
     !freeAuction ||
     freeAuction.status !== "OPEN" ||
@@ -1082,53 +1554,34 @@ window.nextPlayer = async function () {
   }
 
 
-  // =========================================
-  // CLAIM FREE CHARACTER SAFELY
-  // =========================================
-
   const claimResult =
     await runTransaction(
       auctionRef,
-      (current) => {
+      current => {
 
-        if (!current) {
-          return;
-        }
-
+        if (!current) return;
 
         if (
-          current.status !== "OPEN"
-        ) {
-
-          return;
-
-        }
-
+          current.status !==
+          "OPEN"
+        ) return;
 
         if (
           current.highestBidder
-        ) {
-
-          return;
-
-        }
-
+        ) return;
 
         if (
-          Number(current.characterIndex) !==
-          nextIndex
-        ) {
-
-          return;
-
-        }
-
+          Number(
+            current.characterIndex
+          ) !== nextIndex
+        ) return;
 
         return {
 
           ...current,
 
-          currentBid: 0,
+          currentBid:
+            0,
 
           highestBidder:
             freeTeam.id,
@@ -1136,9 +1589,11 @@ window.nextPlayer = async function () {
           highestBidderName:
             freeTeam.team.name,
 
-          status: "SOLD",
+          status:
+            "SOLD",
 
-          freeCharacter: true
+          freeCharacter:
+            true
 
         };
 
@@ -1146,16 +1601,18 @@ window.nextPlayer = async function () {
     );
 
 
-  if (!claimResult.committed) {
+  if (
+    !claimResult.committed
+  ) {
 
     return;
 
   }
 
 
-  // =========================================
-  // ADD FREE CHARACTER TO TEAM
-  // =========================================
+  // -----------------------------------------
+  // ADD FREE CHARACTER
+  // -----------------------------------------
 
   const teamRef =
     ref(
@@ -1165,25 +1622,25 @@ window.nextPlayer = async function () {
     );
 
 
-  const latestTeamSnapshot =
-    await get(teamRef);
+  const latestSnapshot =
+    await get(
+      teamRef
+    );
 
 
   const latestTeam =
-    latestTeamSnapshot.val();
+    latestSnapshot.val();
 
 
-  if (!latestTeam) {
-    return;
-  }
+  if (!latestTeam) return;
 
 
-  const latestPlayers =
+  const players =
     latestTeam.players || [];
 
 
   if (
-    latestPlayers.length >=
+    players.length >=
     MAX_PLAYERS
   ) {
 
@@ -1192,29 +1649,15 @@ window.nextPlayer = async function () {
   }
 
 
-  // Make sure character hasn't already
-  // been added
-  const alreadyHasCharacter =
-    latestPlayers.some(
-      p =>
-        p.name ===
-        characters[nextIndex].name
-    );
-
-
-  if (alreadyHasCharacter) {
-
-    return;
-
-  }
-
-
-  latestPlayers.push({
+  players.push({
 
     name:
-      characters[nextIndex].name,
+      getCurrentCharacter(
+        freeAuction
+      ).name,
 
-    price: 0
+    price:
+      0
 
   });
 
@@ -1223,17 +1666,15 @@ window.nextPlayer = async function () {
     teamRef,
     {
 
-      budget: 0,
+      budget:
+        0,
 
-      players: latestPlayers
+      players:
+        players
 
     }
   );
 
-
-  // =========================================
-  // ADD FREE CHARACTER TO HISTORY
-  // =========================================
 
   await set(
     ref(
@@ -1246,53 +1687,252 @@ window.nextPlayer = async function () {
     {
 
       character:
-        characters[nextIndex].name,
+        getCurrentCharacter(
+          freeAuction
+        ).name,
 
       team:
         latestTeam.name,
 
-      price: 0,
+      price:
+        0,
 
-      time: Date.now(),
+      time:
+        Date.now(),
 
-      free: true
+      free:
+        true
 
     }
-  );
-
-
-  showMessage(
-    "🎁 " +
-    characters[nextIndex].name +
-    " goes FREE to " +
-    latestTeam.name
   );
 
 };
 
 
 // =====================================================
-// TEAMS
+// CHARACTER POWER SCORE
 // =====================================================
 
-function displayTeams(teams) {
+function calculateCharacterScore(
+  player
+) {
+
+  const character =
+    characters.find(
+      c =>
+        c.name ===
+        player.name
+    );
+
+
+  if (!character) return 0;
+
+
+  return (
+    character.power * 0.25 +
+    character.attack * 0.15 +
+    character.defense * 0.15 +
+    character.speed * 0.10 +
+    character.hax * 0.15 +
+    character.intelligence * 0.10 +
+    character.synergy * 0.10
+  );
+
+}
+
+
+// =====================================================
+// TEAM SCORE
+// =====================================================
+
+function calculateTeamScore(
+  team
+) {
+
+  const players =
+    team.players || [];
+
+
+  if (
+    players.length === 0
+  ) {
+
+    return 0;
+
+  }
+
+
+  const scores =
+    players.map(
+      player =>
+        calculateCharacterScore(
+          player
+        )
+    );
+
+
+  const totalPower =
+    scores.reduce(
+      (sum, score) =>
+        sum + score,
+      0
+    );
+
+
+  const averagePower =
+    totalPower /
+    players.length;
+
+
+  const strongest =
+    Math.max(
+      ...scores
+    );
+
+
+  const sortedScores =
+    [...scores]
+      .sort(
+        (a, b) =>
+          b - a
+      );
+
+
+  const depth =
+    sortedScores
+      .slice(
+        0,
+        MAX_PLAYERS
+      )
+      .reduce(
+        (sum, score) =>
+          sum + score,
+        0
+      );
+
+
+  const finalScore =
+    strongest * 0.25 +
+    totalPower * 0.35 +
+    averagePower * 0.20 +
+    depth * 0.20;
+
+
+  return Number(
+    finalScore.toFixed(2)
+  );
+
+}
+
+
+// =====================================================
+// RANK TEAMS
+// =====================================================
+
+function rankTeams(
+  teams
+) {
+
+  return Object.entries(
+    teams
+  )
+
+    .map(
+      ([id, team]) => ({
+
+        id:
+
+          id,
+
+        name:
+
+          team.name,
+
+        players:
+
+          team.players || [],
+
+        budget:
+
+          Number(
+            team.budget || 0
+          ),
+
+        score:
+
+          calculateTeamScore(
+            team
+          )
+
+      })
+    )
+
+    .sort(
+      (a, b) =>
+        b.score -
+        a.score
+    );
+
+}
+
+
+// =====================================================
+// DISPLAY TEAMS
+// =====================================================
+
+function displayTeams(
+  teams
+) {
 
   const container =
-    document.getElementById("teams");
+    document.getElementById(
+      "teams"
+    );
 
 
-  container.innerHTML = "";
+  if (!container) return;
 
 
-  Object.values(teams)
-    .forEach(team => {
+  container.innerHTML =
+    "";
+
+
+  const rankedTeams =
+    rankTeams(
+      teams
+    );
+
+
+  rankedTeams.forEach(
+    (team, index) => {
 
       const div =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       div.className =
         "team";
+
+
+      let medal =
+        "🏅";
+
+
+      if (
+        index === 0
+      ) medal = "🥇";
+
+
+      else if (
+        index === 1
+      ) medal = "🥈";
+
+
+      else if (
+        index === 2
+      ) medal = "🥉";
 
 
       const players =
@@ -1302,32 +1942,70 @@ function displayTeams(teams) {
       div.innerHTML = `
 
         <div class="team-name">
-          ${escapeHTML(team.name)}
+
+          ${medal}
+          #${index + 1}
+
+          ${escapeHTML(
+            team.name
+          )}
+
         </div>
 
         <div>
-          Budget:
+
+          ⭐ Power Score:
           <b>
-            ${formatMoney(team.budget)}
+            ${team.score}/100
           </b>
+
         </div>
 
         <div>
-          Players:
-          ${players.length} / 4
+
+          💰 Budget:
+          <b>
+            ${formatMoney(
+              team.budget
+            )}
+          </b>
+
         </div>
+
+        <div>
+
+          👥 Players:
+          ${players.length}
+          / ${MAX_PLAYERS}
+
+        </div>
+
+        <hr>
 
         ${
           players.length
-            ? players.map(
-                p => `
-                  <div>
-                    ${escapeHTML(p.name)}
-                    —
-                    ${formatMoney(p.price)}
-                  </div>
-                `
-              ).join("")
+
+            ? players
+                .map(
+                  player => `
+
+                    <div>
+
+                      ⚔️
+                      ${escapeHTML(
+                        player.name
+                      )}
+
+                      —
+                      ${formatMoney(
+                        player.price
+                      )}
+
+                    </div>
+
+                  `
+                )
+                .join("")
 
             : "<div>No players</div>"
         }
@@ -1335,14 +2013,17 @@ function displayTeams(teams) {
       `;
 
 
-      container.appendChild(div);
+      container.appendChild(
+        div
+      );
 
-    });
+    }
+  );
 
 
-  // =========================================
-  // UPDATE MY TEAM
-  // =========================================
+  // -----------------------------------------
+  // MY TEAM
+  // -----------------------------------------
 
   if (
     myTeamId &&
@@ -1353,21 +2034,34 @@ function displayTeams(teams) {
       teams[myTeamId];
 
 
-    document.getElementById("myTeam")
+    document
+      .getElementById(
+        "myTeam"
+      )
       .textContent =
-      myTeam.name;
+        myTeam.name;
 
 
-    document.getElementById("myBudget")
+    document
+      .getElementById(
+        "myBudget"
+      )
       .textContent =
-      formatMoney(
-        Number(myTeam.budget)
-      );
+        formatMoney(
+          Number(
+            myTeam.budget
+          )
+        );
 
 
-    document.getElementById("myPlayers")
+    document
+      .getElementById(
+        "myPlayers"
+      )
       .textContent =
-      `${(myTeam.players || []).length} / 4`;
+        `${(
+          myTeam.players || []
+        ).length} / ${MAX_PLAYERS}`;
 
   }
 
@@ -1378,95 +2072,291 @@ function displayTeams(teams) {
 // HISTORY
 // =====================================================
 
-function displayHistory(history) {
+function displayHistory(
+  history
+) {
 
   const container =
-    document.getElementById("history");
+    document.getElementById(
+      "history"
+    );
 
 
-  container.innerHTML = "";
+  if (!container) return;
+
+
+  container.innerHTML =
+    "";
 
 
   const entries =
-    Object.values(history)
+    Object.values(
+      history
+    )
       .sort(
         (a, b) =>
-          Number(b.time || 0) -
-          Number(a.time || 0)
+          Number(
+            b.time || 0
+          ) -
+          Number(
+            a.time || 0
+          )
       );
 
 
-  entries.forEach(item => {
+  entries.forEach(
+    item => {
 
-    const div =
-      document.createElement("div");
+      const div =
+        document.createElement(
+          "div"
+        );
 
 
-    div.className =
-      "history-item";
+      div.className =
+        "history-item";
 
 
-    if (Number(item.price) === 0) {
+      if (
+        Number(item.price) === 0
+      ) {
 
-      div.innerHTML = `
+        div.innerHTML = `
 
-        🎁 <b>
-          ${escapeHTML(item.character)}
-        </b>
+          🎁 <b>
+            ${escapeHTML(
+              item.character
+            )}
+          </b>
 
-        went FREE to
+          went FREE to
 
-        <b>
-          ${escapeHTML(item.team)}
-        </b>
+          <b>
+            ${escapeHTML(
+              item.team
+            )}
+          </b>
 
-      `;
+        `;
+
+      }
+
+      else {
+
+        div.innerHTML = `
+
+          🔨 <b>
+            ${escapeHTML(
+              item.character
+            )}
+          </b>
+
+          sold to
+
+          <b>
+            ${escapeHTML(
+              item.team
+            )}
+          </b>
+
+          for
+
+          <b>
+            ${formatMoney(
+              item.price
+            )}
+          </b>
+
+        `;
+
+      }
+
+
+      container.appendChild(
+        div
+      );
 
     }
-
-    else {
-
-      div.innerHTML = `
-
-        🔨 <b>
-          ${escapeHTML(item.character)}
-        </b>
-
-        sold to
-
-        <b>
-          ${escapeHTML(item.team)}
-        </b>
-
-        for
-
-        <b>
-          ${formatMoney(item.price)}
-        </b>
-
-      `;
-
-    }
-
-
-    container.appendChild(div);
-
-  });
+  );
 
 }
 
 
 // =====================================================
-// MONEY FORMAT
+// RESTART AUCTION
 // =====================================================
 
-function formatMoney(lakhs) {
+window.restartAuction =
+async function () {
+
+  const confirmed =
+    confirm(
+      "⚠️ RESTART AUCTION?\n\n" +
+      "All teams, players, budgets " +
+      "and history will be reset."
+    );
+
+
+  if (!confirmed) return;
+
+
+  try {
+
+    // -----------------------------------------
+    // GET TEAMS
+    // -----------------------------------------
+
+    const snapshot =
+      await get(
+        ref(db, "teams")
+      );
+
+
+    const teams =
+      snapshot.val() || {};
+
+
+    // -----------------------------------------
+    // RESET TEAMS
+    // -----------------------------------------
+
+    const updates =
+      {};
+
+
+    Object.keys(
+      teams
+    ).forEach(
+      teamId => {
+
+        updates[
+          "teams/" +
+          teamId +
+          "/budget"
+        ] =
+          STARTING_BUDGET;
+
+
+        updates[
+          "teams/" +
+          teamId +
+          "/players"
+        ] =
+          [];
+
+      }
+    );
+
+
+    if (
+      Object.keys(updates)
+        .length > 0
+    ) {
+
+      await update(
+        ref(db),
+        updates
+      );
+
+    }
+
+
+    // -----------------------------------------
+    // NEW RANDOM ORDER
+    // -----------------------------------------
+
+    const newOrder =
+      shuffleCharacters()
+        .map(
+          c => c.name
+        );
+
+
+    // -----------------------------------------
+    // RESET AUCTION
+    // -----------------------------------------
+
+    await set(
+      ref(db, "auction"),
+      {
+
+        characterIndex:
+          0,
+
+        currentBid:
+          STARTING_BID,
+
+        highestBidder:
+          null,
+
+        highestBidderName:
+          null,
+
+        status:
+          "OPEN",
+
+        characterOrder:
+          newOrder
+
+      }
+    );
+
+
+    // -----------------------------------------
+    // CLEAR HISTORY
+    // -----------------------------------------
+
+    await set(
+      ref(db, "history"),
+      null
+    );
+
+
+    alert(
+      "✅ AUCTION RESTARTED!\n\n" +
+      "Players cleared.\n" +
+      "Budgets reset to ₹20 Cr.\n" +
+      "Characters shuffled."
+    );
+
+
+    location.reload();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Restart error:",
+      error
+    );
+
+
+    alert(
+      "❌ Restart failed:\n\n" +
+      error.message
+    );
+
+  }
+
+};
+
+
+// =====================================================
+// MONEY
+// =====================================================
+
+function formatMoney(
+  lakhs
+) {
 
   const amount =
     Number(lakhs || 0);
 
 
-  if (amount >= 100) {
+  if (
+    amount >= 100
+  ) {
 
     const crore =
       amount / 100;
@@ -1474,7 +2364,9 @@ function formatMoney(lakhs) {
 
     return "₹" +
       (
-        Number.isInteger(crore)
+        Number.isInteger(
+          crore
+        )
           ? crore
           : crore.toFixed(2)
       ) +
@@ -1494,7 +2386,9 @@ function formatMoney(lakhs) {
 // MESSAGE
 // =====================================================
 
-function showMessage(message) {
+function showMessage(
+  message
+) {
 
   const element =
     document.getElementById(
@@ -1516,7 +2410,9 @@ function showMessage(message) {
 // SECURITY
 // =====================================================
 
-function escapeHTML(text) {
+function escapeHTML(
+  text
+) {
 
   return String(text)
 
@@ -1546,228 +2442,23 @@ function escapeHTML(text) {
     );
 
 }
+
+
 // =====================================================
-// RESTART AUCTION
-// =====================================================
-
-window.restartAuction = async function () {
-
-  const message =
-    document.getElementById("restartMessage");
-
-  const confirmRestart =
-    confirm(
-      "⚠️ Restart the entire auction?\n\n" +
-      "All teams, characters, budgets and history " +
-      "will be reset."
-    );
-
-  if (!confirmRestart) {
-    return;
-  }
-
-  try {
-
-    // Reset auction
-    await set(
-      ref(db, "auction"),
-      {
-        characterIndex: 0,
-        currentBid: STARTING_BID,
-        highestBidder: null,
-        highestBidderName: null,
-        status: "OPEN"
-      }
-    );
-
-
-    // Reset all teams
-    const teamsSnapshot =
-      await get(ref(db, "teams"));
-
-    const teams =
-      teamsSnapshot.val() || {};
-
-
-    const updates = {};
-
-
-    Object.keys(teams).forEach(teamId => {
-
-      updates[
-        "teams/" + teamId + "/budget"
-      ] = STARTING_BUDGET;
-
-      updates[
-        "teams/" + teamId + "/players"
-      ] = [];
-
-    });
-
-
-    if (Object.keys(updates).length > 0) {
-
-      await update(
-        ref(db),
-        updates
-      );
-
-    }
-
-
-    // Delete auction history
-    await set(
-      ref(db, "history"),
-      null
-    );
-
-
-    if (message) {
-
-      message.textContent =
-        "✅ Auction restarted!";
-
-    }
-
-    showMessage(
-      "🔄 Auction restarted!"
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Restart error:",
-      error
-    );
-
-    if (message) {
-
-      message.textContent =
-        "❌ Restart failed.";
-
-    }
-
-  }
-
-};
-// =====================================================
-// RESTART AUCTION
+// MAKE FUNCTIONS AVAILABLE TO HTML
 // =====================================================
 
-window.restartAuction = async function () {
+window.joinAuction =
+  window.joinAuction;
 
-  const confirmed = confirm(
-    "⚠️ RESTART AUCTION?\n\n" +
-    "This will reset:\n" +
-    "• All team budgets to ₹20 Cr\n" +
-    "• All characters\n" +
-    "• Current auction\n" +
-    "• Auction history\n\n" +
-    "Continue?"
-  );
+window.placeBid =
+  window.placeBid;
 
-  if (!confirmed) return;
+window.sellPlayer =
+  window.sellPlayer;
 
-  try {
+window.nextPlayer =
+  window.nextPlayer;
 
-    // -----------------------------------------
-    // RESET AUCTION
-    // -----------------------------------------
-
-    await set(ref(db, "auction"), {
-
-      characterIndex: 0,
-
-      currentBid: STARTING_BID,
-
-      highestBidder: null,
-
-      highestBidderName: null,
-
-      status: "OPEN"
-
-    });
-
-
-    // -----------------------------------------
-    // GET ALL TEAMS
-    // -----------------------------------------
-
-    const teamsSnapshot =
-      await get(ref(db, "teams"));
-
-    const teams =
-      teamsSnapshot.val() || {};
-
-
-    // -----------------------------------------
-    // RESET EVERY TEAM
-    // -----------------------------------------
-
-    const updates = {};
-
-    for (const teamId of Object.keys(teams)) {
-
-      updates[`teams/${teamId}/budget`] =
-        STARTING_BUDGET;
-
-      updates[`teams/${teamId}/players`] =
-        [];
-
-    }
-
-
-    if (Object.keys(updates).length > 0) {
-
-      await update(
-        ref(db),
-        updates
-      );
-
-    }
-
-
-    // -----------------------------------------
-    // DELETE HISTORY
-    // -----------------------------------------
-
-    await set(
-      ref(db, "history"),
-      null
-    );
-
-
-    // -----------------------------------------
-    // SUCCESS
-    // -----------------------------------------
-
-    alert(
-      "✅ AUCTION RESTARTED!\n\n" +
-      "All teams have ₹20 Cr.\n" +
-      "All characters have been removed.\n" +
-      "Auction starts from Naruto."
-    );
-
-
-    // Reload page
-    location.reload();
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "RESTART ERROR:",
-      error
-    );
-
-    alert(
-      "❌ Restart failed.\n\n" +
-      error.message
-    );
-
-  }
-
-};
+window.restartAuction =
+  window.restartAuction;
