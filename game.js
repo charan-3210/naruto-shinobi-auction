@@ -146,12 +146,19 @@ const BIG_INCREMENT = 100;
 // =====================================================
 // LOGIN
 // =====================================================
-
 signInAnonymously(auth)
+  .then(() => {
+    console.log("Firebase login successful");
+  })
   .catch((error) => {
-
     console.error("Firebase login error:", error);
 
+    const message = document.getElementById("joinMessage");
+
+    if (message) {
+      message.textContent =
+        "❌ Firebase error: " + error.code;
+    }
   });
 
 
