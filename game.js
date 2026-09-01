@@ -1652,6 +1652,3 @@ window.restartAuction = async function () {
   }
 
 };
-document.getElementById("joinButton").addEventListener("click", async () => {
-  await window.joinAuction();
-});
