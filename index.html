@@ -2,171 +2,698 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-  <title>Naruto Shinobi Auction</title>
+  <title>
+    Naruto Shinobi Auction
+  </title>
 
-  <link rel="stylesheet" href="style.css">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      padding: 15px;
+
+      font-family:
+        Arial,
+        sans-serif;
+
+      background:
+        #111;
+
+      color:
+        white;
+
+    }
+
+
+    .container {
+
+      max-width:
+        700px;
+
+      margin:
+        auto;
+
+    }
+
+
+    h1 {
+
+      text-align:
+        center;
+
+      margin-bottom:
+        20px;
+
+    }
+
+
+    .card {
+
+      background:
+        #1e1e1e;
+
+      border-radius:
+        15px;
+
+      padding:
+        20px;
+
+      margin-bottom:
+        15px;
+
+      box-shadow:
+        0 4px 15px
+        rgba(0,0,0,0.3);
+
+    }
+
+
+    input {
+
+      width:
+        100%;
+
+      padding:
+        14px;
+
+      border:
+        none;
+
+      border-radius:
+        10px;
+
+      margin-bottom:
+        10px;
+
+      font-size:
+        16px;
+
+    }
+
+
+    button {
+
+      width:
+        100%;
+
+      padding:
+        14px;
+
+      border:
+        none;
+
+      border-radius:
+        10px;
+
+      margin-top:
+        8px;
+
+      font-size:
+        16px;
+
+      font-weight:
+        bold;
+
+      cursor:
+        pointer;
+
+    }
+
+
+    .join-button {
+
+      background:
+        #ff9800;
+
+      color:
+        white;
+
+    }
+
+
+    .bid-button {
+
+      background:
+        #e53935;
+
+      color:
+        white;
+
+      font-size:
+        20px;
+
+    }
+
+
+    .restart-button {
+
+      background:
+        #673ab7;
+
+      color:
+        white;
+
+    }
+
+
+    .character {
+
+      text-align:
+        center;
+
+    }
+
+
+    #characterName {
+
+      font-size:
+        30px;
+
+      font-weight:
+        bold;
+
+      margin:
+        10px 0;
+
+    }
+
+
+    #characterInfo {
+
+      color:
+        #bbb;
+
+      margin-bottom:
+        15px;
+
+    }
+
+
+    #auctionTimer {
+
+      font-size:
+        42px;
+
+      font-weight:
+        bold;
+
+      text-align:
+        center;
+
+      margin:
+        15px;
+
+    }
+
+
+    .bid {
+
+      text-align:
+        center;
+
+      font-size:
+        26px;
+
+      font-weight:
+        bold;
+
+      margin:
+        10px;
+
+    }
+
+
+    #highestBidder {
+
+      text-align:
+        center;
+
+      color:
+        #ffcc80;
+
+      margin:
+        10px;
+
+    }
+
+
+    #gameMessage {
+
+      text-align:
+        center;
+
+      min-height:
+        25px;
+
+      margin:
+        12px 0;
+
+      font-weight:
+        bold;
+
+    }
+
+
+    .my-info {
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      gap:
+        8px;
+
+      text-align:
+        center;
+
+    }
+
+
+    .stat {
+
+      background:
+        #292929;
+
+      padding:
+        12px;
+
+      border-radius:
+        10px;
+
+    }
+
+
+    .stat-title {
+
+      color:
+        #aaa;
+
+      font-size:
+        13px;
+
+    }
+
+
+    .stat-value {
+
+      font-size:
+        18px;
+
+      font-weight:
+        bold;
+
+      margin-top:
+        5px;
+
+    }
+
+
+    .team {
+
+      background:
+        #292929;
+
+      border-radius:
+        12px;
+
+      padding:
+        15px;
+
+      margin-bottom:
+        10px;
+
+    }
+
+
+    .team-name {
+
+      font-size:
+        20px;
+
+      font-weight:
+        bold;
+
+      margin-bottom:
+        8px;
+
+    }
+
+
+    .history-item {
+
+      background:
+        #292929;
+
+      padding:
+        10px;
+
+      border-radius:
+        8px;
+
+      margin-bottom:
+        7px;
+
+    }
+
+
+    hr {
+
+      border:
+        0;
+
+      border-top:
+        1px solid #444;
+
+      margin:
+        10px 0;
+
+    }
+
+
+    .section-title {
+
+      font-size:
+        22px;
+
+      font-weight:
+        bold;
+
+      margin-bottom:
+        12px;
+
+    }
+
+
+    #gameScreen {
+
+      display:
+        none;
+
+    }
+
+
+    @media (
+      max-width: 500px
+    ) {
+
+      #characterName {
+
+        font-size:
+          24px;
+
+      }
+
+
+      #auctionTimer {
+
+        font-size:
+          36px;
+
+      }
+
+
+      .my-info {
+
+        grid-template-columns:
+          1fr;
+
+      }
+
+    }
+
+  </style>
+
 </head>
+
 
 <body>
 
-<header>
-  <h1>🍥 Naruto Shinobi Auction</h1>
-  <p>Build the strongest Shinobi team!</p>
-</header>
 
-<main>
+  <div class="container">
 
-  <!-- JOIN -->
-  <section id="joinScreen" class="card">
 
-    <h2>⚔️ Join Auction</h2>
+    <h1>
+      🍥 Naruto Shinobi Auction
+    </h1>
 
-    <input
-      id="teamName"
-      type="text"
-      placeholder="Enter your team name"
-      maxlength="20"
+
+    <!-- =========================================
+         JOIN SCREEN
+    ========================================== -->
+
+    <div
+      id="joinScreen"
+      class="card"
     >
 
-  <button onclick="joinAuction()">
-  JOIN AUCTION
-</button>
-
-    <p id="joinMessage"></p>
-
-  </section>
+      <div class="section-title">
+        Enter Team Name
+      </div>
 
 
-  <!-- GAME -->
-  <section id="gameScreen" style="display:none">
+      <input
+        id="teamName"
+        type="text"
+        placeholder="Example: Team Uchiha"
+        maxlength="30"
+      >
 
-    <!-- YOUR TEAM -->
-    <div class="top-grid">
+
+      <button
+        class="join-button"
+        onclick="joinAuction()"
+      >
+        JOIN AUCTION
+      </button>
+
+
+      <div
+        id="joinMessage"
+        style="margin-top:10px;"
+      ></div>
+
+    </div>
+
+
+
+    <!-- =========================================
+         GAME
+    ========================================== -->
+
+    <div
+      id="gameScreen"
+    >
+
+
+      <!-- MY TEAM -->
 
       <div class="card">
 
-        <h3>👤 Your Team</h3>
+        <div class="section-title">
+          👤 My Team
+        </div>
 
-        <h2 id="myTeam">-</h2>
 
-        <p>
-          Budget:
-          <b id="myBudget">₹20 Cr</b>
-        </p>
+        <div class="my-info">
 
-        <p>
-          Players:
-          <b id="myPlayers">0 / 4</b>
-        </p>
+
+          <div class="stat">
+
+            <div class="stat-title">
+              Team
+            </div>
+
+            <div
+              id="myTeam"
+              class="stat-value"
+            >
+              -
+            </div>
+
+          </div>
+
+
+          <div class="stat">
+
+            <div class="stat-title">
+              Budget
+            </div>
+
+            <div
+              id="myBudget"
+              class="stat-value"
+            >
+              ₹20 Cr
+            </div>
+
+          </div>
+
+
+          <div class="stat">
+
+            <div class="stat-title">
+              Players
+            </div>
+
+            <div
+              id="myPlayers"
+              class="stat-value"
+            >
+              0 / 4
+            </div>
+
+          </div>
+
+
+        </div>
 
       </div>
 
 
-      <!-- CURRENT BID -->
-      <div class="card bid-card">
 
-        <h3>🔥 CURRENT BID</h3>
+      <!-- AUCTION -->
 
-        <h1 id="currentBid">₹1 Cr</h1>
+      <div class="card character">
 
-        <p id="highestBidder">
+
+        <div class="section-title">
+          🔥 LIVE AUCTION
+        </div>
+
+
+        <div id="characterName">
+          Loading...
+        </div>
+
+
+        <div id="characterInfo">
+          -
+        </div>
+
+
+        <!-- TIMER -->
+
+        <div
+          id="auctionTimer"
+        >
+          ⏱️ 10s
+        </div>
+
+
+        <!-- CURRENT BID -->
+
+        <div
+          id="currentBid"
+          class="bid"
+        >
+          ₹1 Cr
+        </div>
+
+
+        <div
+          id="highestBidder"
+        >
           No bids yet
-        </p>
-
-      </div>
-
-    </div>
+        </div>
 
 
-    <!-- CHARACTER -->
-    <div class="card character-card">
-
-      <p class="auction-label">
-        🔴 LIVE AUCTION
-      </p>
-
-      <h2>⚔️ Current Shinobi</h2>
-
-      <div id="characterImage"
-           class="character-image">
-        🍥
-      </div>
-
-      <h1 id="characterName">
-        Waiting...
-      </h1>
-
-      <p id="characterInfo">
-        Waiting for the auction...
-      </p>
+        <div
+          id="gameMessage"
+        ></div>
 
 
-      <div class="bid-buttons">
+        <!-- ONLY BID BUTTON -->
 
         <button
-          id="bidButton"
-          onclick="placeBid()">
+          class="bid-button"
+          onclick="placeBid()"
+        >
           🔥 BID
         </button>
 
-        <button
-          id="soldButton"
-          class="sold"
-          onclick="sellPlayer()">
-          🔨 SOLD
-        </button>
+
+      </div>
+
+
+
+      <!-- RESTART -->
+
+      <div class="card">
 
         <button
-          id="nextButton"
-          class="next"
-          onclick="nextPlayer()">
-          ➡️ NEXT
+          class="restart-button"
+          onclick="restartAuction()"
+        >
+          🔄 START NEW GAME
         </button>
 
       </div>
 
-      <p id="gameMessage"></p>
+
+
+      <!-- TEAMS -->
+
+      <div class="card">
+
+        <div class="section-title">
+          🏆 TEAM POWER RANKING
+        </div>
+
+
+        <div id="teams">
+          Waiting for teams...
+        </div>
+
+      </div>
+
+
+
+      <!-- HISTORY -->
+
+      <div class="card">
+
+        <div class="section-title">
+          📜 AUCTION HISTORY
+        </div>
+
+
+        <div id="history">
+          No history yet.
+        </div>
+
+      </div>
+
 
     </div>
 
 
-    <!-- TEAMS -->
-    <div class="card">
-
-      <h2>🏆 Teams</h2>
-
-      <div id="teams"></div>
-
-    </div>
+  </div>
 
 
-    <!-- HISTORY -->
-    <div class="card">
+  <script
+    type="module"
+    src="game.js"
+  ></script>
 
-      <h2>📜 Auction History</h2>
-
-      <div id="history"></div>
-
-    </div>
-    <div class="card">
-  <button class="restart" onclick="restartAuction()">
-    🔄 RESTART AUCTION
-  </button>
-
-  <p id="restartMessage"></p>
-</div>
-
-  </section>
-
-</main>
-
-
-<script type="module" src="game.js"></script>
 
 </body>
+
 </html>
