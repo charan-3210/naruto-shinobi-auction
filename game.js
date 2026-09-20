@@ -9,7 +9,8 @@ import {
   get,
   update,
   onValue,
-  runTransaction
+  runTransaction,
+  remove
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 import {
@@ -23,45 +24,74 @@ import {
 // FIREBASE CONFIG
 // =====================================================
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
-  authDomain: "naruto-shinobi-auction.firebaseapp.com",
-  databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
-  projectId: "naruto-shinobi-auction",
-  storageBucket: "naruto-shinobi-auction.firebasestorage.app",
-  messagingSenderId: "187952563869",
-  appId: "1:187952563869:web:839ac2add9ae0f5835f674",
-  measurementId: "G-N3QGHDB240"
+
+  apiKey: "PASTE_YOUR_REAL_API_KEY_HERE",
+
+  authDomain:
+    "naruto-shinobi-auction.firebaseapp.com",
+
+  databaseURL:
+    "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
+
+  projectId:
+    "naruto-shinobi-auction",
+
+  storageBucket:
+    "naruto-shinobi-auction.firebasestorage.app",
+
+  messagingSenderId:
+    "187952563869",
+
+  appId:
+    "1:187952563869:web:839ac2add9ae0f5835f674",
+
+  measurementId:
+    "G-N3QGHDB240"
 };
 
 
 // =====================================================
-// FIREBASE
+// FIREBASE INITIALIZATION
 // =====================================================
 
 const app = initializeApp(firebaseConfig);
+
 const db = getDatabase(app);
+
 const auth = getAuth(app);
 
+
+// =====================================================
+// VARIABLES
+// =====================================================
+
 let user = null;
+
+let roomCode = null;
+
 let myTeamId = null;
-let listenersStarted = false;
+
+let isHost = false;
+
 let timerInterval = null;
-let finishingAuction = false;
-let movingNext = false;
+
+let finishing = false;
 
 
 // =====================================================
-// AUCTION SETTINGS
+// GAME SETTINGS
 // =====================================================
 
-const STARTING_BUDGET = 2000; // ₹20 Cr
+const STARTING_BUDGET = 2000;
+
 const MAX_PLAYERS = 4;
 
-const STARTING_BID = 100;      // ₹1 Cr
-const SMALL_INCREMENT = 50;    // ₹50 L
-const BIG_INCREMENT = 100;     // ₹1 Cr
+const STARTING_BID = 100;
+
+const SMALL_INCREMENT = 50;
+
+const BIG_INCREMENT = 100;
 
 const AUCTION_SECONDS = 10;
 
@@ -72,408 +102,233 @@ const AUCTION_SECONDS = 10;
 
 const characters = [
 
-  // =========================
-  // OTSUTSUKI
-  // =========================
+{
+name:"Kaguya Otsutsuki",
+info:"Rabbit Goddess • Rinne Sharingan • Ten Tails",
+power:100,attack:100,defense:100,speed:90,hax:100,intelligence:90,synergy:95
+},
 
-  {
-    name: "Kaguya Otsutsuki",
-    info: "Rabbit Goddess • Rinne Sharingan • Ten Tails",
-    power: 100,
-    attack: 100,
-    defense: 100,
-    speed: 90,
-    hax: 100,
-    intelligence: 90,
-    synergy: 95
-  },
+{
+name:"Hagoromo Otsutsuki",
+info:"Sage of Six Paths • Rinnegan",
+power:99,attack:98,defense:99,speed:90,hax:99,intelligence:100,synergy:95
+},
 
-  {
-    name: "Hagoromo Otsutsuki",
-    info: "Sage of Six Paths • Rinnegan",
-    power: 99,
-    attack: 98,
-    defense: 99,
-    speed: 90,
-    hax: 99,
-    intelligence: 100,
-    synergy: 95
-  },
+{
+name:"Hamura Otsutsuki",
+info:"Byakugan • Six Paths Power",
+power:96,attack:94,defense:95,speed:90,hax:95,intelligence:95,synergy:92
+},
 
-  {
-    name: "Hamura Otsutsuki",
-    info: "Byakugan • Six Paths Power",
-    power: 96,
-    attack: 94,
-    defense: 95,
-    speed: 90,
-    hax: 95,
-    intelligence: 95,
-    synergy: 92
-  },
+{
+name:"Isshiki Otsutsuki",
+info:"Sukunahikona • Daikokuten",
+power:99,attack:100,defense:96,speed:100,hax:100,intelligence:98,synergy:90
+},
 
-  {
-    name: "Isshiki Otsutsuki",
-    info: "Sukunahikona • Daikokuten",
-    power: 99,
-    attack: 100,
-    defense: 96,
-    speed: 100,
-    hax: 100,
-    intelligence: 98,
-    synergy: 90
-  },
+{
+name:"Momoshiki Otsutsuki",
+info:"Rinnegan • Chakra Absorption",
+power:96,attack:96,defense:90,speed:95,hax:98,intelligence:90,synergy:90
+},
 
-  {
-    name: "Momoshiki Otsutsuki",
-    info: "Rinnegan • Chakra Absorption",
-    power: 96,
-    attack: 96,
-    defense: 90,
-    speed: 95,
-    hax: 98,
-    intelligence: 90,
-    synergy: 90
-  },
+{
+name:"Kinshiki Otsutsuki",
+info:"Divine Weapons • Otsutsuki Warrior",
+power:90,attack:95,defense:90,speed:88,hax:82,intelligence:80,synergy:85
+},
 
-  {
-    name: "Kinshiki Otsutsuki",
-    info: "Divine Weapons • Otsutsuki Warrior",
-    power: 90,
-    attack: 95,
-    defense: 90,
-    speed: 88,
-    hax: 82,
-    intelligence: 80,
-    synergy: 85
-  },
+{
+name:"Toneri Otsutsuki",
+info:"Tenseigan • Moon",
+power:91,attack:92,defense:88,speed:90,hax:95,intelligence:85,synergy:85
+},
 
-  {
-    name: "Toneri Otsutsuki",
-    info: "Tenseigan • Moon",
-    power: 91,
-    attack: 92,
-    defense: 88,
-    speed: 90,
-    hax: 95,
-    intelligence: 85,
-    synergy: 85
-  },
+{
+name:"Indra Otsutsuki",
+info:"Mangekyo Sharingan • Powerful Chakra",
+power:94,attack:95,defense:88,speed:92,hax:95,intelligence:96,synergy:90
+},
 
-  {
-    name: "Indra Otsutsuki",
-    info: "Mangekyo Sharingan • Powerful Chakra",
-    power: 94,
-    attack: 95,
-    defense: 88,
-    speed: 92,
-    hax: 95,
-    intelligence: 96,
-    synergy: 90
-  },
+{
+name:"Ashura Otsutsuki",
+info:"Six Paths Chakra • Powerful Life Force",
+power:94,attack:93,defense:96,speed:85,hax:90,intelligence:88,synergy:92
+},
 
-  {
-    name: "Ashura Otsutsuki",
-    info: "Six Paths Chakra • Powerful Life Force",
-    power: 94,
-    attack: 93,
-    defense: 96,
-    speed: 85,
-    hax: 90,
-    intelligence: 88,
-    synergy: 92
-  },
+{
+name:"Madara Uchiha",
+info:"Ten Tails Jinchuriki • Rinne Sharingan",
+power:98,attack:98,defense:97,speed:94,hax:99,intelligence:98,synergy:95
+},
 
+{
+name:"Naruto Uzumaki",
+info:"Six Paths Sage Mode • Seventh Hokage",
+power:97,attack:97,defense:96,speed:98,hax:95,intelligence:92,synergy:98
+},
 
-  // =========================
-  // TOP TIER
-  // =========================
+{
+name:"Sasuke Uchiha",
+info:"Rinnegan • Eternal Mangekyo Sharingan",
+power:96,attack:95,defense:90,speed:98,hax:99,intelligence:98,synergy:95
+},
 
-  {
-    name: "Madara Uchiha",
-    info: "Ten Tails Jinchuriki • Rinne Sharingan",
-    power: 98,
-    attack: 98,
-    defense: 97,
-    speed: 94,
-    hax: 99,
-    intelligence: 98,
-    synergy: 95
-  },
+{
+name:"Hashirama Senju",
+info:"First Hokage • Sage Mode • Wood Style",
+power:94,attack:94,defense:98,speed:86,hax:94,intelligence:92,synergy:96
+},
 
-  {
-    name: "Naruto Uzumaki",
-    info: "Six Paths Sage Mode • Seventh Hokage",
-    power: 97,
-    attack: 97,
-    defense: 96,
-    speed: 98,
-    hax: 95,
-    intelligence: 92,
-    synergy: 98
-  },
+{
+name:"Might Guy",
+info:"Eight Gates • Taijutsu Master",
+power:95,attack:100,defense:80,speed:100,hax:70,intelligence:82,synergy:85
+},
 
-  {
-    name: "Sasuke Uchiha",
-    info: "Rinnegan • Eternal Mangekyo Sharingan",
-    power: 96,
-    attack: 95,
-    defense: 90,
-    speed: 98,
-    hax: 99,
-    intelligence: 98,
-    synergy: 95
-  },
+{
+name:"Minato Namikaze",
+info:"Yellow Flash • Flying Raijin",
+power:92,attack:90,defense:85,speed:100,hax:96,intelligence:99,synergy:98
+},
 
-  {
-    name: "Hashirama Senju",
-    info: "First Hokage • Sage Mode • Wood Style",
-    power: 94,
-    attack: 94,
-    defense: 98,
-    speed: 86,
-    hax: 94,
-    intelligence: 92,
-    synergy: 96
-  },
+{
+name:"Obito Uchiha",
+info:"Ten Tails • Kamui • Sharingan",
+power:94,attack:94,defense:93,speed:94,hax:100,intelligence:94,synergy:92
+},
 
-  {
-    name: "Might Guy",
-    info: "Eight Gates • Taijutsu Master",
-    power: 95,
-    attack: 100,
-    defense: 80,
-    speed: 100,
-    hax: 70,
-    intelligence: 82,
-    synergy: 85
-  },
+{
+name:"Itachi Uchiha",
+info:"Mangekyo Sharingan • Genjutsu",
+power:90,attack:88,defense:82,speed:90,hax:98,intelligence:100,synergy:94
+},
 
-  {
-    name: "Minato Namikaze",
-    info: "Yellow Flash • Flying Raijin",
-    power: 92,
-    attack: 90,
-    defense: 85,
-    speed: 100,
-    hax: 96,
-    intelligence: 99,
-    synergy: 98
-  },
+{
+name:"Tobirama Senju",
+info:"Second Hokage • Flying Raijin",
+power:88,attack:87,defense:85,speed:96,hax:92,intelligence:99,synergy:96
+},
 
-  {
-    name: "Obito Uchiha",
-    info: "Ten Tails • Kamui • Sharingan",
-    power: 94,
-    attack: 94,
-    defense: 93,
-    speed: 94,
-    hax: 100,
-    intelligence: 94,
-    synergy: 92
-  },
+{
+name:"Hiruzen Sarutobi",
+info:"Third Hokage • Professor",
+power:85,attack:84,defense:84,speed:82,hax:85,intelligence:98,synergy:92
+},
 
-  {
-    name: "Itachi Uchiha",
-    info: "Mangekyo Sharingan • Genjutsu",
-    power: 90,
-    attack: 88,
-    defense: 82,
-    speed: 90,
-    hax: 98,
-    intelligence: 100,
-    synergy: 94
-  },
+{
+name:"Jiraiya",
+info:"Legendary Sannin • Sage Mode",
+power:86,attack:85,defense:87,speed:82,hax:88,intelligence:92,synergy:95
+},
 
+{
+name:"Orochimaru",
+info:"Legendary Sannin • Forbidden Jutsu",
+power:87,attack:82,defense:92,speed:80,hax:94,intelligence:98,synergy:90
+},
 
-  // =========================
-  // KAGE / SANNIN
-  // =========================
+{
+name:"Pain",
+info:"Six Paths • Rinnegan",
+power:89,attack:91,defense:90,speed:82,hax:96,intelligence:92,synergy:95
+},
 
-  {
-    name: "Tobirama Senju",
-    info: "Second Hokage • Flying Raijin",
-    power: 88,
-    attack: 87,
-    defense: 85,
-    speed: 96,
-    hax: 92,
-    intelligence: 99,
-    synergy: 96
-  },
+{
+name:"Kakashi Hatake",
+info:"Copy Ninja • Sharingan",
+power:84,attack:82,defense:80,speed:88,hax:90,intelligence:98,synergy:96
+},
 
-  {
-    name: "Hiruzen Sarutobi",
-    info: "Third Hokage • Professor",
-    power: 85,
-    attack: 84,
-    defense: 84,
-    speed: 82,
-    hax: 85,
-    intelligence: 98,
-    synergy: 92
-  },
+{
+name:"Gaara",
+info:"Fifth Kazekage • Sand Manipulation",
+power:80,attack:80,defense:94,speed:72,hax:82,intelligence:88,synergy:92
+},
 
-  {
-    name: "Jiraiya",
-    info: "Legendary Sannin • Sage Mode",
-    power: 86,
-    attack: 85,
-    defense: 87,
-    speed: 82,
-    hax: 88,
-    intelligence: 92,
-    synergy: 95
-  },
+{
+name:"Killer B",
+info:"Eight Tails Jinchuriki • Seven Swords",
+power:86,attack:90,defense:90,speed:85,hax:84,intelligence:82,synergy:88
+},
 
-  {
-    name: "Orochimaru",
-    info: "Legendary Sannin • Forbidden Jutsu",
-    power: 87,
-    attack: 82,
-    defense: 92,
-    speed: 80,
-    hax: 94,
-    intelligence: 98,
-    synergy: 90
-  },
+{
+name:"Nagato",
+info:"Rinnegan • Six Paths",
+power:90,attack:92,defense:90,speed:75,hax:97,intelligence:94,synergy:93
+},
 
-  {
-    name: "Pain",
-    info: "Six Paths • Rinnegan",
-    power: 89,
-    attack: 91,
-    defense: 90,
-    speed: 82,
-    hax: 96,
-    intelligence: 92,
-    synergy: 95
-  },
+{
+name:"Kisame Hoshigaki",
+info:"Samehada • Monster of the Mist",
+power:78,attack:85,defense:90,speed:72,hax:80,intelligence:80,synergy:86
+},
 
-  {
-    name: "Kakashi Hatake",
-    info: "Copy Ninja • Sharingan",
-    power: 84,
-    attack: 82,
-    defense: 80,
-    speed: 88,
-    hax: 90,
-    intelligence: 98,
-    synergy: 96
-  },
+{
+name:"Deidara",
+info:"Explosive Clay • C4",
+power:78,attack:90,defense:70,speed:80,hax:88,intelligence:84,synergy:82
+},
 
-  {
-    name: "Gaara",
-    info: "Fifth Kazekage • Sand Manipulation",
-    power: 80,
-    attack: 80,
-    defense: 94,
-    speed: 72,
-    hax: 82,
-    intelligence: 88,
-    synergy: 92
-  },
+{
+name:"Sasori",
+info:"Puppet Master • Third Kazekage",
+power:76,attack:82,defense:78,speed:72,hax:88,intelligence:90,synergy:86
+},
 
-  {
-    name: "Killer B",
-    info: "Eight Tails Jinchuriki • Seven Swords",
-    power: 86,
-    attack: 90,
-    defense: 90,
-    speed: 85,
-    hax: 84,
-    intelligence: 82,
-    synergy: 88
-  },
+{
+name:"Kakuzu",
+info:"Five Hearts • Earth Grudge",
+power:77,attack:84,defense:91,speed:70,hax:82,intelligence:84,synergy:82
+},
 
+{
+name:"Konan",
+info:"Paper Ninjutsu • Akatsuki",
+power:70,attack:75,defense:72,speed:78,hax:84,intelligence:86,synergy:88
+},
 
-  // =========================
-  // AKATSUKI
-  // =========================
+{
+name:"Hidan",
+info:"Immortality • Jashin Ritual",
+power:65,attack:76,defense:88,speed:65,hax:80,intelligence:60,synergy:70
+},
 
-  {
-    name: "Nagato",
-    info: "Rinnegan • Six Paths",
-    power: 90,
-    attack: 92,
-    defense: 90,
-    speed: 75,
-    hax: 97,
-    intelligence: 94,
-    synergy: 93
-  },
+{
+name:"Shikamaru Nara",
+info:"Shadow Possession • Tactical Genius",
+power:65,attack:60,defense:65,speed:65,hax:82,intelligence:100,synergy:95
+},
 
-  {
-    name: "Kisame Hoshigaki",
-    info: "Samehada • Monster of the Mist",
-    power: 78,
-    attack: 85,
-    defense: 90,
-    speed: 72,
-    hax: 80,
-    intelligence: 80,
-    synergy: 86
-  },
+{
+name:"Rock Lee",
+info:"Taijutsu Specialist • Eight Gates",
+power:75,attack:88,defense:72,speed:95,hax:55,intelligence:70,synergy:82
+},
 
-  {
-    name: "Deidara",
-    info: "Explosive Clay • C4",
-    power: 78,
-    attack: 90,
-    defense: 70,
-    speed: 80,
-    hax: 88,
-    intelligence: 84,
-    synergy: 82
-  },
+{
+name:"Neji Hyuga",
+info:"Byakugan • Gentle Fist",
+power:74,attack:78,defense:75,speed:86,hax:80,intelligence:88,synergy:88
+},
 
-  {
-    name: "Sasori",
-    info: "Puppet Master • Third Kazekage",
-    power: 76,
-    attack: 82,
-    defense: 78,
-    speed: 72,
-    hax: 88,
-    intelligence: 90,
-    synergy: 86
-  },
+{
+name:"Sakura Haruno",
+info:"Medical Ninja • Strength of a Hundred",
+power:78,attack:90,defense:88,speed:75,hax:80,intelligence:90,synergy:92
+},
 
-  {
-    name: "Kakuzu",
-    info: "Five Hearts • Earth Grudge",
-    power: 77,
-    attack: 84,
-    defense: 91,
-    speed: 70,
-    hax: 82,
-    intelligence: 84,
-    synergy: 82
-  },
+{
+name:"Temari",
+info:"Wind Style • Giant Fan",
+power:68,attack:76,defense:68,speed:72,hax:75,intelligence:82,synergy:82
+},
 
-  {
-    name: "Konan",
-    info: "Paper Ninjutsu • Akatsuki",
-    power: 70,
-    attack: 75,
-    defense: 72,
-    speed: 78,
-    hax: 84,
-    intelligence: 86,
-    synergy: 88
-  },
-
-  {
-    name: "Hidan",
-    info: "Immortality • Jashin Ritual",
-    power: 65,
-    attack: 76,
-    defense: 88,
-    speed: 65,
-    hax: 80,
-    intelligence: 60,
-    synergy: 70
-  }
+{
+name:"Kankuro",
+info:"Puppet Master",
+power:65,attack:72,defense:68,speed:65,hax:72,intelligence:82,synergy:78
+}
 
 ];
 
@@ -482,28 +337,19 @@ const characters = [
 // SHUFFLE
 // =====================================================
 
-function shuffleCharacters() {
+function shuffle(array){
 
-  const list = [...characters];
+  const result=[...array];
 
-  for (let i = list.length - 1; i > 0; i--) {
+  for(let i=result.length-1;i>0;i--){
 
-    const j =
-      Math.floor(
-        Math.random() * (i + 1)
-      );
+    const j=Math.floor(Math.random()*(i+1));
 
-    [
-      list[i],
-      list[j]
-    ] = [
-      list[j],
-      list[i]
-    ];
+    [result[i],result[j]]=[result[j],result[i]];
 
   }
 
-  return list;
+  return result;
 }
 
 
@@ -512,160 +358,159 @@ function shuffleCharacters() {
 // =====================================================
 
 signInAnonymously(auth)
-  .catch(error => {
+.catch(error=>{
 
-    console.error(
-      "Firebase login error:",
-      error
-    );
+  console.error(error);
 
-    const message =
-      document.getElementById(
-        "joinMessage"
-      );
+  showMessageToAll(
+    "❌ Firebase authentication error: "+
+    error.code
+  );
 
-    if (message) {
+});
 
-      message.textContent =
-        "❌ Firebase error: " +
-        error.code;
+onAuthStateChanged(auth,currentUser=>{
 
-    }
+  if(currentUser){
+    user=currentUser;
+  }
+
+});
+
+
+// =====================================================
+// NAVIGATION
+// =====================================================
+
+window.showCreateRoom=function(){
+
+  hideAll();
+
+  document
+    .getElementById("createScreen")
+    .classList.remove("hidden");
+
+};
+
+
+window.showJoinRoom=function(){
+
+  hideAll();
+
+  document
+    .getElementById("joinScreen")
+    .classList.remove("hidden");
+
+};
+
+
+window.goHome=function(){
+
+  hideAll();
+
+  document
+    .getElementById("homeScreen")
+    .classList.remove("hidden");
+
+};
+
+
+function hideAll(){
+
+  [
+    "homeScreen",
+    "createScreen",
+    "joinScreen",
+    "lobbyScreen",
+    "gameScreen"
+  ].forEach(id=>{
+
+    document
+      .getElementById(id)
+      .classList.add("hidden");
 
   });
 
-
-onAuthStateChanged(
-  auth,
-  currentUser => {
-
-    if (currentUser) {
-
-      user = currentUser;
-
-    }
-
-  }
-);
+}
 
 
 // =====================================================
-// JOIN
+// CREATE ROOM
 // =====================================================
 
-window.joinAuction = async function () {
+window.createRoom=async function(){
 
-  const input =
-    document.getElementById(
-      "teamName"
-    );
+  const name=
+    document
+      .getElementById("createTeamName")
+      .value.trim();
 
-  const message =
-    document.getElementById(
-      "joinMessage"
-    );
+  const message=
+    document.getElementById("createMessage");
 
-  if (!input || !message)
-    return;
+  if(!name){
 
-  const name =
-    input.value.trim();
-
-  if (!name) {
-
-    message.textContent =
-      "❌ Enter your team name.";
+    message.textContent="❌ Enter your team name.";
 
     return;
-  }
-
-  if (!user) {
-
-    message.textContent =
-      "⏳ Connecting to Firebase...";
-
-    return;
-  }
-
-  myTeamId = user.uid;
-
-  try {
-
-    const teamRef =
-      ref(
-        db,
-        "teams/" +
-        myTeamId
-      );
-
-    const snapshot =
-      await get(teamRef);
-
-    if (!snapshot.exists()) {
-
-      await set(
-        teamRef,
-        {
-
-          name: name,
-
-          budget:
-            STARTING_BUDGET,
-
-          players: [],
-
-          joinedAt:
-            Date.now()
-
-        }
-      );
-
-    } else {
-
-      await update(
-        teamRef,
-        {
-          name: name
-        }
-      );
-
-    }
-
-    document
-      .getElementById(
-        "joinScreen"
-      )
-      .style.display =
-        "none";
-
-    document
-      .getElementById(
-        "gameScreen"
-      )
-      .style.display =
-        "block";
-
-    document
-      .getElementById(
-        "myTeam"
-      )
-      .textContent =
-        name;
-
-    startRealtimeListeners();
 
   }
 
-  catch (error) {
+  if(!user){
 
-    console.error(
-      "Join error:",
-      error
+    message.textContent="⏳ Connecting to Firebase...";
+
+    return;
+
+  }
+
+  try{
+
+    const code=await generateRoomCode();
+
+    roomCode=code;
+
+    myTeamId=user.uid;
+
+    isHost=true;
+
+    const roomRef=
+      ref(db,"rooms/"+roomCode);
+
+    await set(roomRef,{
+
+      hostId:user.uid,
+
+      status:"LOBBY",
+
+      createdAt:Date.now(),
+
+      auction:null
+
+    });
+
+    await set(
+      ref(db,`rooms/${roomCode}/teams/${myTeamId}`),
+      {
+        name:name,
+        budget:STARTING_BUDGET,
+        players:[],
+        joinedAt:Date.now(),
+        uid:myTeamId
+      }
     );
 
-    message.textContent =
-      "❌ Could not join: " +
-      error.message;
+    openLobby();
+
+    listenToRoom();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    message.textContent=
+      "❌ "+error.message;
 
   }
 
@@ -673,69 +518,280 @@ window.joinAuction = async function () {
 
 
 // =====================================================
-// REALTIME LISTENERS
+// GENERATE ROOM CODE
 // =====================================================
 
-function startRealtimeListeners() {
+async function generateRoomCode(){
 
-  if (listenersStarted)
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  for(let attempt=0;attempt<20;attempt++){
+
+    let code="";
+
+    for(let i=0;i<6;i++){
+
+      code+=chars[
+        Math.floor(
+          Math.random()*chars.length
+        )
+      ];
+
+    }
+
+    const snap=
+      await get(
+        ref(db,"rooms/"+code)
+      );
+
+    if(!snap.exists())
+      return code;
+
+  }
+
+  throw new Error("Could not create room code.");
+
+}
+
+
+// =====================================================
+// JOIN ROOM
+// =====================================================
+
+window.joinRoom=async function(){
+
+  const code=
+    document
+      .getElementById("joinRoomCode")
+      .value
+      .trim()
+      .toUpperCase();
+
+  const name=
+    document
+      .getElementById("joinTeamName")
+      .value
+      .trim();
+
+  const message=
+    document.getElementById("joinMessage");
+
+  if(code.length!==6){
+
+    message.textContent="❌ Enter the 6-character room code.";
+
     return;
 
-  listenersStarted = true;
+  }
+
+  if(!name){
+
+    message.textContent="❌ Enter your team name.";
+
+    return;
+
+  }
+
+  if(!user){
+
+    message.textContent="⏳ Connecting to Firebase...";
+
+    return;
+
+  }
+
+  try{
+
+    const roomSnap=
+      await get(
+        ref(db,"rooms/"+code)
+      );
+
+    if(!roomSnap.exists()){
+
+      message.textContent="❌ Room not found.";
+
+      return;
+
+    }
+
+    const room=roomSnap.val();
+
+    if(room.status!=="LOBBY"){
+
+      message.textContent=
+        "❌ This auction has already started.";
+
+      return;
+
+    }
+
+    const teamsSnap=
+      await get(
+        ref(db,`rooms/${code}/teams`)
+      );
+
+    const teams=teamsSnap.val()||{};
+
+    if(Object.keys(teams).length>=4){
+
+      message.textContent=
+        "❌ Room is full. Maximum 4 players.";
+
+      return;
+
+    }
+
+    roomCode=code;
+
+    myTeamId=user.uid;
+
+    isHost=false;
+
+    await set(
+      ref(db,`rooms/${roomCode}/teams/${myTeamId}`),
+      {
+        name:name,
+        budget:STARTING_BUDGET,
+        players:[],
+        joinedAt:Date.now(),
+        uid:myTeamId
+      }
+    );
+
+    openLobby();
+
+    listenToRoom();
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    message.textContent=
+      "❌ "+error.message;
+
+  }
+
+};
 
 
-  // AUCTION
+// =====================================================
+// LOBBY
+// =====================================================
+
+function openLobby(){
+
+  hideAll();
+
+  document
+    .getElementById("lobbyScreen")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("roomCodeDisplay")
+    .textContent=roomCode;
+
+  document
+    .getElementById("roomLink")
+    .value=
+      location.origin+
+      location.pathname+
+      "?room="+
+      roomCode;
+
+  document
+    .getElementById("startButton")
+    .style.display=
+      isHost ? "block" : "none";
+
+}
+
+
+function listenToRoom(){
 
   onValue(
-    ref(db, "auction"),
-    snapshot => {
+    ref(db,`rooms/${roomCode}`),
+    snapshot=>{
 
-      const auction =
-        snapshot.val();
+      const room=snapshot.val();
 
-      if (!auction) {
+      if(!room) return;
 
-        createAuction();
+      if(room.status==="LOBBY"){
+
+        showLobbyPlayers(
+          room.teams||{}
+        );
 
         return;
 
       }
 
-      displayAuction(
-        auction
-      );
+      if(
+        room.status==="PLAYING"||
+        room.status==="FINISHED"
+      ){
 
-      startCountdown(
-        auction
-      );
+        hideAll();
+
+        document
+          .getElementById("gameScreen")
+          .classList.remove("hidden");
+
+        showLobbyPlayers(
+          room.teams||{}
+        );
+
+        displayAuction(
+          room.auction
+        );
+
+      }
 
     }
   );
 
 
-  // TEAMS
-
   onValue(
-    ref(db, "teams"),
-    snapshot => {
+    ref(db,`rooms/${roomCode}/teams`),
+    snapshot=>{
 
       displayTeams(
-        snapshot.val() || {}
+        snapshot.val()||{}
+      );
+
+      showLobbyPlayers(
+        snapshot.val()||{}
       );
 
     }
   );
 
-
-  // HISTORY
 
   onValue(
-    ref(db, "history"),
-    snapshot => {
+    ref(db,`rooms/${roomCode}/history`),
+    snapshot=>{
 
       displayHistory(
-        snapshot.val() || {}
+        snapshot.val()||{}
       );
+
+    }
+  );
+
+
+  onValue(
+    ref(db,`rooms/${roomCode}/auction`),
+    snapshot=>{
+
+      const auction=snapshot.val();
+
+      if(!auction) return;
+
+      displayAuction(auction);
+
+      startCountdown(auction);
 
     }
   );
@@ -744,91 +800,150 @@ function startRealtimeListeners() {
 
 
 // =====================================================
-// CREATE FIRST AUCTION
+// SHOW LOBBY PLAYERS
 // =====================================================
 
-async function createAuction() {
+function showLobbyPlayers(teams){
 
-  const auctionRef =
-    ref(db, "auction");
+  const container=
+    document.getElementById("lobbyPlayers");
 
-  const snapshot =
-    await get(
-      auctionRef
-    );
+  if(!container) return;
 
-  if (snapshot.exists())
+  const list=
+    Object.values(teams);
+
+  if(!list.length){
+
+    container.textContent=
+      "Waiting for players...";
+
     return;
 
-  const order =
-    shuffleCharacters()
-      .map(
-        character =>
-          character.name
-      );
+  }
 
-  await set(
-    auctionRef,
-    {
+  container.innerHTML="";
 
-      characterIndex: 0,
+  list
+    .sort(
+      (a,b)=>
+        Number(a.joinedAt||0)-
+        Number(b.joinedAt||0)
+    )
+    .forEach((team,index)=>{
 
-      characterOrder:
-        order,
+      const div=
+        document.createElement("div");
 
-      currentBid:
-        STARTING_BID,
+      div.className="player-row";
 
-      highestBidder:
-        null,
+      div.innerHTML=
+        `<span>👤 ${escapeHTML(team.name)}</span>
+         <span>#${index+1}</span>`;
 
-      highestBidderName:
-        null,
+      container.appendChild(div);
 
-      status:
-        "OPEN",
-
-      endTime:
-        Date.now() +
-        AUCTION_SECONDS * 1000
-
-    }
-  );
+    });
 
 }
+
+
+// =====================================================
+// START AUCTION
+// =====================================================
+
+window.startAuction=async function(){
+
+  if(!isHost){
+
+    return;
+
+  }
+
+  try{
+
+    const teamsSnap=
+      await get(
+        ref(db,`rooms/${roomCode}/teams`)
+      );
+
+    const teams=teamsSnap.val()||{};
+
+    if(Object.keys(teams).length<1){
+
+      return;
+
+    }
+
+    const order=
+      shuffle(characters)
+      .map(c=>c.name);
+
+    const auction={
+
+      characterIndex:0,
+
+      characterOrder:order,
+
+      currentBid:STARTING_BID,
+
+      highestBidder:null,
+
+      highestBidderName:null,
+
+      status:"OPEN",
+
+      endTime:
+        Date.now()+
+        AUCTION_SECONDS*1000
+
+    };
+
+    await update(
+      ref(db,`rooms/${roomCode}`),
+      {
+        status:"PLAYING",
+        auction:auction
+      }
+    );
+
+  }
+  catch(error){
+
+    console.error(error);
+
+    document
+      .getElementById("lobbyMessage")
+      .textContent=
+        "❌ "+error.message;
+
+  }
+
+};
 
 
 // =====================================================
 // CURRENT CHARACTER
 // =====================================================
 
-function getCurrentCharacter(
-  auction
-) {
+function getCurrentCharacter(auction){
 
-  if (
-    auction &&
-    Array.isArray(
-      auction.characterOrder
-    )
-  ) {
+  if(!auction) return null;
 
-    const index =
-      Number(
-        auction.characterIndex || 0
-      );
+  const order=
+    auction.characterOrder||[];
 
-    const name =
-      auction.characterOrder[index];
-
-    return characters.find(
-      character =>
-        character.name === name
+  const index=
+    Number(
+      auction.characterIndex||0
     );
 
-  }
+  const name=order[index];
 
-  return null;
+  return characters.find(
+    c=>c.name===name
+  )||null;
+
 }
 
 
@@ -836,142 +951,67 @@ function getCurrentCharacter(
 // DISPLAY AUCTION
 // =====================================================
 
-function displayAuction(
-  auction
-) {
+function displayAuction(auction){
 
-  const character =
-    getCurrentCharacter(
-      auction
-    );
+  if(!auction) return;
 
-  const nameElement =
-    document.getElementById(
-      "characterName"
-    );
+  const character=
+    getCurrentCharacter(auction);
 
-  const infoElement =
-    document.getElementById(
-      "characterInfo"
-    );
+  const name=
+    document.getElementById("characterName");
 
-  const bidElement =
-    document.getElementById(
-      "currentBid"
-    );
+  const info=
+    document.getElementById("characterInfo");
 
-  const bidderElement =
-    document.getElementById(
-      "highestBidder"
-    );
+  const bid=
+    document.getElementById("currentBid");
 
-  const bidButton =
-    document.querySelector(
-      ".bid-button"
-    );
+  const bidder=
+    document.getElementById("highestBidder");
 
+  const button=
+    document.getElementById("bidButton");
 
-  if (!character) {
+  if(
+    auction.status==="FINISHED"||
+    !character
+  ){
 
-    if (nameElement)
-      nameElement.textContent =
-        "🏆 Auction Finished";
+    name.textContent="🏆 AUCTION FINISHED";
 
-    if (infoElement)
-      infoElement.textContent =
-        "All characters have been auctioned.";
+    info.textContent=
+      "All characters have been auctioned.";
 
-    if (bidElement)
-      bidElement.textContent =
-        "₹0";
+    bid.textContent="₹0";
 
-    if (bidButton)
-      bidButton.disabled =
-        true;
+    bidder.textContent="Game complete";
 
-    stopCountdown();
+    button.disabled=true;
+
+    stopTimer();
 
     return;
-  }
-
-
-  if (nameElement)
-    nameElement.textContent =
-      character.name;
-
-
-  if (infoElement)
-    infoElement.textContent =
-      character.info;
-
-
-  if (bidElement)
-    bidElement.textContent =
-      formatMoney(
-        Number(
-          auction.currentBid || 0
-        )
-      );
-
-
-  if (bidderElement) {
-
-    bidderElement.textContent =
-      auction.highestBidderName
-        ? "Highest bidder: " +
-          auction.highestBidderName
-        : "No bids yet";
 
   }
 
+  name.textContent=character.name;
 
-  if (bidButton) {
+  info.textContent=character.info;
 
-    bidButton.disabled =
-      auction.status !== "OPEN";
-
-  }
-
-
-  if (
-    auction.status ===
-    "SOLD"
-  ) {
-
-    showMessage(
-      "🏆 " +
-      auction.highestBidderName +
-      " won " +
-      character.name
+  bid.textContent=
+    formatMoney(
+      Number(auction.currentBid||0)
     );
 
-  }
+  bidder.textContent=
+    auction.highestBidderName
+      ? "Highest bidder: "+
+        auction.highestBidderName
+      : "No bids yet";
 
-
-  if (
-    auction.status ===
-    "SKIPPED"
-  ) {
-
-    showMessage(
-      "⏭️ No bids — " +
-      character.name +
-      " skipped"
-    );
-
-  }
-
-
-  if (
-    auction.status ===
-    "FINISHED"
-  ) {
-
-    showMessage(
-      "🏆 Auction Finished!"
-    );
-
-  }
+  button.disabled=
+    auction.status!=="OPEN";
 
 }
 
@@ -980,612 +1020,67 @@ function displayAuction(
 // COUNTDOWN
 // =====================================================
 
-function startCountdown(
-  auction
-) {
+function startCountdown(auction){
 
-  stopCountdown();
+  stopTimer();
 
-  const timer =
-    document.getElementById(
-      "auctionTimer"
-    );
+  const timer=
+    document.getElementById("auctionTimer");
 
-  if (!timer)
-    return;
+  if(!timer) return;
 
+  if(
+    auction.status!=="OPEN"
+  ){
 
-  if (
-    auction.status !==
-    "OPEN"
-  ) {
-
-    timer.textContent =
-      "⏱️ —";
+    timer.textContent="⏱️ —";
 
     return;
+
   }
 
+  function tick(){
 
-  function tick() {
-
-    const remaining =
+    const remaining=
       Math.max(
         0,
-        Number(
-          auction.endTime || 0
-        ) -
+        Number(auction.endTime||0)-
         Date.now()
       );
 
-
-    const seconds =
+    const seconds=
       Math.ceil(
-        remaining / 1000
+        remaining/1000
       );
 
+    timer.textContent=
+      "⏱️ "+seconds+"s";
 
-    timer.textContent =
-      "⏱️ " +
-      seconds +
-      "s";
+    if(remaining<=0){
 
+      stopTimer();
 
-    if (
-      remaining <= 0
-    ) {
-
-      stopCountdown();
-
-      automaticallyFinishAuction();
+      finishAuction();
 
     }
 
   }
-
 
   tick();
 
-
-  timerInterval =
-    setInterval(
-      tick,
-      200
-    );
+  timerInterval=
+    setInterval(tick,250);
 
 }
 
 
-// =====================================================
-// STOP TIMER
-// =====================================================
+function stopTimer(){
 
-function stopCountdown() {
+  if(timerInterval){
 
-  if (timerInterval) {
+    clearInterval(timerInterval);
 
-    clearInterval(
-      timerInterval
-    );
-
-    timerInterval =
-      null;
-
-  }
-
-}
-
-
-// =====================================================
-// AUTOMATIC FINISH
-// =====================================================
-
-async function automaticallyFinishAuction() {
-
-  if (finishingAuction)
-    return;
-
-  finishingAuction =
-    true;
-
-  try {
-
-    const auctionRef =
-      ref(
-        db,
-        "auction"
-      );
-
-
-    /*
-     * IMPORTANT:
-     * Transaction changes OPEN → FINALIZING.
-     *
-     * Only ONE phone can successfully
-     * claim the auction.
-     */
-
-    const result =
-      await runTransaction(
-        auctionRef,
-        current => {
-
-          if (!current)
-            return;
-
-          if (
-            current.status !==
-            "OPEN"
-          )
-            return;
-
-          if (
-            Date.now() <
-            Number(
-              current.endTime || 0
-            )
-          )
-            return;
-
-          return {
-            ...current,
-            status:
-              "FINALIZING"
-          };
-
-        }
-      );
-
-
-    if (!result.committed)
-      return;
-
-
-    const auction =
-      result.snapshot.val();
-
-
-    if (
-      auction.highestBidder
-    ) {
-
-      await finalizeSale(
-        auction
-      );
-
-    } else {
-
-      await finishWithoutBid(
-        auction
-      );
-
-    }
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Automatic finish error:",
-      error
-    );
-
-  }
-
-  finally {
-
-    finishingAuction =
-      false;
-
-  }
-
-}
-
-
-// =====================================================
-// AUTOMATIC SALE
-// =====================================================
-
-async function finalizeSale(
-  auction
-) {
-
-  const winnerId =
-    auction.highestBidder;
-
-  const character =
-    getCurrentCharacter(
-      auction
-    );
-
-
-  if (!winnerId || !character)
-    return;
-
-
-  const winnerRef =
-    ref(
-      db,
-      "teams/" +
-      winnerId
-    );
-
-
-  const snapshot =
-    await get(
-      winnerRef
-    );
-
-
-  const winner =
-    snapshot.val();
-
-
-  if (!winner)
-    return;
-
-
-  const players =
-    Array.isArray(
-      winner.players
-    )
-      ? winner.players
-      : [];
-
-
-  const budget =
-    Number(
-      winner.budget || 0
-    );
-
-
-  const price =
-    Number(
-      auction.currentBid || 0
-    );
-
-
-  if (
-    players.length >=
-    MAX_PLAYERS
-  ) {
-
-    await update(
-      ref(db, "auction"),
-      {
-        status:
-          "SKIPPED"
-      }
-    );
-
-    setTimeout(
-      nextCharacter,
-      1000
-    );
-
-    return;
-  }
-
-
-  if (
-    price >
-    budget
-  ) {
-
-    await update(
-      ref(db, "auction"),
-      {
-        status:
-          "SKIPPED"
-      }
-    );
-
-    setTimeout(
-      nextCharacter,
-      1000
-    );
-
-    return;
-  }
-
-
-  players.push({
-
-    name:
-      character.name,
-
-    price:
-      price
-
-  });
-
-
-  await update(
-    winnerRef,
-    {
-
-      budget:
-        budget - price,
-
-      players:
-        players
-
-    }
-  );
-
-
-  await update(
-    ref(db, "auction"),
-    {
-
-      status:
-        "SOLD"
-
-    }
-  );
-
-
-  await set(
-    ref(
-      db,
-      "history/" +
-      Date.now() +
-      "_" +
-      Math.random()
-        .toString(36)
-        .slice(2)
-    ),
-    {
-
-      character:
-        character.name,
-
-      team:
-        winner.name,
-
-      price:
-        price,
-
-      time:
-        Date.now(),
-
-      free:
-        false
-
-    }
-  );
-
-
-  showMessage(
-    "🏆 " +
-    character.name +
-    " → " +
-    winner.name +
-    " for " +
-    formatMoney(price)
-  );
-
-
-  /*
-   * Automatically go to next character.
-   */
-
-  setTimeout(
-    nextCharacter,
-    1200
-  );
-
-}
-
-
-// =====================================================
-// NO BID
-// =====================================================
-
-async function finishWithoutBid(
-  auction
-) {
-
-  const character =
-    getCurrentCharacter(
-      auction
-    );
-
-
-  if (!character)
-    return;
-
-
-  /*
-   * IMPORTANT:
-   * No free player.
-   *
-   * If nobody bids for 10 seconds,
-   * the character is simply skipped.
-   */
-
-  await update(
-    ref(db, "auction"),
-    {
-
-      status:
-        "SKIPPED",
-
-      currentBid:
-        STARTING_BID,
-
-      highestBidder:
-        null,
-
-      highestBidderName:
-        null
-
-    }
-  );
-
-
-  showMessage(
-    "⏭️ No bids — " +
-    character.name +
-    " skipped"
-  );
-
-
-  setTimeout(
-    nextCharacter,
-    1000
-  );
-
-}
-
-
-// =====================================================
-// NEXT CHARACTER
-// =====================================================
-
-async function nextCharacter() {
-
-  if (movingNext)
-    return;
-
-  movingNext =
-    true;
-
-
-  try {
-
-    const auctionRef =
-      ref(
-        db,
-        "auction"
-      );
-
-
-    const result =
-      await runTransaction(
-        auctionRef,
-        current => {
-
-          if (!current)
-            return;
-
-          if (
-            current.status !==
-              "SOLD" &&
-            current.status !==
-              "SKIPPED"
-          )
-            return;
-
-
-          const nextIndex =
-            Number(
-              current.characterIndex || 0
-            ) + 1;
-
-
-          const order =
-            current.characterOrder ||
-            [];
-
-
-          if (
-            nextIndex >=
-            order.length
-          ) {
-
-            return {
-
-              ...current,
-
-              characterIndex:
-                nextIndex,
-
-              currentBid:
-                0,
-
-              highestBidder:
-                null,
-
-              highestBidderName:
-                null,
-
-              status:
-                "FINISHED",
-
-              endTime:
-                0
-
-            };
-
-          }
-
-
-          return {
-
-            ...current,
-
-            characterIndex:
-              nextIndex,
-
-            currentBid:
-              STARTING_BID,
-
-            highestBidder:
-              null,
-
-            highestBidderName:
-              null,
-
-            status:
-              "OPEN",
-
-            endTime:
-              Date.now() +
-              AUCTION_SECONDS * 1000
-
-          };
-
-        }
-      );
-
-
-    if (
-      result.committed
-    ) {
-
-      const newAuction =
-        result.snapshot.val();
-
-
-      if (
-        newAuction.status ===
-        "FINISHED"
-      ) {
-
-        showMessage(
-          "🏆 AUCTION FINISHED!"
-        );
-
-      }
-
-    }
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Next character error:",
-      error
-    );
-
-  }
-
-  finally {
-
-    movingNext =
-      false;
+    timerInterval=null;
 
   }
 
@@ -1596,397 +1091,542 @@ async function nextCharacter() {
 // BID
 // =====================================================
 
-window.placeBid =
-async function () {
+window.placeBid=async function(){
 
-  if (!myTeamId) {
+  if(!roomCode||!myTeamId){
 
-    showMessage(
-      "❌ Join the game first."
+    showGameMessage(
+      "❌ You are not in a room."
     );
 
     return;
 
   }
 
+  try{
 
-  const auctionSnapshot =
-    await get(
-      ref(
-        db,
-        "auction"
-      )
-    );
+    const auctionSnap=
+      await get(
+        ref(db,`rooms/${roomCode}/auction`)
+      );
 
+    const auction=auctionSnap.val();
 
-  const auction =
-    auctionSnapshot.val();
+    if(
+      !auction||
+      auction.status!=="OPEN"
+    ){
 
+      showGameMessage(
+        "❌ Bidding is closed."
+      );
 
-  if (
-    !auction ||
-    auction.status !==
-    "OPEN"
-  ) {
+      return;
 
-    showMessage(
-      "❌ Auction is not open."
-    );
+    }
 
-    return;
+    if(
+      Date.now()>=
+      Number(auction.endTime||0)
+    ){
 
-  }
+      await finishAuction();
 
+      return;
 
-  if (
-    Date.now() >=
-    Number(
-      auction.endTime || 0
-    )
-  ) {
+    }
 
-    await automaticallyFinishAuction();
-
-    return;
-
-  }
-
-
-  const teamSnapshot =
-    await get(
-      ref(
-        db,
-        "teams/" +
-        myTeamId
-      )
-    );
-
-
-  const team =
-    teamSnapshot.val();
-
-
-  if (!team)
-    return;
-
-
-  const players =
-    Array.isArray(
-      team.players
-    )
-      ? team.players
-      : [];
-
-
-  if (
-    players.length >=
-    MAX_PLAYERS
-  ) {
-
-    showMessage(
-      "❌ You already have 4 characters."
-    );
-
-    return;
-
-  }
-
-
-  const budget =
-    Number(
-      team.budget || 0
-    );
-
-
-  if (
-    budget <= 0
-  ) {
-
-    showMessage(
-      "❌ Your budget is ₹0. You cannot bid."
-    );
-
-    return;
-
-  }
-
-
-  const currentBid =
-    Number(
-      auction.currentBid || 0
-    );
-
-
-  /*
-   * ₹1 Cr → ₹1.5 Cr → ₹2 Cr...
-   * Up to ₹10 Cr in 50L increments.
-   *
-   * After ₹10 Cr:
-   * increase by ₹1 Cr.
-   */
-
-  const increment =
-    currentBid < 1000
-      ? SMALL_INCREMENT
-      : BIG_INCREMENT;
-
-
-  const newBid =
-    currentBid +
-    increment;
-
-
-  if (
-    newBid >
-    budget
-  ) {
-
-    showMessage(
-      "❌ Not enough budget for this bid."
-    );
-
-    return;
-
-  }
-
-
-  const auctionRef =
-    ref(
-      db,
-      "auction"
-    );
-
-
-  /*
-   * Transaction prevents two phones
-   * from making the same bid at once.
-   */
-
-  const result =
-    await runTransaction(
-      auctionRef,
-      current => {
-
-        if (!current)
-          return;
-
-        if (
-          current.status !==
-          "OPEN"
+    const teamSnap=
+      await get(
+        ref(
+          db,
+          `rooms/${roomCode}/teams/${myTeamId}`
         )
-          return;
+      );
 
-        if (
-          Date.now() >=
-          Number(
-            current.endTime || 0
+    const team=teamSnap.val();
+
+    if(!team) return;
+
+    const players=
+      team.players||[];
+
+    if(players.length>=MAX_PLAYERS){
+
+      showGameMessage(
+        "❌ You already have 4 players."
+      );
+
+      return;
+
+    }
+
+    const budget=
+      Number(team.budget||0);
+
+    const currentBid=
+      Number(auction.currentBid||0);
+
+    const increment=
+      currentBid<1000
+        ? SMALL_INCREMENT
+        : BIG_INCREMENT;
+
+    const newBid=
+      currentBid+increment;
+
+    if(newBid>budget){
+
+      showGameMessage(
+        "❌ Not enough budget."
+      );
+
+      return;
+
+    }
+
+    const auctionRef=
+      ref(db,`rooms/${roomCode}/auction`);
+
+    const result=
+      await runTransaction(
+        auctionRef,
+        current=>{
+
+          if(!current) return;
+
+          if(current.status!=="OPEN")
+            return;
+
+          if(
+            Date.now()>=
+            Number(current.endTime||0)
           )
-        )
-          return;
+            return;
 
-        if (
-          Number(
-            current.currentBid || 0
-          ) !==
-          currentBid
-        )
-          return;
+          if(
+            Number(current.currentBid||0)!==
+            currentBid
+          )
+            return;
 
-        return {
+          return{
 
-          ...current,
+            ...current,
 
-          currentBid:
-            newBid,
+            currentBid:newBid,
 
-          highestBidder:
-            myTeamId,
+            highestBidder:myTeamId,
 
-          highestBidderName:
-            team.name,
+            highestBidderName:team.name,
 
-          /*
-           * Every successful bid
-           * resets the 10 second timer.
-           */
+            endTime:
+              Date.now()+
+              AUCTION_SECONDS*1000
 
-          endTime:
-            Date.now() +
-            AUCTION_SECONDS * 1000
+          };
 
-        };
+        }
+      );
 
-      }
+    if(!result.committed){
+
+      showGameMessage(
+        "⚠️ Another player bid first."
+      );
+
+      return;
+
+    }
+
+    showGameMessage(
+      "🔥 Bid placed: "+
+      formatMoney(newBid)+
+      " • Timer reset"
     );
-
-
-  if (
-    !result.committed
-  ) {
-
-    showMessage(
-      "⚠️ Another player bid first."
-    );
-
-    return;
 
   }
+  catch(error){
 
+    console.error(error);
 
-  showMessage(
-    "🔥 " +
-    formatMoney(newBid) +
-    " • Timer reset to 10s"
-  );
+    showGameMessage(
+      "❌ "+error.message
+    );
+
+  }
 
 };
 
 
 // =====================================================
-// START NEW GAME
+// FINISH AUCTION
 // =====================================================
 
-window.restartAuction =
-async function () {
+async function finishAuction(){
 
-  const confirmed =
-    confirm(
-      "⚠️ START NEW GAME?\n\n" +
-      "All players and auction history " +
-      "will be erased.\n\n" +
-      "Every team gets ₹20 Cr again."
-    );
+  if(finishing) return;
 
+  finishing=true;
 
-  if (!confirmed)
-    return;
+  try{
 
+    const auctionRef=
+      ref(db,`rooms/${roomCode}/auction`);
 
-  try {
+    const snap=
+      await get(auctionRef);
 
-    /*
-     * Get current teams.
-     */
+    const auction=snap.val();
 
-    const teamsSnapshot =
-      await get(
-        ref(db, "teams")
+    if(
+      !auction||
+      auction.status!=="OPEN"
+    )
+      return;
+
+    if(
+      Date.now()<
+      Number(auction.endTime||0)
+    )
+      return;
+
+    // ================================================
+    // SOMEONE BID
+    // ================================================
+
+    if(auction.highestBidder){
+
+      const winnerRef=
+        ref(
+          db,
+          `rooms/${roomCode}/teams/${auction.highestBidder}`
+        );
+
+      const winnerSnap=
+        await get(winnerRef);
+
+      const winner=winnerSnap.val();
+
+      if(!winner) return;
+
+      const players=
+        winner.players||[];
+
+      const price=
+        Number(auction.currentBid||0);
+
+      const budget=
+        Number(winner.budget||0);
+
+      if(
+        players.length>=MAX_PLAYERS||
+        price>budget
+      ){
+
+        await update(
+          auctionRef,
+          {
+            status:"SKIPPED"
+          }
+        );
+
+      }
+      else{
+
+        const character=
+          getCurrentCharacter(auction);
+
+        players.push({
+
+          name:character.name,
+
+          price:price
+
+        });
+
+        await update(
+          winnerRef,
+          {
+
+            budget:
+              budget-price,
+
+            players:players
+
+          }
+        );
+
+        await set(
+          ref(
+            db,
+            `rooms/${roomCode}/history/${Date.now()}`
+          ),
+          {
+
+            character:character.name,
+
+            team:winner.name,
+
+            price:price,
+
+            time:Date.now(),
+
+            free:false
+
+          }
+        );
+
+        await update(
+          auctionRef,
+          {
+            status:"SOLD"
+          }
+        );
+
+      }
+
+    }
+
+    // ================================================
+    // NO BID
+    // ================================================
+
+    else{
+
+      await update(
+        auctionRef,
+        {
+          status:"SKIPPED"
+        }
       );
 
+    }
 
-    const teams =
-      teamsSnapshot.val() ||
-      {};
+    // ================================================
+    // MOVE TO NEXT
+    // ================================================
+
+    setTimeout(
+      nextCharacter,
+      500
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      "Finish error:",
+      error
+    );
+
+  }
+  finally{
+
+    finishing=false;
+
+  }
+
+}
 
 
-    const updates =
-      {};
+// =====================================================
+// NEXT CHARACTER
+// =====================================================
 
+async function nextCharacter(){
 
-    /*
-     * Reset every team.
-     */
+  try{
 
-    Object.keys(
-      teams
-    ).forEach(
-      teamId => {
+    const auctionRef=
+      ref(db,`rooms/${roomCode}/auction`);
 
-        updates[
-          "teams/" +
-          teamId +
-          "/budget"
-        ] =
-          STARTING_BUDGET;
+    const snap=
+      await get(auctionRef);
 
+    const auction=snap.val();
 
-        updates[
-          "teams/" +
-          teamId +
-          "/players"
-        ] =
-          [];
+    if(!auction) return;
+
+    if(
+      auction.status!=="SOLD"&&
+      auction.status!=="SKIPPED"
+    )
+      return;
+
+    const nextIndex=
+      Number(auction.characterIndex||0)+1;
+
+    const order=
+      auction.characterOrder||[];
+
+    // ================================================
+    // FINISHED
+    // ================================================
+
+    if(nextIndex>=order.length){
+
+      await update(
+        ref(db,`rooms/${roomCode}`),
+        {
+          status:"FINISHED"
+        }
+      );
+
+      await update(
+        auctionRef,
+        {
+          characterIndex:nextIndex,
+          currentBid:0,
+          highestBidder:null,
+          highestBidderName:null,
+          status:"FINISHED",
+          endTime:0
+        }
+      );
+
+      showGameMessage(
+        "🏆 AUCTION FINISHED!"
+      );
+
+      return;
+
+    }
+
+    // ================================================
+    // NEW CHARACTER
+    // ================================================
+
+    await update(
+      auctionRef,
+      {
+
+        characterIndex:nextIndex,
+
+        currentBid:STARTING_BID,
+
+        highestBidder:null,
+
+        highestBidderName:null,
+
+        status:"OPEN",
+
+        endTime:
+          Date.now()+
+          AUCTION_SECONDS*1000
 
       }
     );
 
+  }
+  catch(error){
 
-    /*
-     * Clear old history.
-     */
+    console.error(error);
 
-    updates["history"] =
-      null;
+  }
 
-
-    /*
-     * New random character order.
-     */
-
-    const newOrder =
-      shuffleCharacters()
-        .map(
-          character =>
-            character.name
-        );
+}
 
 
-    /*
-     * New auction.
-     */
+// =====================================================
+// NEW GAME
+// =====================================================
 
-    updates["auction"] = {
+window.restartGame=async function(){
 
-      characterIndex:
-        0,
+  if(!isHost){
 
-      characterOrder:
-        newOrder,
+    alert(
+      "Only the room creator can start a new game."
+    );
 
-      currentBid:
-        STARTING_BID,
+    return;
 
-      highestBidder:
-        null,
+  }
 
-      highestBidderName:
-        null,
+  const ok=
+    confirm(
+      "START NEW GAME?\n\n"+
+      "All players will stay in the room,\n"+
+      "but budgets, characters and history\n"+
+      "will be completely reset."
+    );
 
-      status:
-        "OPEN",
+  if(!ok) return;
+
+  try{
+
+    const teamsSnap=
+      await get(
+        ref(db,`rooms/${roomCode}/teams`)
+      );
+
+    const teams=teamsSnap.val()||{};
+
+    const updates={};
+
+    Object.keys(teams).forEach(id=>{
+
+      updates[
+        `rooms/${roomCode}/teams/${id}/budget`
+      ]=STARTING_BUDGET;
+
+      updates[
+        `rooms/${roomCode}/teams/${id}/players`
+      ]=[];
+
+    });
+
+    updates[
+      `rooms/${roomCode}/history`
+    ]=null;
+
+    updates[
+      `rooms/${roomCode}/status`
+    ]="PLAYING";
+
+    const order=
+      shuffle(characters)
+      .map(c=>c.name);
+
+    updates[
+      `rooms/${roomCode}/auction`
+    ]={
+
+      characterIndex:0,
+
+      characterOrder:order,
+
+      currentBid:STARTING_BID,
+
+      highestBidder:null,
+
+      highestBidderName:null,
+
+      status:"OPEN",
 
       endTime:
-        Date.now() +
-        AUCTION_SECONDS * 1000
+        Date.now()+
+        AUCTION_SECONDS*1000
 
     };
-
 
     await update(
       ref(db),
       updates
     );
 
-
-    stopCountdown();
-
-
-    showMessage(
+    showGameMessage(
       "🔄 NEW GAME STARTED!"
     );
 
   }
+  catch(error){
 
-  catch (error) {
-
-    console.error(
-      "Restart error:",
-      error
-    );
-
+    console.error(error);
 
     alert(
-      "❌ Restart failed:\n" +
+      "❌ Restart failed:\n"+
       error.message
     );
 
@@ -1996,97 +1636,63 @@ async function () {
 
 
 // =====================================================
-// CHARACTER SCORE
+// TEAM RANKING
 // =====================================================
 
-function calculateCharacterScore(
-  player
-) {
+function calculateCharacterScore(player){
 
-  const character =
+  const character=
     characters.find(
-      c =>
-        c.name ===
-        player.name
+      c=>c.name===player.name
     );
 
+  if(!character) return 0;
 
-  if (!character)
-    return 0;
-
-
-  return (
-    character.power * 0.25 +
-    character.attack * 0.15 +
-    character.defense * 0.15 +
-    character.speed * 0.10 +
-    character.hax * 0.15 +
-    character.intelligence * 0.10 +
-    character.synergy * 0.10
+  return(
+    character.power*.25+
+    character.attack*.15+
+    character.defense*.15+
+    character.speed*.10+
+    character.hax*.15+
+    character.intelligence*.10+
+    character.synergy*.10
   );
 
 }
 
 
-// =====================================================
-// TEAM SCORE
-// =====================================================
+function calculateTeamScore(team){
 
-function calculateTeamScore(
-  team
-) {
+  const players=
+    team.players||[];
 
-  const players =
-    Array.isArray(
-      team.players
-    )
-      ? team.players
-      : [];
-
-
-  if (
-    players.length === 0
-  )
+  if(!players.length)
     return 0;
 
-
-  const scores =
+  const scores=
     players.map(
       calculateCharacterScore
     );
 
-
-  const total =
+  const total=
     scores.reduce(
-      (a, b) =>
-        a + b,
+      (a,b)=>a+b,
       0
     );
 
+  const average=
+    total/scores.length;
 
-  const average =
-    total /
-    scores.length;
-
-
-  const strongest =
-    Math.max(
-      ...scores
-    );
-
-
-  const final =
-    strongest * 0.25 +
-    total * 0.35 +
-    average * 0.20 +
-    Math.min(
-      total,
-      400
-    ) * 0.20;
-
+  const strongest=
+    Math.max(...scores);
 
   return Number(
-    final.toFixed(2)
+    (
+      strongest*.25+
+      total*.35+
+      average*.20+
+      Math.min(total,400)*.20
+    ).toFixed(2)
   );
 
 }
@@ -2096,211 +1702,123 @@ function calculateTeamScore(
 // DISPLAY TEAMS
 // =====================================================
 
-function displayTeams(
-  teams
-) {
+function displayTeams(teams){
 
-  const container =
-    document.getElementById(
-      "teams"
-    );
+  const container=
+    document.getElementById("teams");
 
+  if(!container) return;
 
-  if (!container)
+  const ranked=
+    Object.entries(teams)
+      .map(([id,team])=>({
+
+        id:id,
+
+        name:team.name||"Unknown",
+
+        budget:Number(team.budget||0),
+
+        players:team.players||[],
+
+        score:
+          calculateTeamScore(team)
+
+      }))
+      .sort(
+        (a,b)=>
+          b.score-a.score
+      );
+
+  container.innerHTML="";
+
+  if(!ranked.length){
+
+    container.textContent=
+      "No teams.";
+
     return;
 
+  }
 
-  container.innerHTML =
-    "";
+  ranked.forEach((team,index)=>{
 
+    let medal="🏅";
 
-  const ranked =
-    Object.entries(
-      teams
-    )
-      .map(
-        ([id, team]) => ({
+    if(index===0) medal="🥇";
 
-          id:
-            id,
+    if(index===1) medal="🥈";
 
-          name:
-            team.name ||
-            "Unnamed Team",
+    if(index===2) medal="🥉";
 
-          budget:
-            Number(
-              team.budget || 0
-            ),
+    const div=
+      document.createElement("div");
 
-          players:
-            Array.isArray(
-              team.players
-            )
-              ? team.players
-              : [],
+    div.className="team";
 
-          score:
-            calculateTeamScore(
-              team
-            )
+    div.innerHTML=`
 
-        })
-      )
-      .sort(
-        (a, b) =>
-          b.score -
-          a.score
-      );
+      <div class="team-name">
+        ${medal}
+        #${index+1}
+        ${escapeHTML(team.name)}
+      </div>
 
+      <div>
+        ⭐ Power:
+        <b>${team.score}</b>
+      </div>
 
-  ranked.forEach(
-    (team, index) => {
+      <div>
+        💰 Budget:
+        <b>${formatMoney(team.budget)}</b>
+      </div>
 
-      const div =
-        document.createElement(
-          "div"
-        );
+      <div>
+        👥 Players:
+        ${team.players.length}/${MAX_PLAYERS}
+      </div>
 
+      <hr>
 
-      div.className =
-        "team";
+      ${
+        team.players.length
+        ?
+        team.players.map(player=>`
 
+          <div style="margin:5px 0">
+            ⚔️ ${escapeHTML(player.name)}
+            — ${formatMoney(player.price)}
+          </div>
 
-      let medal =
-        "🏅";
+        `).join("")
+        :
+        "<div>No players</div>"
+      }
 
+    `;
 
-      if (
-        index === 0
-      )
-        medal =
-          "🥇";
+    container.appendChild(div);
 
-      else if (
-        index === 1
-      )
-        medal =
-          "🥈";
+  });
 
-      else if (
-        index === 2
-      )
-        medal =
-          "🥉";
-
-
-      div.innerHTML = `
-
-        <div class="team-name">
-          ${medal}
-          #${index + 1}
-          ${escapeHTML(team.name)}
-        </div>
-
-        <div>
-          ⭐ Power:
-          <b>
-            ${team.score}
-          </b>
-        </div>
-
-        <div>
-          💰 Budget:
-          <b>
-            ${formatMoney(team.budget)}
-          </b>
-        </div>
-
-        <div>
-          👥 Players:
-          ${team.players.length}/${MAX_PLAYERS}
-        </div>
-
-        <hr>
-
-        ${
-          team.players.length
-
-            ? team.players
-                .map(
-                  player => `
-
-                    <div>
-                      ⚔️
-                      ${escapeHTML(
-                        player.name
-                      )}
-                      —
-                      ${formatMoney(
-                        player.price
-                      )}
-                    </div>
-
-                  `
-                )
-                .join("")
-
-            : "<div>No players</div>"
-        }
-
-      `;
-
-
-      container.appendChild(
-        div
-      );
-
-    }
-  );
-
-
-  /*
-   * Update MY TEAM display.
-   */
-
-  if (
-    myTeamId &&
+  if(
+    myTeamId&&
     teams[myTeamId]
-  ) {
+  ){
 
-    const mine =
-      teams[myTeamId];
+    const mine=teams[myTeamId];
 
+    document.getElementById("myTeam")
+      .textContent=mine.name;
 
-    const myTeam =
-      document.getElementById(
-        "myTeam"
-      );
+    document.getElementById("myBudget")
+      .textContent=
+        formatMoney(mine.budget);
 
-    const myBudget =
-      document.getElementById(
-        "myBudget"
-      );
-
-    const myPlayers =
-      document.getElementById(
-        "myPlayers"
-      );
-
-
-    if (myTeam)
-      myTeam.textContent =
-        mine.name;
-
-
-    if (myBudget)
-      myBudget.textContent =
-        formatMoney(
-          mine.budget
-        );
-
-
-    if (myPlayers)
-      myPlayers.textContent =
-        `${(
-          mine.players || []
-        ).length}/${MAX_PLAYERS}`;
+    document.getElementById("myPlayers")
+      .textContent=
+        `${(mine.players||[]).length}/${MAX_PLAYERS}`;
 
   }
 
@@ -2311,199 +1829,234 @@ function displayTeams(
 // HISTORY
 // =====================================================
 
-function displayHistory(
-  history
-) {
+function displayHistory(history){
 
-  const container =
-    document.getElementById(
-      "history"
-    );
+  const container=
+    document.getElementById("history");
 
+  if(!container) return;
 
-  if (!container)
-    return;
+  container.innerHTML="";
 
-
-  container.innerHTML =
-    "";
-
-
-  const items =
-    Object.values(
-      history
-    )
+  const items=
+    Object.values(history)
       .sort(
-        (a, b) =>
-          Number(b.time || 0) -
-          Number(a.time || 0)
+        (a,b)=>
+          Number(b.time||0)-
+          Number(a.time||0)
       );
 
+  if(!items.length){
 
-  if (
-    items.length === 0
-  ) {
-
-    container.innerHTML =
+    container.textContent=
       "No history yet.";
 
     return;
 
   }
 
+  items.forEach(item=>{
 
-  items.forEach(
-    item => {
+    const div=
+      document.createElement("div");
 
-      const div =
-        document.createElement(
-          "div"
-        );
+    div.className="history-item";
 
+    div.innerHTML=`
 
-      div.className =
-        "history-item";
+      🔨
+      <b>${escapeHTML(item.character)}</b>
+      →
+      <b>${escapeHTML(item.team)}</b>
+      →
+      ${formatMoney(item.price)}
 
+    `;
 
-      div.innerHTML = `
+    container.appendChild(div);
 
-        🔨
-        <b>
-          ${escapeHTML(
-            item.character
-          )}
-        </b>
-
-        →
-
-        <b>
-          ${escapeHTML(
-            item.team
-          )}
-        </b>
-
-        →
-
-        ${formatMoney(
-          item.price
-        )}
-
-      `;
-
-
-      container.appendChild(
-        div
-      );
-
-    }
-  );
+  });
 
 }
 
 
 // =====================================================
-// MONEY
+// COPY ROOM LINK
 // =====================================================
 
-function formatMoney(
-  lakhs
-) {
+window.copyRoomLink=async function(){
 
-  const amount =
-    Number(
-      lakhs || 0
+  const input=
+    document.getElementById("roomLink");
+
+  try{
+
+    await navigator.clipboard.writeText(
+      input.value
     );
 
+    alert("✅ Room link copied!");
 
-  if (
-    amount >= 100
-  ) {
+  }
+  catch{
 
-    const crore =
-      amount / 100;
+    input.select();
+
+    document.execCommand("copy");
+
+    alert("✅ Room link copied!");
+
+  }
+
+};
 
 
-    return (
-      "₹" +
-      (
-        Number.isInteger(
-          crore
+// =====================================================
+// LEAVE ROOM
+// =====================================================
+
+window.leaveRoom=async function(){
+
+  if(roomCode&&myTeamId){
+
+    try{
+
+      await remove(
+        ref(
+          db,
+          `rooms/${roomCode}/teams/${myTeamId}`
         )
-          ? crore
-          : crore.toFixed(2)
-      ) +
+      );
+
+    }
+    catch(error){
+
+      console.error(error);
+
+    }
+
+  }
+
+  roomCode=null;
+
+  myTeamId=null;
+
+  isHost=false;
+
+  location.reload();
+
+};
+
+
+// =====================================================
+// URL ROOM CODE
+// =====================================================
+
+const urlParams=
+  new URLSearchParams(
+    location.search
+  );
+
+const automaticRoom=
+  urlParams.get("room");
+
+if(automaticRoom){
+
+  setTimeout(()=>{
+
+    hideAll();
+
+    document
+      .getElementById("joinScreen")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("joinRoomCode")
+      .value=
+        automaticRoom.toUpperCase();
+
+  },500);
+
+}
+
+
+// =====================================================
+// HELPERS
+// =====================================================
+
+function formatMoney(lakhs){
+
+  const amount=
+    Number(lakhs||0);
+
+  if(amount>=100){
+
+    const crore=
+      amount/100;
+
+    return(
+      "₹"+
+      (
+        Number.isInteger(crore)
+        ? crore
+        : crore.toFixed(2)
+      )+
       " Cr"
     );
 
   }
 
-
-  return (
-    "₹" +
-    amount +
-    " L"
-  );
+  return "₹"+amount+" L";
 
 }
 
 
-// =====================================================
-// MESSAGE
-// =====================================================
+function showGameMessage(message){
 
-function showMessage(
-  message
-) {
+  const element=
+    document.getElementById("gameMessage");
 
-  const element =
-    document.getElementById(
-      "gameMessage"
-    );
+  if(element)
+    element.textContent=message;
+
+}
 
 
-  if (element) {
+function showMessageToAll(message){
 
-    element.textContent =
-      message;
+  const ids=[
+    "homeMessage",
+    "createMessage",
+    "joinMessage",
+    "lobbyMessage",
+    "gameMessage"
+  ];
+
+  for(const id of ids){
+
+    const el=
+      document.getElementById(id);
+
+    if(el)
+      el.textContent=message;
 
   }
 
 }
 
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
-
-function escapeHTML(
-  text
-) {
+function escapeHTML(text){
 
   return String(text)
 
-    .replaceAll(
-      "&",
-      "&amp;"
-    )
+    .replaceAll("&","&amp;")
 
-    .replaceAll(
-      "<",
-      "&lt;"
-    )
+    .replaceAll("<","&lt;")
 
-    .replaceAll(
-      ">",
-      "&gt;"
-    )
+    .replaceAll(">","&gt;")
 
-    .replaceAll(
-      '"',
-      "&quot;"
-    )
+    .replaceAll('"',"&quot;")
 
-    .replaceAll(
-      "'",
-      "&#039;"
-    );
+    .replaceAll("'","&#039;");
 
-}
+  }
