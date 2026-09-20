@@ -1,9 +1,5 @@
-// ============================================================
-// NARUTO SHINOBI AUCTION - MULTIPLAYER
-// ============================================================
-
 import { initializeApp } from
-  "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 
 import {
   getDatabase,
@@ -15,14 +11,14 @@ import {
   onValue,
   runTransaction
 } from
-  "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 import {
   getAuth,
   signInAnonymously,
   onAuthStateChanged
 } from
-  "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+"https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 
 // ============================================================
@@ -30,14 +26,31 @@ import {
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
-  authDomain: "naruto-shinobi-auction.firebaseapp.com",
-  databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
-  projectId: "naruto-shinobi-auction",
-  storageBucket: "naruto-shinobi-auction.firebasestorage.app",
-  messagingSenderId: "187952563869",
-  appId: "1:187952563869:web:839ac2add9ae0f5835f674",
-  measurementId: "G-N3QGHDB240"
+
+  apiKey:
+    "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
+
+  authDomain:
+    "naruto-shinobi-auction.firebaseapp.com",
+
+  databaseURL:
+    "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
+
+  projectId:
+    "naruto-shinobi-auction",
+
+  storageBucket:
+    "naruto-shinobi-auction.firebasestorage.app",
+
+  messagingSenderId:
+    "187952563869",
+
+  appId:
+    "1:187952563869:web:839ac2add9ae0f5835f674",
+
+  measurementId:
+    "G-N3QGHDB240"
+
 };
 
 
@@ -45,13 +58,242 @@ const firebaseConfig = {
 // FIREBASE
 // ============================================================
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getDatabase(app);
+
+const auth =
+  getAuth(app);
 
 
 // ============================================================
-// GLOBAL VARIABLES
+// GAME SETTINGS
+// ============================================================
+
+const STARTING_BUDGET = 2000; // ₹20 Cr
+
+const MAX_TEAMS = 4;
+
+const MAX_CHARACTERS = 4;
+
+const AUCTION_TIME = 10;
+
+const START_BID = 100; // ₹1 Cr
+
+const SMALL_INCREMENT = 50; // ₹50 L
+
+const BIG_INCREMENT = 100; // ₹1 Cr
+
+
+// ============================================================
+// CHARACTER FUNCTION
+// ============================================================
+
+function character(id,name,power){
+
+  const attack =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 37) - 18)
+      )
+    );
+
+  const defense =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 43) - 21)
+      )
+    );
+
+  const speed =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 31) - 15)
+      )
+    );
+
+  const hax =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 47) - 23)
+      )
+    );
+
+  const intelligence =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 29) - 14)
+      )
+    );
+
+  const synergy =
+    Math.max(
+      500,
+      Math.min(
+        949,
+        power + ((power % 41) - 20)
+      )
+    );
+
+  return {
+    id,
+    name,
+    power,
+    attack,
+    defense,
+    speed,
+    hax,
+    intelligence,
+    synergy
+  };
+}
+
+
+// ============================================================
+// 100 CHARACTERS
+// POWER RANGE: 550–950
+// EVERY POWER VALUE IS DIFFERENT
+// ============================================================
+
+const characters = [
+
+  character("isshiki","Isshiki Otsutsuki",950),
+  character("shibai","Shibai Otsutsuki",948),
+  character("juubidara","Juubidara — Ten Tails Madara",942),
+  character("kaguya","Kaguya Otsutsuki",936),
+  character("hagoromo","Hagoromo Otsutsuki",925),
+  character("hamura","Hamura Otsutsuki",920),
+  character("narutoso6p","Naruto Six Paths",918),
+  character("sasuke6p","Sasuke Six Paths",914),
+  character("madara","Madara Uchiha",905),
+  character("momoshiki","Momoshiki Otsutsuki",902),
+
+  character("indura","Indra Otsutsuki",895),
+  character("obitojuubi","Juubito — Ten Tails Obito",897),
+  character("ashura","Ashura Otsutsuki",890),
+  character("hashirama","Hashirama Senju",875),
+  character("narutokcm2","Naruto KCM 2",868),
+  character("hashiramaedo","Edo Hashirama",865),
+  character("sasukems2","Sasuke Eternal Mangekyo",862),
+  character("madaraedo","Edo Madara",858),
+  character("minatoedo","Edo Minato",852),
+  character("kinshiki","Kinshiki Otsutsuki",850),
+
+  character("itachireanimated","Reanimated Itachi",848),
+  character("minato","Minato Namikaze",842),
+  character("nagatoedo","Edo Nagato",838),
+  character("nagato","Nagato",835),
+  character("pain","Pain",828),
+  character("tobiramaedo","Edo Tobirama",824),
+  character("tobirama","Tobirama Senju",815),
+  character("mightguy","Might Guy — Eighth Gate",812),
+  character("toneri","Toneri Otsutsuki",810),
+  character("jiraiyasage","Jiraiya Sage Mode",805),
+
+  character("narutokcm","Naruto KCM",802),
+  character("urashiki","Urashiki Otsutsuki",795),
+  character("sasukems","Sasuke Mangekyo",792),
+  character("itachi","Itachi Uchiha",790),
+  character("kabutosage","Sage Kabuto",785),
+  character("orochimarureborn","Reanimated Orochimaru",780),
+  character("thirdraikage","Third Raikage",777),
+  character("killerbee","Killer B",775),
+  character("hiruzen","Hiruzen Sarutobi",765),
+  character("orochimaru","Orochimaru",760),
+
+  character("kakashi","Kakashi Hatake",755),
+  character("obito","Obito Uchiha",750),
+  character("onoki","Onoki",748),
+  character("mu","Mu",744),
+  character("gengetsu","Gengetsu Hozuki",740),
+  character("raikage","Fourth Raikage",738),
+  character("hanzo","Hanzo",735),
+  character("mei","Mei Terumi",728),
+  character("gaaraadult","Adult Gaara",725),
+  character("gaara","Gaara",718),
+
+  character("tsunade","Tsunade",712),
+  character("sakura","Sakura Haruno",708),
+  character("deidara","Deidara",705),
+  character("sasori","Sasori",702),
+  character("kisame","Kisame Hoshigaki",698),
+  character("kakuzu","Kakuzu",692),
+  character("danzo","Danzo Shimura",688),
+  character("kimimaro","Kimimaro",682),
+  character("zabuza2","Zabuza Reanimated",680),
+  character("konan","Konan",678),
+
+  character("asuma","Asuma Sarutobi",674),
+  character("zabuza","Zabuza Momochi",670),
+  character("kabuto","Kabuto Yakushi",668),
+  character("darui","Darui",665),
+  character("yagura","Yagura",662),
+  character("yugito","Yugito Nii",658),
+  character("han","Han",655),
+  character("roshi","Roshi",650),
+  character("utakata","Utakata",646),
+  character("neji","Neji Hyuga",640),
+
+  character("rocklee","Rock Lee",636),
+  character("shikamaru","Shikamaru Nara",632),
+  character("temari","Temari",628),
+  character("kankuro","Kankuro",624),
+  character("shino","Shino Aburame",620),
+  character("haku2","Haku Reanimated",615),
+  character("jugo","Jugo",612),
+  character("chiyo","Chiyo",610),
+  character("suigetsu","Suigetsu Hozuki",608),
+  character("sakontayuya","Sakon & Ukon",606),
+
+  character("haku","Haku",604),
+  character("kidomaru","Kidomaru",602),
+  character("kurenai","Kurenai Yuhi",598),
+  character("shikaku","Shikaku Nara",594),
+  character("inoichi","Inoichi Yamanaka",590),
+  character("tayuya","Tayuya",588),
+  character("ino","Ino Yamanaka",586),
+  character("jirobo","Jirobo",584),
+  character("choji","Choji Akimichi",582),
+  character("kiba","Kiba Inuzuka",578),
+
+  character("hinata","Hinata Hyuga",574),
+  character("karin","Karin Uzumaki",570),
+  character("pakura","Pakura",566),
+  character("gari","Gari",562),
+  character("fuu","Fu",560),
+  character("mifune","Mifune",558),
+  character("hidan","Hidan",556),
+  character("zetsu","Black Zetsu",554),
+  character("whitezetsu","White Zetsu",552),
+  character("temariwar","Temari War Arc",550)
+
+];
+
+
+// ============================================================
+// CHECK CHARACTER COUNT
+// ============================================================
+
+console.log(
+  "Characters loaded:",
+  characters.length
+);
+
+
+// ============================================================
+// STATE
 // ============================================================
 
 let currentUser = null;
@@ -60,717 +302,242 @@ let currentRoom = null;
 
 let roomListener = null;
 let auctionListener = null;
+
 let timerInterval = null;
 let finishingAuction = false;
 
-let authReadyResolve;
+let authResolve;
 
-const authReady = new Promise(resolve => {
-  authReadyResolve = resolve;
-});
-
-
-// ============================================================
-// GAME SETTINGS
-// ============================================================
-
-const STARTING_BUDGET = 2000;
-const MAX_TEAMS = 4;
-const MAX_CHARACTERS = 4;
-
-const AUCTION_TIME = 10;
-
-const START_BID = 100;
-const SMALL_INCREMENT = 50;
-const BIG_INCREMENT = 100;
+const authReady =
+  new Promise(resolve=>{
+    authResolve = resolve;
+  });
 
 
 // ============================================================
-// CHARACTERS
+// HELPERS
 // ============================================================
 
-const characters = [
-
-  {
-    id: "kaguya",
-    name: "Kaguya Otsutsuki",
-    power: 100,
-    attack: 100,
-    defense: 100,
-    speed: 94,
-    hax: 100,
-    intelligence: 96,
-    synergy: 92
-  },
-
-  {
-    id: "isshiki",
-    name: "Isshiki Otsutsuki",
-    power: 100,
-    attack: 100,
-    defense: 98,
-    speed: 100,
-    hax: 100,
-    intelligence: 99,
-    synergy: 94
-  },
-
-  {
-    id: "hagoromo",
-    name: "Hagoromo Otsutsuki",
-    power: 99,
-    attack: 98,
-    defense: 99,
-    speed: 92,
-    hax: 100,
-    intelligence: 100,
-    synergy: 100
-  },
-
-  {
-    id: "hamura",
-    name: "Hamura Otsutsuki",
-    power: 96,
-    attack: 95,
-    defense: 96,
-    speed: 92,
-    hax: 95,
-    intelligence: 94,
-    synergy: 94
-  },
-
-  {
-    id: "momoshiki",
-    name: "Momoshiki Otsutsuki",
-    power: 98,
-    attack: 98,
-    defense: 94,
-    speed: 97,
-    hax: 99,
-    intelligence: 96,
-    synergy: 94
-  },
-
-  {
-    id: "kinshiki",
-    name: "Kinshiki Otsutsuki",
-    power: 94,
-    attack: 98,
-    defense: 94,
-    speed: 91,
-    hax: 87,
-    intelligence: 84,
-    synergy: 87
-  },
-
-  {
-    id: "toneri",
-    name: "Toneri Otsutsuki",
-    power: 91,
-    attack: 91,
-    defense: 89,
-    speed: 91,
-    hax: 95,
-    intelligence: 89,
-    synergy: 88
-  },
-
-  {
-    id: "naruto",
-    name: "Naruto Uzumaki",
-    power: 99,
-    attack: 99,
-    defense: 98,
-    speed: 97,
-    hax: 96,
-    intelligence: 94,
-    synergy: 100
-  },
-
-  {
-    id: "sasuke",
-    name: "Sasuke Uchiha",
-    power: 98,
-    attack: 98,
-    defense: 94,
-    speed: 98,
-    hax: 99,
-    intelligence: 98,
-    synergy: 96
-  },
-
-  {
-    id: "madara",
-    name: "Madara Uchiha",
-    power: 99,
-    attack: 100,
-    defense: 98,
-    speed: 95,
-    hax: 100,
-    intelligence: 99,
-    synergy: 98
-  },
-
-  {
-    id: "hashirama",
-    name: "Hashirama Senju",
-    power: 98,
-    attack: 98,
-    defense: 100,
-    speed: 90,
-    hax: 96,
-    intelligence: 94,
-    synergy: 100
-  },
-
-  {
-    id: "obito",
-    name: "Obito Uchiha",
-    power: 96,
-    attack: 94,
-    defense: 93,
-    speed: 96,
-    hax: 100,
-    intelligence: 95,
-    synergy: 96
-  },
-
-  {
-    id: "itachi",
-    name: "Itachi Uchiha",
-    power: 95,
-    attack: 92,
-    defense: 88,
-    speed: 94,
-    hax: 99,
-    intelligence: 100,
-    synergy: 98
-  },
-
-  {
-    id: "minato",
-    name: "Minato Namikaze",
-    power: 96,
-    attack: 94,
-    defense: 89,
-    speed: 100,
-    hax: 95,
-    intelligence: 99,
-    synergy: 98
-  },
-
-  {
-    id: "tobirama",
-    name: "Tobirama Senju",
-    power: 93,
-    attack: 91,
-    defense: 88,
-    speed: 96,
-    hax: 94,
-    intelligence: 99,
-    synergy: 96
-  },
-
-  {
-    id: "jiraiya",
-    name: "Jiraiya",
-    power: 88,
-    attack: 88,
-    defense: 86,
-    speed: 83,
-    hax: 91,
-    intelligence: 94,
-    synergy: 96
-  },
-
-  {
-    id: "pain",
-    name: "Pain",
-    power: 95,
-    attack: 94,
-    defense: 92,
-    speed: 88,
-    hax: 98,
-    intelligence: 94,
-    synergy: 95
-  },
-
-  {
-    id: "nagato",
-    name: "Nagato",
-    power: 96,
-    attack: 95,
-    defense: 91,
-    speed: 82,
-    hax: 100,
-    intelligence: 95,
-    synergy: 94
-  },
-
-  {
-    id: "kakashi",
-    name: "Kakashi Hatake",
-    power: 90,
-    attack: 88,
-    defense: 85,
-    speed: 91,
-    hax: 92,
-    intelligence: 98,
-    synergy: 98
-  },
-
-  {
-    id: "guy",
-    name: "Might Guy",
-    power: 94,
-    attack: 100,
-    defense: 88,
-    speed: 99,
-    hax: 82,
-    intelligence: 78,
-    synergy: 90
-  },
-
-  {
-    id: "gaara",
-    name: "Gaara",
-    power: 86,
-    attack: 85,
-    defense: 95,
-    speed: 75,
-    hax: 90,
-    intelligence: 88,
-    synergy: 92
-  },
-
-  {
-    id: "killerbee",
-    name: "Killer B",
-    power: 91,
-    attack: 94,
-    defense: 90,
-    speed: 87,
-    hax: 91,
-    intelligence: 82,
-    synergy: 91
-  },
-
-  {
-    id: "orochimaru",
-    name: "Orochimaru",
-    power: 91,
-    attack: 89,
-    defense: 91,
-    speed: 82,
-    hax: 96,
-    intelligence: 99,
-    synergy: 92
-  },
-
-  {
-    id: "kabuto",
-    name: "Kabuto Yakushi",
-    power: 87,
-    attack: 84,
-    defense: 86,
-    speed: 84,
-    hax: 92,
-    intelligence: 98,
-    synergy: 88
-  },
-
-  {
-    id: "deidara",
-    name: "Deidara",
-    power: 84,
-    attack: 88,
-    defense: 72,
-    speed: 79,
-    hax: 90,
-    intelligence: 87,
-    synergy: 84
-  },
-
-  {
-    id: "sasori",
-    name: "Sasori",
-    power: 85,
-    attack: 88,
-    defense: 82,
-    speed: 78,
-    hax: 91,
-    intelligence: 91,
-    synergy: 86
-  },
-
-  {
-    id: "kisame",
-    name: "Kisame Hoshigaki",
-    power: 86,
-    attack: 91,
-    defense: 91,
-    speed: 75,
-    hax: 85,
-    intelligence: 78,
-    synergy: 88
-  },
-
-  {
-    id: "kakuzu",
-    name: "Kakuzu",
-    power: 84,
-    attack: 86,
-    defense: 94,
-    speed: 73,
-    hax: 86,
-    intelligence: 83,
-    synergy: 86
-  },
-
-  {
-    id: "hidan",
-    name: "Hidan",
-    power: 76,
-    attack: 84,
-    defense: 82,
-    speed: 72,
-    hax: 88,
-    intelligence: 68,
-    synergy: 74
-  },
-
-  {
-    id: "konan",
-    name: "Konan",
-    power: 79,
-    attack: 81,
-    defense: 74,
-    speed: 78,
-    hax: 87,
-    intelligence: 89,
-    synergy: 84
-  },
-
-  {
-    id: "shikamaru",
-    name: "Shikamaru Nara",
-    power: 73,
-    attack: 61,
-    defense: 70,
-    speed: 67,
-    hax: 82,
-    intelligence: 100,
-    synergy: 98
-  },
-
-  {
-    id: "sakura",
-    name: "Sakura Haruno",
-    power: 84,
-    attack: 94,
-    defense: 85,
-    speed: 79,
-    hax: 76,
-    intelligence: 87,
-    synergy: 91
-  },
-
-  {
-    id: "tsunade",
-    name: "Tsunade",
-    power: 91,
-    attack: 96,
-    defense: 94,
-    speed: 76,
-    hax: 86,
-    intelligence: 92,
-    synergy: 97
-  },
-
-  {
-    id: "sarutobi",
-    name: "Hiruzen Sarutobi",
-    power: 91,
-    attack: 90,
-    defense: 86,
-    speed: 81,
-    hax: 88,
-    intelligence: 98,
-    synergy: 94
-  },
-
-  {
-    id: "danzo",
-    name: "Danzo Shimura",
-    power: 82,
-    attack: 83,
-    defense: 81,
-    speed: 77,
-    hax: 91,
-    intelligence: 93,
-    synergy: 78
-  },
-
-  {
-    id: "naruto_sage",
-    name: "Naruto Sage Mode",
-    power: 92,
-    attack: 92,
-    defense: 90,
-    speed: 90,
-    hax: 91,
-    intelligence: 91,
-    synergy: 97
-  },
-
-  {
-    id: "sasuke_ms",
-    name: "Sasuke Mangekyo",
-    power: 91,
-    attack: 91,
-    defense: 82,
-    speed: 93,
-    hax: 96,
-    intelligence: 96,
-    synergy: 92
-  }
-
-];
-
-
-// ============================================================
-// BASIC HELPERS
-// ============================================================
-
-function $(id) {
+function $(id){
   return document.getElementById(id);
 }
 
 
-function showConnection(message) {
+function showConnection(message){
 
-  const element = $("connectionStatus");
+  const element =
+    $("connectionStatus");
 
-  if (element) {
-    element.textContent = message;
+  if(element){
+    element.textContent =
+      message;
   }
 
 }
 
 
-function formatMoney(lakhs) {
+function formatMoney(lakhs){
 
-  lakhs = Number(lakhs || 0);
+  lakhs =
+    Number(lakhs || 0);
 
-  if (lakhs >= 100) {
+  if(lakhs >= 100){
 
-    const crores = lakhs / 100;
+    const crores =
+      lakhs / 100;
 
     return Number.isInteger(crores)
       ? `₹${crores} Cr`
       : `₹${crores.toFixed(2)} Cr`;
+
   }
 
   return `₹${lakhs} L`;
 }
 
 
-function escapeHtml(value) {
+function escapeHtml(value){
 
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
 
 
-function randomRoomCode() {
+function shuffle(array){
 
-  const chars =
-    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const result =
+    [...array];
 
-  let result = "";
-
-  for (let i = 0; i < 6; i++) {
-
-    result +=
-      chars[Math.floor(Math.random() * chars.length)];
-
-  }
-
-  return result;
-
-}
-
-
-function shuffle(array) {
-
-  const result = [...array];
-
-  for (
-    let i = result.length - 1;
-    i > 0;
+  for(
+    let i=result.length-1;
+    i>0;
     i--
-  ) {
+  ){
 
     const j =
-      Math.floor(Math.random() * (i + 1));
+      Math.floor(
+        Math.random()*(i+1)
+      );
 
     [
       result[i],
       result[j]
-    ] =
-    [
+    ]=[
       result[j],
       result[i]
     ];
-
   }
 
   return result;
-
 }
 
 
-function getCharacter(id) {
+function randomRoomCode(){
+
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  let code="";
+
+  for(
+    let i=0;
+    i<6;
+    i++
+  ){
+
+    code +=
+      chars[
+        Math.floor(
+          Math.random()*chars.length
+        )
+      ];
+
+  }
+
+  return code;
+}
+
+
+function getCharacter(id){
 
   return characters.find(
-    character => character.id === id
+    c=>c.id===id
   );
-
 }
 
 
-function getNextBid(currentBid) {
+function getNextBid(currentBid){
 
-  currentBid = Number(currentBid || 0);
+  currentBid =
+    Number(currentBid || 0);
 
-  if (currentBid < START_BID) {
+  if(currentBid < START_BID){
     return START_BID;
   }
 
-  if (currentBid < 1000) {
+  if(currentBid < 1000){
     return currentBid + SMALL_INCREMENT;
   }
 
   return currentBid + BIG_INCREMENT;
+}
 
+
+function roomRef(code=currentRoomCode){
+
+  return ref(
+    db,
+    `rooms/${code}`
+  );
+}
+
+
+function auctionRef(code=currentRoomCode){
+
+  return ref(
+    db,
+    `rooms/${code}/auction`
+  );
+}
+
+
+function teamRef(uid,code=currentRoomCode){
+
+  return ref(
+    db,
+    `rooms/${code}/teams/${uid}`
+  );
 }
 
 
 // ============================================================
-// AUTHENTICATION
+// AUTH
 // ============================================================
 
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(
+  auth,
+  user=>{
 
-  if (user) {
+    if(user){
 
-    currentUser = user;
+      currentUser =
+        user;
 
-    console.log(
-      "Firebase authentication ready:",
-      user.uid
-    );
+      showConnection(
+        "🟢 Connected to Firebase"
+      );
 
-    showConnection(
-      "🟢 Connected to Firebase"
-    );
+      authResolve(user);
 
-    authReadyResolve(user);
+      checkURLRoom();
 
-    checkRoomURL();
+    }else{
 
-  } else {
+      showConnection(
+        "⏳ Signing in..."
+      );
 
-    showConnection(
-      "⏳ Signing in..."
-    );
+      signInAnonymously(auth)
+        .catch(error=>{
 
-    signInAnonymously(auth)
-      .catch(error => {
+          console.error(error);
 
-        console.error(
-          "Anonymous sign-in failed:",
-          error
-        );
+          showConnection(
+            "❌ Authentication failed"
+          );
 
-        showConnection(
-          "❌ Firebase authentication failed"
-        );
+          alert(
+            "Firebase authentication failed:\n\n"+
+            error.message
+          );
 
-        alert(
-          "Firebase authentication failed:\n\n" +
-          error.message
-        );
+        });
 
-      });
+    }
 
   }
+);
 
-});
 
+async function waitForAuth(){
 
-// ============================================================
-// WAIT FOR AUTH
-// ============================================================
-
-async function waitForAuth() {
-
-  if (currentUser) {
+  if(currentUser){
     return currentUser;
   }
 
-  showConnection(
-    "⏳ Connecting to Firebase..."
-  );
-
   return await authReady;
-
 }
 
 
 // ============================================================
-// URL ROOM
+// SCREEN SYSTEM
 // ============================================================
 
-function checkRoomURL() {
-
-  const params =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  const room =
-    params.get("room");
-
-  if (!room) {
-    return;
-  }
-
-  const input =
-    $("joinRoomCode");
-
-  if (input) {
-
-    input.value =
-      room.trim().toUpperCase();
-
-  }
-
-  showJoinRoom();
-
-}
-
-
-// ============================================================
-// SCREENS
-// ============================================================
-
-function hideScreens() {
+function hideScreens(){
 
   [
     "homeScreen",
@@ -778,106 +545,106 @@ function hideScreens() {
     "joinRoomScreen",
     "lobbyScreen",
     "gameScreen"
-  ].forEach(id => {
+  ].forEach(id=>{
 
-    const element = $(id);
+    const element =
+      $(id);
 
-    if (element) {
-      element.style.display = "none";
+    if(element){
+      element.style.display =
+        "none";
     }
 
   });
-
 }
 
 
-function showScreen(id) {
+function showScreen(id){
 
   hideScreens();
 
-  const element = $(id);
+  const element =
+    $(id);
 
-  if (!element) {
-
-    console.error(
-      "Screen not found:",
-      id
-    );
-
-    return;
-
+  if(element){
+    element.style.display =
+      "block";
   }
 
-  element.style.display = "block";
-
 }
 
 
-function showCreateRoom() {
-
+function showCreateRoom(){
   showScreen("createRoomScreen");
-
 }
 
 
-function showJoinRoom() {
-
+function showJoinRoom(){
   showScreen("joinRoomScreen");
-
 }
 
 
-function goHome() {
+function goHome(){
 
-  if (timerInterval) {
+  if(timerInterval){
 
-    clearInterval(timerInterval);
+    clearInterval(
+      timerInterval
+    );
 
-    timerInterval = null;
+    timerInterval =
+      null;
 
   }
 
   showScreen("homeScreen");
-
 }
 
 
 // ============================================================
-// ROOM REFERENCES
+// URL ROOM
 // ============================================================
 
-function roomRef(code = currentRoomCode) {
+function updateRoomURL(code){
 
-  return ref(
-    db,
-    `rooms/${code}`
+  const url =
+    `${window.location.origin}${window.location.pathname}?room=${code}`;
+
+  $("displayRoomCode").textContent =
+    code;
+
+  $("roomLink").textContent =
+    url;
+
+  window.history.replaceState(
+    {},
+    document.title,
+    `?room=${code}`
   );
-
 }
 
 
-function teamRef(
-  uid,
-  code = currentRoomCode
-) {
+function checkURLRoom(){
 
-  return ref(
-    db,
-    `rooms/${code}/teams/${uid}`
-  );
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
 
-}
+  const code =
+    params.get("room");
 
+  if(!code){
 
-function auctionRef(
-  code = currentRoomCode
-) {
+    showScreen("homeScreen");
 
-  return ref(
-    db,
-    `rooms/${code}/auction`
-  );
+    return;
+  }
 
+  $("joinRoomCode").value =
+    code.toUpperCase();
+
+  showJoinRoom();
 }
 
 
@@ -885,44 +652,43 @@ function auctionRef(
 // CREATE ROOM
 // ============================================================
 
-async function createRoom() {
+async function createRoom(){
 
-  try {
+  try{
 
     const user =
       await waitForAuth();
 
-    const input =
-      $("createTeamName");
-
     const teamName =
-      input
-        ? input.value.trim()
-        : "";
+      $("createTeamName")
+        .value
+        .trim();
 
-    if (!teamName) {
+    if(!teamName){
 
       alert(
-        "Please enter your team name."
+        "Enter your team name."
       );
 
       return;
-
     }
 
     const button =
       $("createRoomButton");
 
-    if (button) {
+    button.disabled =
+      true;
 
-      button.disabled = true;
-      button.textContent = "CREATING...";
-
-    }
+    button.textContent =
+      "CREATING...";
 
     let code = null;
 
-    for (let i = 0; i < 10; i++) {
+    for(
+      let attempt=0;
+      attempt<10;
+      attempt++
+    ){
 
       const candidate =
         randomRoomCode();
@@ -932,9 +698,10 @@ async function createRoom() {
           roomRef(candidate)
         );
 
-      if (!existing.exists()) {
+      if(!existing.exists()){
 
-        code = candidate;
+        code =
+          candidate;
 
         break;
 
@@ -942,43 +709,51 @@ async function createRoom() {
 
     }
 
-    if (!code) {
+    if(!code){
 
       throw new Error(
-        "Could not create a unique room."
+        "Could not create room."
       );
 
     }
 
     const room = {
 
-      hostUid: user.uid,
+      hostUid:
+        user.uid,
 
-      status: "LOBBY",
+      status:
+        "LOBBY",
 
-      createdAt: Date.now(),
+      createdAt:
+        Date.now(),
 
-      teams: {
+      teams:{
 
-        [user.uid]: {
+        [user.uid]:{
 
-          name: teamName,
+          name:
+            teamName,
 
-          budget: STARTING_BUDGET,
+          budget:
+            STARTING_BUDGET,
 
-          players: [],
+          players:[],
 
-          joinedAt: Date.now()
+          joinedAt:
+            Date.now()
 
         }
 
       },
 
-      auction: null,
+      auction:null,
 
-      characterOrder: [],
+      characterOrder:[],
 
-      history: []
+      history:[],
+
+      finalResults:null
 
     };
 
@@ -987,36 +762,41 @@ async function createRoom() {
       room
     );
 
-    currentRoomCode = code;
-    currentRoom = room;
+    currentRoomCode =
+      code;
+
+    currentRoom =
+      room;
 
     updateRoomURL(code);
 
-    showLobby();
+    showScreen(
+      "lobbyScreen"
+    );
 
     listenToRoom();
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(
-      "CREATE ROOM ERROR:",
-      error
-    );
+    console.error(error);
 
     alert(
-      "Could not create room:\n\n" +
+      "Could not create room:\n\n"+
       error.message
     );
 
-  } finally {
+  }finally{
 
     const button =
       $("createRoomButton");
 
-    if (button) {
+    if(button){
 
-      button.disabled = false;
-      button.textContent = "CREATE ROOM";
+      button.disabled =
+        false;
+
+      button.textContent =
+        "CREATE ROOM";
 
     }
 
@@ -1029,239 +809,157 @@ async function createRoom() {
 // JOIN ROOM
 // ============================================================
 
-async function joinRoom() {
+async function joinRoom(){
 
-  try {
+  try{
 
-    // IMPORTANT:
-    // Wait for Firebase authentication first.
     const user =
       await waitForAuth();
 
-    const codeInput =
-      $("joinRoomCode");
-
-    const nameInput =
-      $("joinTeamName");
-
     const code =
-      codeInput
-        ? codeInput.value.trim().toUpperCase()
-        : "";
+      $("joinRoomCode")
+        .value
+        .trim()
+        .toUpperCase();
 
     const teamName =
-      nameInput
-        ? nameInput.value.trim()
-        : "";
+      $("joinTeamName")
+        .value
+        .trim();
 
-    if (!code) {
+    if(code.length!==6){
 
       alert(
-        "Enter the room code."
+        "Enter the correct 6-character room code."
       );
 
       return;
-
     }
 
-    if (code.length !== 6) {
-
-      alert(
-        "Room code must contain 6 characters."
-      );
-
-      return;
-
-    }
-
-    if (!teamName) {
+    if(!teamName){
 
       alert(
         "Enter your team name."
       );
 
       return;
-
     }
-
-    const button =
-      document.querySelector(
-        '#joinRoomScreen button[onclick="joinRoom()"]'
-      );
-
-    if (button) {
-
-      button.disabled = true;
-      button.textContent = "JOINING...";
-
-    }
-
-    console.log(
-      "Trying to join room:",
-      code
-    );
 
     const snapshot =
       await get(
         roomRef(code)
       );
 
-    if (!snapshot.exists()) {
+    if(!snapshot.exists()){
 
-      throw new Error(
-        "Room not found. Check the room code."
+      alert(
+        "Room not found."
       );
 
+      return;
     }
 
     const room =
       snapshot.val();
 
-    console.log(
-      "Room found:",
-      room
-    );
+    if(room.status!=="LOBBY"){
 
-    // Allow joining only before auction starts.
-    if (
-      room.status !== "LOBBY"
-    ) {
-
-      throw new Error(
-        "This auction has already started. Join before the host starts the auction."
+      alert(
+        "The auction has already started."
       );
 
+      return;
     }
 
     const teams =
       room.teams || {};
 
-    const teamIds =
+    const ids =
       Object.keys(teams);
 
-    // If this user is already inside,
-    // update their name instead of creating another team.
-    if (
+    if(
       !teams[user.uid] &&
-      teamIds.length >= MAX_TEAMS
-    ) {
+      ids.length>=MAX_TEAMS
+    ){
 
-      throw new Error(
-        "This room already has 4 players."
+      alert(
+        "Room is full. Maximum 4 teams."
       );
 
+      return;
     }
 
     await set(
-      teamRef(user.uid, code),
+      teamRef(
+        user.uid,
+        code
+      ),
       {
 
-        name: teamName,
+        name:
+          teamName,
 
-        budget: teams[user.uid]
-          ? Number(
-              teams[user.uid].budget ??
-              STARTING_BUDGET
-            )
-          : STARTING_BUDGET,
+        budget:
+          teams[user.uid]
+            ? Number(
+                teams[user.uid].budget ??
+                STARTING_BUDGET
+              )
+            : STARTING_BUDGET,
 
-        players: teams[user.uid]
-          ? teams[user.uid].players || []
-          : [],
+        players:
+          teams[user.uid]
+            ? teams[user.uid].players || []
+            : [],
 
         joinedAt:
-          teams[user.uid]?.joinedAt ||
-          Date.now()
+          teams[user.uid]
+            ? teams[user.uid].joinedAt ||
+              Date.now()
+            : Date.now()
 
       }
     );
 
-    currentRoomCode = code;
+    currentRoomCode =
+      code;
 
     updateRoomURL(code);
 
-    showLobby();
+    showScreen(
+      "lobbyScreen"
+    );
 
     listenToRoom();
 
-    console.log(
-      "Successfully joined:",
-      code
-    );
+  }catch(error){
 
-  } catch (error) {
-
-    console.error(
-      "JOIN ROOM ERROR:",
-      error
-    );
+    console.error(error);
 
     alert(
-      "Could not join room:\n\n" +
+      "Could not join room:\n\n"+
       error.message
     );
 
-  } finally {
-
-    const button =
-      document.querySelector(
-        '#joinRoomScreen button[onclick="joinRoom()"]'
-      );
-
-    if (button) {
-
-      button.disabled = false;
-      button.textContent = "JOIN ROOM";
-
-    }
-
   }
 
 }
 
 
 // ============================================================
-// ROOM URL
+// COPY ROOM LINK
 // ============================================================
 
-function updateRoomURL(code) {
+async function copyRoomLink(){
 
-  const url =
-    `${window.location.origin}${window.location.pathname}?room=${code}`;
-
-  const display =
-    $("displayRoomCode");
-
-  if (display) {
-    display.textContent = code;
-  }
-
-  const link =
-    $("roomLink");
-
-  if (link) {
-    link.textContent = url;
-  }
-
-  window.history.replaceState(
-    {},
-    document.title,
-    `?room=${code}`
-  );
-
-}
-
-
-async function copyRoomLink() {
-
-  if (!currentRoomCode) {
+  if(!currentRoomCode){
     return;
   }
 
   const url =
     `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
 
-  try {
+  try{
 
     await navigator.clipboard.writeText(url);
 
@@ -1269,10 +967,10 @@ async function copyRoomLink() {
       "Room link copied!"
     );
 
-  } catch {
+  }catch{
 
     prompt(
-      "Copy this room link:",
+      "Copy room link:",
       url
     );
 
@@ -1282,92 +980,67 @@ async function copyRoomLink() {
 
 
 // ============================================================
-// SHOW LOBBY
+// LISTEN TO ROOM
 // ============================================================
 
-function showLobby() {
+function listenToRoom(){
 
-  showScreen("lobbyScreen");
-
-}
-
-
-// ============================================================
-// ROOM LISTENER
-// ============================================================
-
-function listenToRoom() {
-
-  if (!currentRoomCode) {
+  if(!currentRoomCode){
     return;
   }
 
-  if (roomListener) {
+  if(roomListener){
     roomListener();
   }
 
-  if (auctionListener) {
+  if(auctionListener){
     auctionListener();
   }
 
   roomListener =
     onValue(
       roomRef(),
-      snapshot => {
+      snapshot=>{
 
-        if (!snapshot.exists()) {
+        if(!snapshot.exists()){
 
           alert(
-            "This room was deleted."
+            "Room no longer exists."
           );
 
-          currentRoomCode = null;
+          currentRoomCode =
+            null;
 
           goHome();
 
           return;
-
         }
 
         currentRoom =
           snapshot.val();
 
-        renderRoom(currentRoom);
-
-      },
-
-      error => {
-
-        console.error(
-          "Room listener error:",
-          error
-        );
-
-        alert(
-          "Database connection error:\n\n" +
-          error.message
+        renderRoom(
+          currentRoom
         );
 
       }
     );
-
 
   auctionListener =
     onValue(
       auctionRef(),
-      snapshot => {
+      snapshot=>{
 
-        if (!snapshot.exists()) {
-          return;
+        if(snapshot.exists()){
+
+          displayAuction(
+            snapshot.val()
+          );
+
         }
-
-        displayAuction(
-          snapshot.val()
-        );
 
       }
     );
-
 }
 
 
@@ -1375,20 +1048,58 @@ function listenToRoom() {
 // RENDER ROOM
 // ============================================================
 
-function renderRoom(room) {
+function renderRoom(room){
 
-  renderLobby(room);
+  if(room.status==="LOBBY"){
 
-  if (
-    room.status === "PLAYING" ||
-    room.status === "FINISHED"
-  ) {
+    renderLobby(room);
+
+    return;
+  }
+
+  if(room.status==="PLAYING"){
 
     showScreen("gameScreen");
 
     renderTeams(room);
+
     renderHistory(room);
-    renderRanking(room);
+
+    $("finalResultsCard").style.display =
+      "none";
+
+    return;
+  }
+
+  if(room.status==="FINISHED"){
+
+    showScreen("gameScreen");
+
+    renderTeams(room);
+
+    renderHistory(room);
+
+    renderFinalResults(room);
+
+    const bid =
+      $("bidButton");
+
+    bid.disabled =
+      true;
+
+    bid.textContent =
+      "🏁 AUCTION FINISHED";
+
+    if(timerInterval){
+
+      clearInterval(
+        timerInterval
+      );
+
+      timerInterval =
+        null;
+
+    }
 
   }
 
@@ -1399,89 +1110,72 @@ function renderRoom(room) {
 // LOBBY
 // ============================================================
 
-function renderLobby(room) {
+function renderLobby(room){
 
-  if (
-    room.status !== "LOBBY"
-  ) {
-    return;
-  }
+  showScreen("lobbyScreen");
 
-  showLobby();
+  $("displayRoomCode").textContent =
+    currentRoomCode;
 
-  const display =
-    $("displayRoomCode");
+  $("roomLink").textContent =
+    `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
 
-  if (display) {
-
-    display.textContent =
-      currentRoomCode;
-
-  }
-
-  const players =
+  const container =
     $("lobbyPlayers");
 
-  if (!players) {
-    return;
-  }
+  container.innerHTML = "";
 
-  players.innerHTML = "";
+  Object.entries(
+    room.teams || {}
+  ).forEach(
+    ([uid,team],index)=>{
 
-  const teams =
-    room.teams || {};
+      const div =
+        document.createElement(
+          "div"
+        );
 
-  Object.entries(teams)
-    .forEach(
-      ([uid, team], index) => {
+      div.className =
+        "player-card";
 
-        const div =
-          document.createElement("div");
+      div.innerHTML = `
 
-        div.className =
-          "player-card";
+        <strong>
+          ${index+1}.
+          ${escapeHtml(team.name)}
+        </strong>
 
-        const host =
-          uid === room.hostUid
-            ? " 👑 HOST"
-            : "";
+        <span>
+          ${
+            uid===room.hostUid
+              ? "👑 HOST"
+              : ""
+          }
+        </span>
 
-        div.innerHTML = `
-          <strong>
-            ${index + 1}.
-            ${escapeHtml(team.name)}
-          </strong>
+      `;
 
-          <span>
-            ${host}
-          </span>
-        `;
-
-        players.appendChild(div);
-
-      }
-    );
-
-
-  const startButton =
-    $("startAuctionButton");
-
-  if (startButton) {
-
-    if (
-      currentUser &&
-      currentUser.uid === room.hostUid
-    ) {
-
-      startButton.style.display =
-        "block";
-
-    } else {
-
-      startButton.style.display =
-        "none";
+      container.appendChild(div);
 
     }
+  );
+
+  const start =
+    $("startAuctionButton");
+
+  if(
+    currentUser &&
+    currentUser.uid===
+    room.hostUid
+  ){
+
+    start.style.display =
+      "block";
+
+  }else{
+
+    start.style.display =
+      "none";
 
   }
 
@@ -1492,107 +1186,86 @@ function renderLobby(room) {
 // START AUCTION
 // ============================================================
 
-async function startAuction() {
+async function startAuction(){
 
-  try {
+  const user =
+    await waitForAuth();
 
-    const user =
-      await waitForAuth();
-
-    const snapshot =
-      await get(
-        roomRef()
-      );
-
-    if (!snapshot.exists()) {
-      return;
-    }
-
-    const room =
-      snapshot.val();
-
-    if (
-      room.hostUid !== user.uid
-    ) {
-
-      alert(
-        "Only the host can start the auction."
-      );
-
-      return;
-
-    }
-
-    if (
-      room.status !== "LOBBY"
-    ) {
-      return;
-    }
-
-    const teamCount =
-      Object.keys(
-        room.teams || {}
-      ).length;
-
-    if (teamCount < 1) {
-      return;
-    }
-
-    const order =
-      shuffle(
-        characters.map(
-          character => character.id
-        )
-      );
-
-    const first =
-      getCharacter(order[0]);
-
-    await update(
-      roomRef(),
-      {
-
-        status: "PLAYING",
-
-        characterOrder: order,
-
-        history: [],
-
-        auction: {
-
-          status: "ACTIVE",
-
-          characterIndex: 0,
-
-          characterId: first.id,
-
-          currentBid: START_BID,
-
-          highestBidder: null,
-
-          highestBidderName: null,
-
-          endTime:
-            Date.now() +
-            AUCTION_TIME * 1000
-
-        }
-
-      }
+  const snapshot =
+    await get(
+      roomRef()
     );
 
-  } catch (error) {
+  if(!snapshot.exists()){
+    return;
+  }
 
-    console.error(
-      "Start error:",
-      error
-    );
+  const room =
+    snapshot.val();
+
+  if(room.hostUid!==user.uid){
 
     alert(
-      error.message
+      "Only the host can start the auction."
     );
 
+    return;
   }
+
+  const order =
+    shuffle(
+      characters.map(
+        c=>c.id
+      )
+    );
+
+  const first =
+    getCharacter(
+      order[0]
+    );
+
+  await update(
+    roomRef(),
+    {
+
+      status:
+        "PLAYING",
+
+      characterOrder:
+        order,
+
+      history:[],
+
+      finalResults:null,
+
+      auction:{
+
+        status:
+          "ACTIVE",
+
+        characterIndex:
+          0,
+
+        characterId:
+          first.id,
+
+        currentBid:
+          START_BID,
+
+        highestBidder:
+          null,
+
+        highestBidderName:
+          null,
+
+        endTime:
+          Date.now()+
+          AUCTION_TIME*1000
+
+      }
+
+    }
+  );
 
 }
 
@@ -1601,83 +1274,54 @@ async function startAuction() {
 // DISPLAY AUCTION
 // ============================================================
 
-function displayAuction(auction) {
+function displayAuction(auction){
 
-  if (!auction) {
+  if(!auction){
     return;
   }
 
-  const character =
+  const c =
     getCharacter(
       auction.characterId
     );
 
-  if (!character) {
+  if(!c){
     return;
   }
 
-  const name =
-    $("characterName");
+  $("characterName").textContent =
+    c.name;
 
-  if (name) {
-    name.textContent =
-      character.name;
-  }
+  $("characterPower").textContent =
+    `⚡ Power ${c.power}/1000`;
 
-  const power =
-    $("characterPower");
+  $("currentBid").textContent =
+    formatMoney(
+      auction.currentBid
+    );
 
-  if (power) {
-
-    power.textContent =
-      `Power ${character.power}`;
-
-  }
-
-  const bid =
-    $("currentBid");
-
-  if (bid) {
-
-    bid.textContent =
-      formatMoney(
-        auction.currentBid
-      );
-
-  }
-
-  const bidder =
-    $("highestBidder");
-
-  if (bidder) {
-
-    bidder.textContent =
-      auction.highestBidderName
-        ? `Highest Bidder: ${auction.highestBidderName}`
-        : "No bids yet";
-
-  }
+  $("highestBidder").textContent =
+    auction.highestBidderName
+      ? `Highest Bidder: ${auction.highestBidderName}`
+      : "No bids yet";
 
   const next =
-    $("nextBid");
+    auction.highestBidder
+      ? getNextBid(
+          auction.currentBid
+        )
+      : START_BID;
 
-  if (next) {
+  $("nextBid").textContent =
+    `Next bid: ${formatMoney(next)}`;
 
-    const nextAmount =
-      auction.highestBidder
-        ? getNextBid(
-            auction.currentBid
-          )
-        : START_BID;
+  updateBidButton(
+    auction
+  );
 
-    next.textContent =
-      `Next bid: ${formatMoney(nextAmount)}`;
-
-  }
-
-  updateBidButton(auction);
-
-  startTimer(auction);
+  startTimer(
+    auction
+  );
 
 }
 
@@ -1686,56 +1330,47 @@ function displayAuction(auction) {
 // BID BUTTON
 // ============================================================
 
-function updateBidButton(auction) {
+function updateBidButton(auction){
 
   const button =
     $("bidButton");
 
-  if (!button) {
-    return;
-  }
+  if(!currentUser ||
+     !currentRoom ||
+     auction.status!=="ACTIVE"){
 
-  if (
-    !currentUser ||
-    !currentRoom ||
-    auction.status !== "ACTIVE"
-  ) {
-
-    button.disabled = true;
+    button.disabled=true;
 
     return;
-
   }
 
   const team =
     currentRoom.teams &&
-    currentRoom.teams[currentUser.uid];
+    currentRoom.teams[
+      currentUser.uid
+    ];
 
-  if (!team) {
+  if(!team){
 
-    button.disabled = true;
+    button.disabled=true;
 
     button.textContent =
       "NOT IN ROOM";
 
     return;
-
   }
 
   const players =
     team.players || [];
 
-  if (
-    players.length >= MAX_CHARACTERS
-  ) {
+  if(players.length>=MAX_CHARACTERS){
 
-    button.disabled = true;
+    button.disabled=true;
 
     button.textContent =
-      "MAX 4 CHARACTERS";
+      "TEAM FULL";
 
     return;
-
   }
 
   const nextBid =
@@ -1745,21 +1380,20 @@ function updateBidButton(auction) {
         )
       : START_BID;
 
-  if (
-    Number(team.budget || 0) <
+  if(
+    Number(team.budget||0)<
     nextBid
-  ) {
+  ){
 
-    button.disabled = true;
+    button.disabled=true;
 
     button.textContent =
-      "NOT ENOUGH BUDGET";
+      "OUT OF MONEY";
 
     return;
-
   }
 
-  button.disabled = false;
+  button.disabled=false;
 
   button.textContent =
     `BID ${formatMoney(nextBid)}`;
@@ -1771,151 +1405,119 @@ function updateBidButton(auction) {
 // PLACE BID
 // ============================================================
 
-async function placeBid() {
+async function placeBid(){
 
-  try {
+  const user =
+    await waitForAuth();
 
-    const user =
-      await waitForAuth();
-
-    if (!currentRoomCode) {
-      return;
-    }
-
-    const roomSnapshot =
-      await get(
-        roomRef()
-      );
-
-    if (!roomSnapshot.exists()) {
-      return;
-    }
-
-    const room =
-      roomSnapshot.val();
-
-    const auction =
-      room.auction;
-
-    if (
-      !auction ||
-      auction.status !== "ACTIVE"
-    ) {
-      return;
-    }
-
-    const team =
-      room.teams &&
-      room.teams[user.uid];
-
-    if (!team) {
-
-      alert(
-        "You are not part of this room."
-      );
-
-      return;
-
-    }
-
-    const players =
-      team.players || [];
-
-    if (
-      players.length >= MAX_CHARACTERS
-    ) {
-      return;
-    }
-
-    const nextBid =
-      auction.highestBidder
-        ? getNextBid(
-            auction.currentBid
-          )
-        : START_BID;
-
-    if (
-      Number(team.budget || 0) <
-      nextBid
-    ) {
-
-      alert(
-        "Not enough budget."
-      );
-
-      return;
-
-    }
-
-    const result =
-      await runTransaction(
-        auctionRef(),
-        current => {
-
-          if (!current) {
-            return;
-          }
-
-          if (
-            current.status !==
-            "ACTIVE"
-          ) {
-            return;
-          }
-
-          if (
-            Date.now() >=
-            Number(current.endTime)
-          ) {
-            return;
-          }
-
-          const bid =
-            current.highestBidder
-              ? getNextBid(
-                  current.currentBid
-                )
-              : START_BID;
-
-          return {
-
-            ...current,
-
-            currentBid: bid,
-
-            highestBidder:
-              user.uid,
-
-            highestBidderName:
-              team.name,
-
-            endTime:
-              Date.now() +
-              AUCTION_TIME * 1000
-
-          };
-
-        }
-      );
-
-    console.log(
-      "Bid result:",
-      result.committed
+  const snapshot =
+    await get(
+      roomRef()
     );
 
-  } catch (error) {
+  if(!snapshot.exists()){
+    return;
+  }
 
-    console.error(
-      "Bid error:",
-      error
-    );
+  const room =
+    snapshot.val();
+
+  const auction =
+    room.auction;
+
+  if(
+    !auction ||
+    auction.status!=="ACTIVE"
+  ){
+    return;
+  }
+
+  const team =
+    room.teams &&
+    room.teams[user.uid];
+
+  if(!team){
 
     alert(
-      "Bid failed:\n\n" +
-      error.message
+      "You are not in this room."
     );
 
+    return;
   }
+
+  if(
+    (team.players||[]).length>=
+    MAX_CHARACTERS
+  ){
+    return;
+  }
+
+  const nextBid =
+    auction.highestBidder
+      ? getNextBid(
+          auction.currentBid
+        )
+      : START_BID;
+
+  if(
+    Number(team.budget||0)<
+    nextBid
+  ){
+
+    alert(
+      "You don't have enough money."
+    );
+
+    return;
+  }
+
+  await runTransaction(
+    auctionRef(),
+    current=>{
+
+      if(!current){
+        return;
+      }
+
+      if(current.status!=="ACTIVE"){
+        return;
+      }
+
+      if(
+        Date.now()>=
+        Number(current.endTime)
+      ){
+        return;
+      }
+
+      const bid =
+        current.highestBidder
+          ? getNextBid(
+              current.currentBid
+            )
+          : START_BID;
+
+      return {
+
+        ...current,
+
+        currentBid:
+          bid,
+
+        highestBidder:
+          user.uid,
+
+        highestBidderName:
+          team.name,
+
+        endTime:
+          Date.now()+
+          AUCTION_TIME*1000
+
+      };
+
+    }
+  );
 
 }
 
@@ -1924,9 +1526,9 @@ async function placeBid() {
 // TIMER
 // ============================================================
 
-function startTimer(auction) {
+function startTimer(auction){
 
-  if (timerInterval) {
+  if(timerInterval){
 
     clearInterval(
       timerInterval
@@ -1937,33 +1539,30 @@ function startTimer(auction) {
   const timer =
     $("auctionTimer");
 
-  if (!timer) {
-    return;
-  }
-
-  function updateTimer() {
+  function tick(){
 
     const remaining =
       Math.max(
         0,
         Math.ceil(
           (
-            Number(auction.endTime) -
+            Number(auction.endTime)-
             Date.now()
-          ) / 1000
+          )/1000
         )
       );
 
     timer.textContent =
       `${remaining}s`;
 
-    if (remaining <= 0) {
+    if(remaining<=0){
 
       clearInterval(
         timerInterval
       );
 
-      timerInterval = null;
+      timerInterval =
+        null;
 
       finishAuction();
 
@@ -1971,11 +1570,11 @@ function startTimer(auction) {
 
   }
 
-  updateTimer();
+  tick();
 
   timerInterval =
     setInterval(
-      updateTimer,
+      tick,
       250
     );
 
@@ -1983,82 +1582,128 @@ function startTimer(auction) {
 
 
 // ============================================================
+// TEAM CAN CONTINUE
+// ============================================================
+
+function teamCanContinue(team){
+
+  const players =
+    team.players || [];
+
+  const budget =
+    Number(
+      team.budget || 0
+    );
+
+  if(
+    players.length>=
+    MAX_CHARACTERS
+  ){
+    return false;
+  }
+
+  if(
+    budget<
+    START_BID
+  ){
+    return false;
+  }
+
+  return true;
+}
+
+
+function canAuctionContinue(room){
+
+  const teams =
+    Object.values(
+      room.teams || {}
+    );
+
+  if(!teams.length){
+    return false;
+  }
+
+  return teams.some(
+    team=>
+      teamCanContinue(team)
+  );
+}
+
+
+// ============================================================
 // FINISH AUCTION
 // ============================================================
 
-async function finishAuction() {
+async function finishAuction(){
 
-  if (
+  if(
     finishingAuction ||
     !currentRoomCode
-  ) {
+  ){
     return;
   }
 
-  finishingAuction = true;
+  finishingAuction=true;
 
-  try {
+  try{
 
     const result =
       await runTransaction(
         auctionRef(),
-        auction => {
+        current=>{
 
-          if (!auction) {
+          if(!current){
             return;
           }
 
-          if (
-            auction.status !==
-            "ACTIVE"
-          ) {
+          if(
+            current.status!=="ACTIVE"
+          ){
             return;
           }
 
-          if (
-            Date.now() <
-            Number(auction.endTime)
-          ) {
+          if(
+            Date.now()<
+            Number(current.endTime)
+          ){
             return;
           }
 
           return {
-            ...auction,
-            status: "FINALIZING"
+
+            ...current,
+
+            status:
+              "FINALIZING"
+
           };
 
         }
       );
 
-    if (!result.committed) {
+    if(!result.committed){
       return;
     }
 
     const auction =
       result.snapshot.val();
 
-    const character =
+    const c =
       getCharacter(
         auction.characterId
       );
 
-    if (!character) {
-      return;
-    }
-
-    // No bidder
-    if (
-      !auction.highestBidder
-    ) {
+    if(!auction.highestBidder){
 
       await addHistory({
 
-        type: "SKIP",
+        type:"SKIP",
 
         character:
-          character.name,
+          c.name,
 
-        price: 0,
+        price:0,
 
         teamName:
           "No Bid",
@@ -2068,46 +1713,44 @@ async function finishAuction() {
 
       });
 
-    }
-
-    // Winner
-    else {
+    }else{
 
       const winner =
         auction.highestBidder;
 
+      const price =
+        Number(
+          auction.currentBid
+        );
+
       const winnerResult =
         await runTransaction(
           teamRef(winner),
-          team => {
+          team=>{
 
-            if (!team) {
+            if(!team){
               return;
             }
 
             const players =
               team.players || [];
 
-            const price =
-              Number(
-                auction.currentBid
-              );
-
             const budget =
               Number(
-                team.budget || 0
+                team.budget||0
               );
 
-            if (
-              players.length >=
+            if(
+              players.length>=
               MAX_CHARACTERS
-            ) {
+            ){
               return;
             }
 
-            if (
-              budget < price
-            ) {
+            if(
+              budget<
+              price
+            ){
               return;
             }
 
@@ -2116,44 +1759,46 @@ async function finishAuction() {
               ...team,
 
               budget:
-                budget - price,
+                budget-price,
 
-              players: [
+              players:[
 
                 ...players,
 
                 {
 
                   id:
-                    character.id,
+                    c.id,
 
                   name:
-                    character.name,
+                    c.name,
 
                   price:
-
                     price,
 
                   power:
-                    character.power,
+                    c.power,
 
                   attack:
-                    character.attack,
+                    c.attack,
 
                   defense:
-                    character.defense,
+                    c.defense,
 
                   speed:
-                    character.speed,
+                    c.speed,
 
                   hax:
-                    character.hax,
+                    c.hax,
 
                   intelligence:
-                    character.intelligence,
+                    c.intelligence,
 
                   synergy:
-                    character.synergy
+                    c.synergy,
+
+                  purchasedAt:
+                    Date.now()
 
                 }
 
@@ -2164,22 +1809,23 @@ async function finishAuction() {
           }
         );
 
-      if (winnerResult.committed) {
+      if(winnerResult.committed){
 
         await addHistory({
 
-          type: "SOLD",
+          type:"SOLD",
 
           character:
-            character.name,
+            c.name,
 
           price:
-            Number(
-              auction.currentBid
-            ),
+            price,
 
           teamName:
             auction.highestBidderName,
+
+          teamUid:
+            winner,
 
           timestamp:
             Date.now()
@@ -2194,16 +1840,16 @@ async function finishAuction() {
       auction
     );
 
-  } catch (error) {
+  }catch(error){
 
     console.error(
-      "Finish error:",
+      "FINISH AUCTION:",
       error
     );
 
-  } finally {
+  }finally{
 
-    finishingAuction = false;
+    finishingAuction=false;
 
   }
 
@@ -2214,21 +1860,21 @@ async function finishAuction() {
 // HISTORY
 // ============================================================
 
-async function addHistory(item) {
+async function addHistory(item){
 
   await runTransaction(
     ref(
       db,
       `rooms/${currentRoomCode}/history`
     ),
-    history => {
+    history=>{
 
       const list =
         Array.isArray(history)
           ? history
           : [];
 
-      return [
+      return[
         ...list,
         item
       ];
@@ -2240,40 +1886,29 @@ async function addHistory(item) {
 
 
 // ============================================================
-// NEXT CHARACTER
+// GAME END
 // ============================================================
 
-async function nextCharacter(
-  previous
-) {
+async function checkGameEnd(){
 
   const snapshot =
     await get(
       roomRef()
     );
 
-  if (!snapshot.exists()) {
-    return;
+  if(!snapshot.exists()){
+    return true;
   }
 
   const room =
     snapshot.val();
 
-  const order =
-    room.characterOrder || [];
+  if(!canAuctionContinue(room)){
 
-  const currentIndex =
-    Number(
-      previous.characterIndex || 0
-    );
-
-  const nextIndex =
-    currentIndex + 1;
-
-  if (
-    nextIndex >=
-    order.length
-  ) {
+    const finalResults =
+      calculateFinalResults(
+        room
+      );
 
     await update(
       roomRef(),
@@ -2282,26 +1917,122 @@ async function nextCharacter(
         status:
           "FINISHED",
 
-        auction: {
-          ...previous,
+        finalResults,
+
+        auction:{
+
+          ...(room.auction||{}),
+
           status:
             "FINISHED"
+
+        }
+
+      }
+    );
+
+    return true;
+  }
+
+  return false;
+}
+
+
+// ============================================================
+// NEXT CHARACTER
+// ============================================================
+
+async function nextCharacter(previous){
+
+  if(
+    await checkGameEnd()
+  ){
+    return;
+  }
+
+  const snapshot =
+    await get(
+      roomRef()
+    );
+
+  if(!snapshot.exists()){
+    return;
+  }
+
+  const room =
+    snapshot.val();
+
+  if(
+    !canAuctionContinue(room)
+  ){
+
+    const finalResults =
+      calculateFinalResults(room);
+
+    await update(
+      roomRef(),
+      {
+
+        status:
+          "FINISHED",
+
+        finalResults
+
+      }
+    );
+
+    return;
+  }
+
+  const order =
+    room.characterOrder || [];
+
+  const currentIndex =
+    Number(
+      previous.characterIndex||0
+    );
+
+  const nextIndex =
+    currentIndex+1;
+
+  if(
+    nextIndex>=
+    order.length
+  ){
+
+    const finalResults =
+      calculateFinalResults(room);
+
+    await update(
+      roomRef(),
+      {
+
+        status:
+          "FINISHED",
+
+        finalResults,
+
+        auction:{
+
+          ...(room.auction||{}),
+
+          status:
+            "FINISHED"
+
         }
 
       }
     );
 
     return;
-
   }
 
-  const nextId =
-    order[nextIndex];
-
   const next =
-    getCharacter(nextId);
+    getCharacter(
+      order[nextIndex]
+    );
 
-  if (!next) {
+  if(!next){
     return;
   }
 
@@ -2309,7 +2040,7 @@ async function nextCharacter(
     roomRef(),
     {
 
-      auction: {
+      auction:{
 
         status:
           "ACTIVE",
@@ -2330,8 +2061,8 @@ async function nextCharacter(
           null,
 
         endTime:
-          Date.now() +
-          AUCTION_TIME * 1000
+          Date.now()+
+          AUCTION_TIME*1000
 
       }
 
@@ -2342,90 +2073,118 @@ async function nextCharacter(
 
 
 // ============================================================
-// TEAMS
+// TEAM DISPLAY
 // ============================================================
 
-function renderTeams(room) {
+function renderTeams(room){
 
   const container =
     $("teamStats");
 
-  if (!container) {
-    return;
-  }
+  container.innerHTML="";
 
-  container.innerHTML = "";
+  Object.entries(
+    room.teams||{}
+  ).forEach(
+    ([uid,team])=>{
 
-  const teams =
-    room.teams || {};
+      const players =
+        team.players||[];
 
-  Object.entries(teams)
-    .forEach(
-      ([uid, team]) => {
+      const out =
+        !teamCanContinue(team);
 
-        const players =
-          team.players || [];
+      const div =
+        document.createElement(
+          "div"
+        );
 
-        const card =
-          document.createElement("div");
+      div.className =
+        "team-card"+
+        (
+          currentUser &&
+          uid===currentUser.uid
+            ? " my-team"
+            : ""
+        )+
+        (
+          out
+            ? " out"
+            : ""
+        );
 
-        card.className =
-          "team-card" +
-          (
+      div.innerHTML = `
+
+        <h3>
+
+          ${escapeHtml(team.name)}
+
+          ${
             currentUser &&
-            uid === currentUser.uid
-              ? " my-team"
+            uid===currentUser.uid
+              ? " ⭐"
               : ""
-          );
+          }
 
-        card.innerHTML = `
+        </h3>
 
-          <h3>
-            ${escapeHtml(team.name)}
+        <div>
+          Budget:
+          <strong>
+            ${formatMoney(team.budget)}
+          </strong>
+        </div>
+
+        <div>
+          Characters:
+          <strong>
+            ${players.length}/4
+          </strong>
+        </div>
+
+        <div>
+          Status:
+          <strong>
             ${
-              currentUser &&
-              uid === currentUser.uid
-                ? " ⭐"
-                : ""
+              out
+                ? "OUT"
+                : "ACTIVE"
             }
-          </h3>
+          </strong>
+        </div>
 
-          <div>
-            Budget:
-            <strong>
-              ${formatMoney(team.budget)}
-            </strong>
-          </div>
+        <div class="team-players">
 
-          <div>
-            Characters:
-            <strong>
-              ${players.length}/4
-            </strong>
-          </div>
+          ${
+            players.length
 
-          <div class="team-players">
+              ? players.map(
+                  p=>`
 
-            ${
-              players.length
-                ? players.map(player => `
                     <div>
-                      ${escapeHtml(player.name)}
+                      ${escapeHtml(p.name)}
                       —
-                      ${formatMoney(player.price)}
+                      ${formatMoney(p.price)}
+                      —
+                      Power ${p.power}
                     </div>
-                  `).join("")
-                : "<div>No characters</div>"
-            }
 
-          </div>
+                  `
+                ).join("")
 
-        `;
+              : "<div>No characters</div>"
+          }
 
-        container.appendChild(card);
+        </div>
 
-      }
-    );
+      `;
+
+      container.appendChild(
+        div
+      );
+
+    }
+  );
 
 }
 
@@ -2434,57 +2193,73 @@ function renderTeams(room) {
 // HISTORY DISPLAY
 // ============================================================
 
-function renderHistory(room) {
+function renderHistory(room){
 
   const container =
     $("auctionHistory");
 
-  if (!container) {
-    return;
-  }
-
   const history =
-    room.history || [];
+    room.history||[];
 
-  if (!history.length) {
+  if(!history.length){
 
     container.innerHTML =
       "<div>No auction history yet.</div>";
 
     return;
-
   }
 
   container.innerHTML =
     [...history]
       .reverse()
-      .map(item => {
+      .map(item=>{
 
-        if (
-          item.type === "SKIP"
-        ) {
+        if(
+          item.type==="SKIP"
+        ){
 
           return `
+
             <div class="history-item">
+
               ⏭️
-              ${escapeHtml(item.character)}
+              ${escapeHtml(
+                item.character
+              )}
+
               — No bids
+
             </div>
+
           `;
 
         }
 
         return `
+
           <div class="history-item">
+
             🔥
-            ${escapeHtml(item.character)}
+            ${escapeHtml(
+              item.character
+            )}
+
             —
-            ${escapeHtml(item.teamName)}
+
+            ${escapeHtml(
+              item.teamName
+            )}
+
             —
+
             <strong>
-              ${formatMoney(item.price)}
+              ${formatMoney(
+                item.price
+              )}
             </strong>
+
           </div>
+
         `;
 
       })
@@ -2494,224 +2269,535 @@ function renderHistory(room) {
 
 
 // ============================================================
-// POWER RANKING
+// FINAL SCORE
 // ============================================================
 
-function teamPower(team) {
+function calculateFinalTeamScore(team){
 
   const players =
-    team.players || [];
+    team.players||[];
 
-  if (!players.length) {
-    return 0;
-  }
+  let score=0;
 
-  let total = 0;
+  players.forEach(p=>{
 
-  players.forEach(player => {
+    score +=
+      Number(p.power||0)*0.30;
 
-    total +=
-      Number(player.power || 0) * 0.30;
+    score +=
+      Number(p.attack||0)*0.12;
 
-    total +=
-      Number(player.attack || 0) * 0.12;
+    score +=
+      Number(p.defense||0)*0.12;
 
-    total +=
-      Number(player.defense || 0) * 0.12;
+    score +=
+      Number(p.speed||0)*0.12;
 
-    total +=
-      Number(player.speed || 0) * 0.12;
+    score +=
+      Number(p.hax||0)*0.14;
 
-    total +=
-      Number(player.hax || 0) * 0.14;
+    score +=
+      Number(p.intelligence||0)*0.10;
 
-    total +=
-      Number(player.intelligence || 0) * 0.10;
-
-    total +=
-      Number(player.synergy || 0) * 0.10;
+    score +=
+      Number(p.synergy||0)*0.10;
 
   });
 
-  return Math.round(total);
+  if(
+    players.length===4
+  ){
 
+    score+=10;
+
+  }
+
+  return Math.round(score);
 }
 
 
-function renderRanking(room) {
+// ============================================================
+// FINAL RESULTS
+// ============================================================
+
+function calculateFinalResults(room){
+
+  const teams=[];
+
+  Object.entries(
+    room.teams||{}
+  ).forEach(
+    ([uid,team])=>{
+
+      const players =
+        team.players||[];
+
+      teams.push({
+
+        uid,
+
+        name:
+          team.name,
+
+        players,
+
+        characters:
+          players.length,
+
+        budget:
+          Number(
+            team.budget||0
+          ),
+
+        score:
+          calculateFinalTeamScore(
+            team
+          ),
+
+        totalPower:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.power||0),
+            0
+          ),
+
+        totalAttack:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.attack||0),
+            0
+          ),
+
+        totalDefense:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.defense||0),
+            0
+          ),
+
+        totalSpeed:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.speed||0),
+            0
+          ),
+
+        totalHax:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.hax||0),
+            0
+          ),
+
+        totalIntelligence:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.intelligence||0),
+            0
+          ),
+
+        totalSynergy:
+          players.reduce(
+            (sum,p)=>
+              sum+
+              Number(p.synergy||0),
+            0
+          )
+
+      });
+
+    }
+  );
+
+  teams.sort(
+    (a,b)=>{
+
+      if(
+        b.score!==a.score
+      ){
+        return b.score-a.score;
+      }
+
+      if(
+        b.totalPower!==
+        a.totalPower
+      ){
+        return b.totalPower-a.totalPower;
+      }
+
+      if(
+        b.characters!==
+        a.characters
+      ){
+        return b.characters-a.characters;
+      }
+
+      return b.budget-a.budget;
+
+    }
+  );
+
+  teams.forEach(
+    (team,index)=>{
+      team.rank =
+        index+1;
+    }
+  );
+
+  return teams;
+}
+
+
+// ============================================================
+// RANK SUFFIX
+// ============================================================
+
+function rankSuffix(rank){
+
+  if(
+    rank>=11 &&
+    rank<=13
+  ){
+    return "th";
+  }
+
+  if(rank%10===1){
+    return "st";
+  }
+
+  if(rank%10===2){
+    return "nd";
+  }
+
+  if(rank%10===3){
+    return "rd";
+  }
+
+  return "th";
+}
+
+
+// ============================================================
+// FINAL RESULTS DISPLAY
+// ============================================================
+
+function renderFinalResults(room){
+
+  const card =
+    $("finalResultsCard");
 
   const container =
-    $("teamRanking");
+    $("finalResults");
 
-  if (!container) {
+  if(room.status!=="FINISHED"){
+
+    card.style.display =
+      "none";
+
     return;
   }
 
-  const teams =
-    Object.entries(
-      room.teams || {}
-    )
-      .map(
-        ([uid, team]) => ({
+  card.style.display =
+    "block";
 
-          uid,
-          ...team,
+  const results =
+    room.finalResults ||
+    calculateFinalResults(room);
 
-          power:
-            teamPower(team)
+  container.innerHTML="";
 
-        })
-      )
-      .sort(
-        (a, b) =>
-          b.power - a.power
+  results.forEach(team=>{
+
+    let medal="🏅";
+
+    if(team.rank===1){
+      medal="🥇";
+    }
+
+    if(team.rank===2){
+      medal="🥈";
+    }
+
+    if(team.rank===3){
+      medal="🥉";
+    }
+
+    const div =
+      document.createElement(
+        "div"
       );
 
-  container.innerHTML =
-    teams.map(
-      (team, index) => `
+    div.className =
+      "final-team-result";
 
-        <div class="ranking-item">
+    const players =
+      team.players.length
 
+        ? team.players.map(
+            p=>`
+
+              <div class="final-player">
+
+                <span style="color:#fff;">
+                  ${escapeHtml(
+                    p.name
+                  )}
+                </span>
+
+                <span>
+                  ${formatMoney(
+                    p.price
+                  )}
+                </span>
+
+              </div>
+
+            `
+          ).join("")
+
+        : "<div>No characters</div>";
+
+    div.innerHTML = `
+
+      <div class="final-rank">
+
+        <span class="medal">
+          ${medal}
+        </span>
+
+        <strong>
+          ${team.rank}${rankSuffix(
+            team.rank
+          )}
+        </strong>
+
+        <span class="final-team-name">
+          ${escapeHtml(
+            team.name
+          )}
+        </span>
+
+      </div>
+
+
+      <div class="final-score">
+
+        Final Score:
+
+        <strong>
+          ${team.score}
+        </strong>
+
+      </div>
+
+
+      <div class="final-stats">
+
+        <div>
+          Characters
           <strong>
-            #${index + 1}
-            ${escapeHtml(team.name)}
+            ${team.characters}/4
           </strong>
-
-          <span>
-            Power ${team.power}
-          </span>
-
         </div>
 
-      `
-    ).join("");
+        <div>
+          Total Power
+          <strong>
+            ${team.totalPower}
+          </strong>
+        </div>
+
+        <div>
+          Attack
+          <strong>
+            ${team.totalAttack}
+          </strong>
+        </div>
+
+        <div>
+          Defense
+          <strong>
+            ${team.totalDefense}
+          </strong>
+        </div>
+
+        <div>
+          Speed
+          <strong>
+            ${team.totalSpeed}
+          </strong>
+        </div>
+
+        <div>
+          Hax
+          <strong>
+            ${team.totalHax}
+          </strong>
+        </div>
+
+        <div>
+          Intelligence
+          <strong>
+            ${team.totalIntelligence}
+          </strong>
+        </div>
+
+        <div>
+          Synergy
+          <strong>
+            ${team.totalSynergy}
+          </strong>
+        </div>
+
+        <div>
+          Remaining Budget
+          <strong>
+            ${formatMoney(
+              team.budget
+            )}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="final-characters">
+
+        <h4>
+          Shinobi Acquired
+        </h4>
+
+        ${players}
+
+      </div>
+
+    `;
+
+    container.appendChild(
+      div
+    );
+
+  });
 
 }
 
 
 // ============================================================
-// RESTART GAME
+// START NEW GAME
 // ============================================================
 
-async function restartGame() {
+async function restartGame(){
 
-  try {
+  const user =
+    await waitForAuth();
 
-    const user =
-      await waitForAuth();
-
-    const snapshot =
-      await get(
-        roomRef()
-      );
-
-    if (!snapshot.exists()) {
-      return;
-    }
-
-    const room =
-      snapshot.val();
-
-    if (
-      room.hostUid !== user.uid
-    ) {
-
-      alert(
-        "Only the host can start a new game."
-      );
-
-      return;
-
-    }
-
-    const resetTeams = {};
-
-    Object.entries(
-      room.teams || {}
-    ).forEach(
-      ([uid, team]) => {
-
-        resetTeams[uid] = {
-
-          ...team,
-
-          budget:
-            STARTING_BUDGET,
-
-          players: []
-
-        };
-
-      }
+  const snapshot =
+    await get(
+      roomRef()
     );
 
-    const order =
-      shuffle(
-        characters.map(
-          character => character.id
-        )
-      );
+  if(!snapshot.exists()){
+    return;
+  }
 
-    const first =
-      getCharacter(order[0]);
+  const room =
+    snapshot.val();
 
-    await update(
-      roomRef(),
-      {
-
-        status:
-          "PLAYING",
-
-        teams:
-          resetTeams,
-
-        characterOrder:
-          order,
-
-        history: [],
-
-        auction: {
-
-          status:
-            "ACTIVE",
-
-          characterIndex:
-            0,
-
-          characterId:
-            first.id,
-
-          currentBid:
-            START_BID,
-
-          highestBidder:
-            null,
-
-          highestBidderName:
-            null,
-
-          endTime:
-            Date.now() +
-            AUCTION_TIME * 1000
-
-        }
-
-      }
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Restart error:",
-      error
-    );
+  if(
+    room.hostUid!==
+    user.uid
+  ){
 
     alert(
-      error.message
+      "Only the host can start a new game."
     );
 
+    return;
   }
+
+  const teams={};
+
+  Object.entries(
+    room.teams||{}
+  ).forEach(
+    ([uid,team])=>{
+
+      teams[uid]={
+
+        ...team,
+
+        budget:
+          STARTING_BUDGET,
+
+        players:[]
+
+      };
+
+    }
+  );
+
+  const order =
+    shuffle(
+      characters.map(
+        c=>c.id
+      )
+    );
+
+  const first =
+    getCharacter(
+      order[0]
+    );
+
+  await update(
+    roomRef(),
+    {
+
+      status:
+        "PLAYING",
+
+      teams,
+
+      characterOrder:
+        order,
+
+      history:[],
+
+      finalResults:null,
+
+      auction:{
+
+        status:
+          "ACTIVE",
+
+        characterIndex:
+          0,
+
+        characterId:
+          first.id,
+
+        currentBid:
+          START_BID,
+
+        highestBidder:
+          null,
+
+        highestBidderName:
+          null,
+
+        endTime:
+          Date.now()+
+          AUCTION_TIME*1000
+
+      }
+
+    }
+  );
 
 }
 
@@ -2720,52 +2806,52 @@ async function restartGame() {
 // LEAVE ROOM
 // ============================================================
 
-async function leaveRoom() {
+async function leaveRoom(){
 
-  if (!currentUser || !currentRoomCode) {
+  if(
+    !currentUser ||
+    !currentRoomCode
+  ){
 
     goHome();
 
     return;
-
   }
 
-  if (
+  if(
     !confirm(
       "Leave this room?"
     )
-  ) {
+  ){
     return;
   }
 
-  try {
+  try{
 
     const snapshot =
       await get(
         roomRef()
       );
 
-    if (snapshot.exists()) {
+    if(snapshot.exists()){
 
       const room =
         snapshot.val();
 
-      if (
-        room.hostUid ===
+      if(
+        room.hostUid===
         currentUser.uid
-      ) {
+      ){
 
         const ids =
           Object.keys(
-            room.teams || {}
-          )
-            .filter(
-              id =>
-                id !==
-                currentUser.uid
-            );
+            room.teams||{}
+          ).filter(
+            id=>
+              id!==currentUser.uid
+          );
 
-        if (ids.length) {
+        if(ids.length){
 
           await update(
             roomRef(),
@@ -2787,27 +2873,24 @@ async function leaveRoom() {
       )
     );
 
-  } catch (error) {
+  }catch(error){
 
-    console.error(
-      "Leave error:",
-      error
-    );
+    console.error(error);
 
   }
 
-  currentRoomCode = null;
-  currentRoom = null;
-
-  if (timerInterval) {
+  if(timerInterval){
 
     clearInterval(
       timerInterval
     );
 
-    timerInterval = null;
+    timerInterval=null;
 
   }
+
+  currentRoomCode=null;
+  currentRoom=null;
 
   window.history.replaceState(
     {},
@@ -2816,12 +2899,11 @@ async function leaveRoom() {
   );
 
   goHome();
-
 }
 
 
 // ============================================================
-// EXPOSE FUNCTIONS TO HTML
+// EXPOSE FUNCTIONS
 // ============================================================
 
 window.showCreateRoom =
@@ -2856,29 +2938,12 @@ window.leaveRoom =
 
 
 // ============================================================
-// INITIAL SCREEN
+// INITIALIZE
 // ============================================================
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    if (
-      params.get("room")
-    ) {
-
-      showJoinRoom();
-
-    } else {
-
-      showScreen("homeScreen");
-
-    }
-
+  ()=>{
+    checkURLRoom();
   }
 );
