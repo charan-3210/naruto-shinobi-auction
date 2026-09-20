@@ -1,11 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1.0,maximum-scale=1.0"
+>
+
 <title>Naruto Shinobi Auction</title>
 
+
 <style>
+
+/* ============================================================
+   GLOBAL
+============================================================ */
+
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
@@ -25,7 +37,8 @@ body{
   overflow-x:hidden;
 }
 
-button,input{
+button,
+input{
   font:inherit;
 }
 
@@ -40,6 +53,11 @@ button{
   margin:auto;
   padding:18px 14px 50px;
 }
+
+
+/* ============================================================
+   HEADER
+============================================================ */
 
 .header{
   text-align:center;
@@ -70,6 +88,11 @@ button{
   font-weight:bold;
 }
 
+
+/* ============================================================
+   CARDS
+============================================================ */
+
 .card{
   background:#1d1d1d;
   border:1px solid #292929;
@@ -84,26 +107,10 @@ button{
   font-size:30px;
 }
 
-.input{
-  width:100%;
-  height:60px;
-  background:#292929;
-  color:#fff;
-  border:1px solid #555;
-  border-radius:17px;
-  padding:0 18px;
-  font-size:19px;
-  outline:none;
-  margin-bottom:14px;
-}
 
-.input:focus{
-  border-color:#2196f3;
-}
-
-.input::placeholder{
-  color:#888;
-}
+/* ============================================================
+   BUTTONS
+============================================================ */
 
 .btn{
   width:100%;
@@ -117,6 +124,7 @@ button{
 
 .btn:disabled{
   opacity:.45;
+  cursor:not-allowed;
 }
 
 .blue{
@@ -144,10 +152,46 @@ button{
   color:white;
 }
 
+
+/* ============================================================
+   INPUTS
+============================================================ */
+
+.input{
+  width:100%;
+  height:60px;
+  background:#292929;
+  color:#fff;
+  border:1px solid #555;
+  border-radius:17px;
+  padding:0 18px;
+  font-size:19px;
+  outline:none;
+  margin-bottom:14px;
+}
+
+.input:focus{
+  border-color:#2196f3;
+}
+
+.input::placeholder{
+  color:#888;
+}
+
+
+/* ============================================================
+   HOME
+============================================================ */
+
 .home-card{
   text-align:center;
   padding:35px 22px;
 }
+
+
+/* ============================================================
+   ROOM
+============================================================ */
 
 .room-code-box{
   text-align:center;
@@ -177,6 +221,11 @@ button{
   margin-top:10px;
 }
 
+
+/* ============================================================
+   LOBBY
+============================================================ */
+
 #lobbyPlayers{
   display:flex;
   flex-direction:column;
@@ -197,6 +246,11 @@ button{
   color:#ffc107;
   font-size:13px;
 }
+
+
+/* ============================================================
+   AUCTION
+============================================================ */
 
 .auction-card{
   text-align:center;
@@ -224,6 +278,11 @@ button{
   font-size:18px;
 }
 
+
+/* ============================================================
+   TIMER
+============================================================ */
+
 .timer{
   width:110px;
   height:110px;
@@ -237,6 +296,11 @@ button{
   font-size:34px;
   font-weight:900;
 }
+
+
+/* ============================================================
+   BID BOX
+============================================================ */
 
 .bid-box{
   background:#111;
@@ -274,6 +338,11 @@ button{
   font-weight:bold;
 }
 
+
+/* ============================================================
+   BID BUTTON
+============================================================ */
+
 #bidButton{
   width:100%;
   min-height:68px;
@@ -289,6 +358,40 @@ button{
   background:#444;
   color:#999;
 }
+
+
+/* ============================================================
+   SKIP BUTTON
+============================================================ */
+
+#skipButton{
+  width:100%;
+  min-height:58px;
+  margin-top:10px;
+  border-radius:18px;
+  background:#555;
+  color:white;
+  font-size:20px;
+  font-weight:900;
+}
+
+#skipButton:disabled{
+  background:#333;
+  color:#777;
+  cursor:not-allowed;
+}
+
+#skipStatus{
+  margin-top:10px;
+  color:#aaa;
+  font-size:14px;
+  min-height:20px;
+}
+
+
+/* ============================================================
+   TEAMS
+============================================================ */
 
 #teamStats{
   display:grid;
@@ -338,6 +441,11 @@ button{
   margin:6px 0;
 }
 
+
+/* ============================================================
+   HISTORY
+============================================================ */
+
 #auctionHistory{
   display:flex;
   flex-direction:column;
@@ -352,6 +460,40 @@ button{
   font-size:14px;
 }
 
+
+/* ============================================================
+   RESULTS SCREEN
+============================================================ */
+
+#resultsScreen{
+  width:100%;
+}
+
+.results-header{
+  text-align:center;
+}
+
+.results-trophy{
+  font-size:60px;
+  margin-bottom:5px;
+}
+
+.results-title{
+  font-size:36px;
+  font-weight:900;
+  margin:5px 0;
+}
+
+.results-subtitle{
+  color:#999;
+  margin:8px 0 0;
+}
+
+
+/* ============================================================
+   FINAL TEAM RESULT
+============================================================ */
+
 #finalResults{
   display:flex;
   flex-direction:column;
@@ -363,6 +505,11 @@ button{
   border:1px solid #444;
   border-radius:21px;
   padding:19px;
+}
+
+.final-team-result:first-child{
+  border:2px solid #ffc107;
+  background:#302b1c;
 }
 
 .final-rank{
@@ -384,15 +531,22 @@ button{
 .final-score{
   background:#171717;
   border-radius:12px;
-  padding:12px;
+  padding:15px;
   margin-top:13px;
   color:#aaa;
 }
 
 .final-score strong{
+  display:block;
   color:#4ade80;
-  font-size:23px;
+  font-size:30px;
+  margin-top:5px;
 }
+
+
+/* ============================================================
+   FINAL STATS
+============================================================ */
 
 .final-stats{
   display:grid;
@@ -404,7 +558,7 @@ button{
 .final-stats div{
   background:#202020;
   border-radius:9px;
-  padding:9px;
+  padding:10px;
   color:#999;
   font-size:12px;
 }
@@ -415,6 +569,11 @@ button{
   font-size:15px;
   margin-top:3px;
 }
+
+
+/* ============================================================
+   CHARACTERS
+============================================================ */
 
 .final-characters{
   border-top:1px solid #444;
@@ -430,22 +589,64 @@ button{
 .final-player{
   display:flex;
   justify-content:space-between;
+  align-items:center;
+  gap:10px;
   background:#202020;
-  padding:9px;
+  padding:10px;
   border-radius:8px;
   margin-top:5px;
   font-size:14px;
 }
 
-.final-player span{
+.final-player span:first-child{
+  color:#fff;
+  font-weight:bold;
+}
+
+.final-player span:last-child{
   color:#4ade80;
   font-weight:bold;
 }
+
+
+/* ============================================================
+   SCORE EXPLANATION
+============================================================ */
+
+.score-info{
+  margin-top:18px;
+  padding:15px;
+  background:#111;
+  border-radius:14px;
+  border:1px solid #333;
+}
+
+.score-info-title{
+  color:#ffc107;
+  font-weight:900;
+  margin-bottom:10px;
+}
+
+.score-info div{
+  color:#aaa;
+  font-size:13px;
+  margin:6px 0;
+}
+
+
+/* ============================================================
+   SECTION TITLE
+============================================================ */
 
 .section-title{
   font-size:25px;
   margin:0 0 15px;
 }
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
 
 @media(max-width:600px){
 
@@ -469,351 +670,563 @@ button{
     grid-template-columns:1fr 1fr;
   }
 
+  .results-title{
+    font-size:30px;
+  }
+
+  .final-score strong{
+    font-size:27px;
+  }
+
 }
+
+
+/* ============================================================
+   VERY SMALL DEVICES
+============================================================ */
+
+@media(max-width:380px){
+
+  .final-stats{
+    grid-template-columns:1fr;
+  }
+
+  .timer{
+    width:95px;
+    height:95px;
+  }
+
+  #currentBid{
+    font-size:34px;
+  }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
 
 <header class="header">
 
-<div class="logo">🎯</div>
+  <div class="logo">
+    🎯
+  </div>
 
-<h1 class="title">
-Naruto Shinobi Auction
-</h1>
+  <h1 class="title">
+    Naruto Shinobi Auction
+  </h1>
 
-<p class="subtitle">
-Build the strongest Shinobi team!
-</p>
+  <p class="subtitle">
+    Build the strongest Shinobi team!
+  </p>
 
 </header>
 
+
+<!-- =========================================================
+     CONNECTION
+========================================================= -->
+
 <div id="connectionStatus">
-⏳ Connecting to Firebase...
+  ⏳ Connecting to Firebase...
 </div>
 
 
-<!-- HOME -->
+<!-- =========================================================
+     HOME
+========================================================= -->
 
 <section id="homeScreen">
 
-<div class="card home-card">
+  <div class="card home-card">
 
-<h2>⚔️ Multiplayer Auction</h2>
+    <h2>
+      ⚔️ Multiplayer Auction
+    </h2>
 
-<p style="color:#999;">
-Create a room or join your friend's room.
-</p>
+    <p style="color:#999;">
+      Create a room or join your friend's room.
+    </p>
 
-<button
-class="btn blue"
-onclick="showCreateRoom()"
->
-🏠 CREATE ROOM
-</button>
+    <button
+      class="btn blue"
+      onclick="showCreateRoom()"
+    >
+      🏠 CREATE ROOM
+    </button>
 
-<button
-class="btn orange"
-onclick="showJoinRoom()"
->
-🚪 JOIN ROOM
-</button>
+    <button
+      class="btn orange"
+      onclick="showJoinRoom()"
+    >
+      🚪 JOIN ROOM
+    </button>
 
-</div>
-
-</section>
-
-
-<!-- CREATE ROOM -->
-
-<section
-id="createRoomScreen"
-style="display:none;"
->
-
-<div class="card">
-
-<h2>🏠 Create Room</h2>
-
-<input
-id="createTeamName"
-class="input"
-maxlength="25"
-placeholder="Enter your team name"
->
-
-<button
-id="createRoomButton"
-class="btn blue"
-onclick="createRoom()"
->
-CREATE ROOM
-</button>
-
-<button
-class="btn gray"
-onclick="goHome()"
->
-← BACK
-</button>
-
-</div>
+  </div>
 
 </section>
 
 
-<!-- JOIN ROOM -->
+<!-- =========================================================
+     CREATE ROOM
+========================================================= -->
 
 <section
-id="joinRoomScreen"
-style="display:none;"
+  id="createRoomScreen"
+  style="display:none;"
 >
 
-<div class="card">
+  <div class="card">
 
-<h2>🚪 Join Room</h2>
+    <h2>
+      🏠 Create Room
+    </h2>
 
-<input
-id="joinRoomCode"
-class="input"
-maxlength="6"
-autocomplete="off"
-autocapitalize="characters"
-placeholder="Enter room code"
->
+    <input
+      id="createTeamName"
+      class="input"
+      maxlength="25"
+      placeholder="Enter your team name"
+    >
 
-<input
-id="joinTeamName"
-class="input"
-maxlength="25"
-placeholder="Enter your team name"
->
+    <button
+      id="createRoomButton"
+      class="btn blue"
+      onclick="createRoom()"
+    >
+      CREATE ROOM
+    </button>
 
-<button
-class="btn orange"
-onclick="joinRoom()"
->
-JOIN ROOM
-</button>
+    <button
+      class="btn gray"
+      onclick="goHome()"
+    >
+      ← BACK
+    </button>
 
-<button
-class="btn gray"
-onclick="goHome()"
->
-← BACK
-</button>
-
-</div>
+  </div>
 
 </section>
 
 
-<!-- LOBBY -->
+<!-- =========================================================
+     JOIN ROOM
+========================================================= -->
 
 <section
-id="lobbyScreen"
-style="display:none;"
+  id="joinRoomScreen"
+  style="display:none;"
 >
 
-<div class="card">
+  <div class="card">
 
-<h2>👥 Waiting Lobby</h2>
+    <h2>
+      🚪 Join Room
+    </h2>
 
-<div class="room-code-box">
+    <input
+      id="joinRoomCode"
+      class="input"
+      maxlength="6"
+      autocomplete="off"
+      autocapitalize="characters"
+      placeholder="Enter room code"
+    >
 
-<div class="room-code-label">
-ROOM CODE
-</div>
+    <input
+      id="joinTeamName"
+      class="input"
+      maxlength="25"
+      placeholder="Enter your team name"
+    >
 
-<div id="displayRoomCode">
-------
-</div>
+    <button
+      class="btn orange"
+      onclick="joinRoom()"
+    >
+      JOIN ROOM
+    </button>
 
-<div
-id="roomLink"
-class="room-link"
-></div>
+    <button
+      class="btn gray"
+      onclick="goHome()"
+    >
+      ← BACK
+    </button>
 
-</div>
-
-<button
-class="btn blue"
-onclick="copyRoomLink()"
->
-🔗 COPY ROOM LINK
-</button>
-
-</div>
-
-
-<div class="card">
-
-<h2 class="section-title">
-👥 Players
-</h2>
-
-<div id="lobbyPlayers"></div>
-
-</div>
-
-
-<div class="card">
-
-<button
-id="startAuctionButton"
-class="btn green"
-onclick="startAuction()"
-style="display:none;"
->
-⚔️ START AUCTION
-</button>
-
-<button
-class="btn red"
-onclick="leaveRoom()"
->
-🚪 LEAVE ROOM
-</button>
-
-</div>
+  </div>
 
 </section>
 
 
-<!-- GAME -->
+<!-- =========================================================
+     LOBBY
+========================================================= -->
 
 <section
-id="gameScreen"
-style="display:none;"
+  id="lobbyScreen"
+  style="display:none;"
 >
 
+  <div class="card">
+
+    <h2>
+      👥 Waiting Lobby
+    </h2>
+
+    <div class="room-code-box">
+
+      <div class="room-code-label">
+        ROOM CODE
+      </div>
+
+      <div id="displayRoomCode">
+        ------
+      </div>
+
+      <div
+        id="roomLink"
+        class="room-link"
+      ></div>
+
+    </div>
+
+    <button
+      class="btn blue"
+      onclick="copyRoomLink()"
+    >
+      🔗 COPY ROOM LINK
+    </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2 class="section-title">
+      👥 Players
+    </h2>
+
+    <div id="lobbyPlayers"></div>
+
+  </div>
+
+
+  <div class="card">
+
+    <button
+      id="startAuctionButton"
+      class="btn green"
+      onclick="startAuction()"
+      style="display:none;"
+    >
+      ⚔️ START AUCTION
+    </button>
+
+    <button
+      class="btn red"
+      onclick="leaveRoom()"
+    >
+      🚪 LEAVE ROOM
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     GAME SCREEN
+========================================================= -->
+
+<section
+  id="gameScreen"
+  style="display:none;"
+>
+
+
+<!-- =========================================================
+     CURRENT AUCTION
+========================================================= -->
 
 <div class="card auction-card">
 
-<div class="auction-label">
-CURRENT AUCTION
+  <div class="auction-label">
+    CURRENT AUCTION
+  </div>
+
+  <h2 id="characterName">
+    Waiting...
+  </h2>
+
+  <div id="characterPower">
+    Power --
+  </div>
+
+
+  <!-- TIMER -->
+
+  <div class="timer">
+
+    <span id="auctionTimer">
+      10s
+    </span>
+
+  </div>
+
+
+  <!-- BID INFORMATION -->
+
+  <div class="bid-box">
+
+    <div class="bid-label">
+      CURRENT BID
+    </div>
+
+    <div id="currentBid">
+      ₹1 Cr
+    </div>
+
+    <div id="highestBidder">
+      No bids yet
+    </div>
+
+    <div id="nextBid">
+      Starting bid: ₹1 Cr
+    </div>
+
+  </div>
+
+
+  <div id="gameMessage"></div>
+
+
+  <!-- BID -->
+
+  <button
+    id="bidButton"
+    onclick="placeBid()"
+  >
+    BID ₹1 Cr
+  </button>
+
+
+  <!-- SKIP -->
+
+  <button
+    id="skipButton"
+    onclick="placeSkip()"
+  >
+    ⏭️ SKIP
+  </button>
+
+
+  <div id="skipStatus">
+    Skip votes: 0/0
+  </div>
+
 </div>
 
-<h2 id="characterName">
-Waiting...
-</h2>
 
-<div id="characterPower">
-Power --
-</div>
-
-<div class="timer">
-
-<span id="auctionTimer">
-10s
-</span>
-
-</div>
-
-<div class="bid-box">
-
-<div class="bid-label">
-CURRENT BID
-</div>
-
-<div id="currentBid">
-₹1 Cr
-</div>
-
-<div id="highestBidder">
-No bids yet
-</div>
-
-<div id="nextBid">
-Starting bid: ₹1 Cr
-</div>
-
-</div>
-
-<div id="gameMessage"></div>
-
-<button
-id="bidButton"
-onclick="placeBid()"
->
-BID ₹1 Cr
-</button>
-
-</div>
-
-
-<!-- TEAMS -->
+<!-- =========================================================
+     TEAMS
+========================================================= -->
 
 <div class="card">
 
-<h2 class="section-title">
-👥 Teams
-</h2>
+  <h2 class="section-title">
+    👥 Teams
+  </h2>
 
-<div id="teamStats"></div>
+  <div id="teamStats"></div>
 
 </div>
 
 
-<!-- HISTORY -->
+<!-- =========================================================
+     HISTORY
+========================================================= -->
 
 <div class="card">
 
-<h2 class="section-title">
-📜 Auction History
-</h2>
+  <h2 class="section-title">
+    📜 Auction History
+  </h2>
 
-<div id="auctionHistory"></div>
-
-</div>
-
-
-<!-- FINAL RESULTS -->
-
-<div
-id="finalResultsCard"
-class="card"
-style="display:none;"
->
-
-<h2 class="section-title">
-🏆 FINAL RESULTS
-</h2>
-
-<div id="finalResults"></div>
+  <div id="auctionHistory"></div>
 
 </div>
 
+
+<!-- =========================================================
+     GAME CONTROLS
+========================================================= -->
 
 <div class="card">
 
-<button
-class="btn green"
-onclick="restartGame()"
->
-🔄 START NEW GAME
-</button>
+  <button
+    class="btn green"
+    onclick="restartGame()"
+  >
+    🔄 START NEW GAME
+  </button>
 
-<button
-class="btn red"
-onclick="leaveRoom()"
->
-🚪 LEAVE ROOM
-</button>
+  <button
+    class="btn red"
+    onclick="leaveRoom()"
+  >
+    🚪 LEAVE ROOM
+  </button>
 
 </div>
 
 </section>
 
+
+<!-- =========================================================
+     RESULTS SCREEN
+========================================================= -->
+
+<section
+  id="resultsScreen"
+  style="display:none;"
+>
+
+
+<!-- RESULTS HEADER -->
+
+<div class="card results-header">
+
+  <div class="results-trophy">
+    🏆
+  </div>
+
+  <div class="results-title">
+    FINAL RESULTS
+  </div>
+
+  <div class="results-subtitle">
+    Complete Team Performance Analysis
+  </div>
+
 </div>
 
+
+<!-- RESULTS -->
+
+<div id="finalResults"></div>
+
+
+<!-- SCORE EXPLANATION -->
+
+<div class="card">
+
+  <h2 class="section-title">
+    📊 How the Final Score Works
+  </h2>
+
+  <div class="score-info">
+
+    <div class="score-info-title">
+      Team evaluation considers the complete team.
+    </div>
+
+    <div>
+      ⚡ Character strength
+    </div>
+
+    <div>
+      🤝 Team synergy and coordination
+    </div>
+
+    <div>
+      🧠 Intelligence and knowledge
+    </div>
+
+    <div>
+      🎯 Battle planning and tactics
+    </div>
+
+    <div>
+      ⚔️ Ability combinations
+    </div>
+
+    <div>
+      🛡️ Offensive and defensive balance
+    </div>
+
+    <div>
+      🔮 Hax and special abilities
+    </div>
+
+    <div>
+      👑 Leadership
+    </div>
+
+    <div>
+      📚 Battle experience
+    </div>
+
+    <div>
+      🔄 Adaptability and role coverage
+    </div>
+
+    <div>
+      💰 Auction and budget management
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- RESULT CONTROLS -->
+
+<div class="card">
+
+  <button
+    class="btn green"
+    onclick="restartGame()"
+  >
+    🔄 START NEW GAME
+  </button>
+
+  <button
+    class="btn red"
+    onclick="leaveRoom()"
+  >
+    🚪 LEAVE ROOM
+  </button>
+
+</div>
+
+
+</section>
+
+
+</div>
+
+
+<!-- =========================================================
+     GAME JAVASCRIPT
+========================================================= -->
+
 <script
-type="module"
-src="game.js"
+  type="module"
+  src="game.js"
 ></script>
+
 
 </body>
   </html>
