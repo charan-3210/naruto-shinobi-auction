@@ -1,512 +1,933 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Naruto Shinobi Auction</title>
+  <meta charset="UTF-8">
 
-<style>
-*{box-sizing:border-box}
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+  >
 
-body{
-  margin:0;
-  padding:15px;
-  font-family:Arial,sans-serif;
-  background:#0d0f0e;
-  color:#fff;
-}
+  <title>Naruto Shinobi Auction</title>
 
-.container{
-  max-width:700px;
-  margin:auto;
-}
+  <style>
 
-h1{
-  text-align:center;
-  font-size:32px;
-  margin:15px 0 8px;
-}
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-.subtitle{
-  text-align:center;
-  color:#aaa;
-  margin-bottom:25px;
-}
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: #080b0a;
+      color: white;
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    }
 
-.card{
-  background:#1d1d1d;
-  border-radius:18px;
-  padding:20px;
-  margin-bottom:16px;
-  box-shadow:0 5px 20px rgba(0,0,0,.35);
-}
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-.section-title{
-  font-size:25px;
-  font-weight:bold;
-  margin-bottom:18px;
-}
+    button,
+    input {
+      font: inherit;
+    }
 
-input{
-  width:100%;
-  padding:16px;
-  margin:7px 0;
-  border:1px solid #555;
-  border-radius:12px;
-  background:#292929;
-  color:white;
-  font-size:17px;
-  outline:none;
-}
+    button {
+      cursor: pointer;
+      border: none;
+    }
 
-input:focus{
-  border-color:#ff9800;
-}
+    .container {
+      width: 100%;
+      max-width: 850px;
+      margin: auto;
+      padding: 20px 16px 50px;
+    }
 
-button{
-  width:100%;
-  padding:16px;
-  border:0;
-  border-radius:12px;
-  margin-top:9px;
-  font-size:17px;
-  font-weight:bold;
-  cursor:pointer;
-}
+    /* =====================================================
+       HEADER
+    ===================================================== */
 
-button:disabled{
-  opacity:.45;
-}
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
 
-.blue{
-  background:#2196f3;
-  color:white;
-}
+    .logo {
+      font-size: 48px;
+      margin-bottom: 5px;
+    }
 
-.orange{
-  background:#ff9800;
-  color:#111;
-}
+    .title {
+      margin: 0;
+      font-size: clamp(30px, 7vw, 48px);
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
 
-.red{
-  background:#e53935;
-  color:white;
-}
+    .subtitle {
+      margin: 8px 0 0;
+      color: #aaa;
+      font-size: 18px;
+    }
 
-.purple{
-  background:#673ab7;
-  color:white;
-}
+    /* =====================================================
+       CONNECTION
+    ===================================================== */
 
-.gray{
-  background:#4b4b4b;
-  color:white;
-}
+    #connectionStatus {
+      text-align: center;
+      margin: 10px auto 20px;
+      color: #ffcc80;
+      font-weight: bold;
+      min-height: 22px;
+    }
 
-.hidden{
-  display:none!important;
-}
+    /* =====================================================
+       SCREENS
+    ===================================================== */
 
-.room-code{
-  font-size:38px;
-  text-align:center;
-  letter-spacing:6px;
-  color:#ff9800;
-  font-weight:bold;
-  margin:15px 0;
-}
+    .screen {
+      width: 100%;
+    }
 
-.center{
-  text-align:center;
-}
+    .hidden {
+      display: none !important;
+    }
 
-.small{
-  color:#aaa;
-  font-size:14px;
-}
+    /* =====================================================
+       CARD
+    ===================================================== */
 
-.players-list{
-  margin-top:15px;
-}
+    .card {
+      background: #1d1d1d;
+      border-radius: 28px;
+      padding: 28px;
+      margin-bottom: 20px;
+      box-shadow:
+        0 15px 40px rgba(0, 0, 0, 0.35);
+      border: 1px solid #292929;
+    }
 
-.player-row{
-  background:#292929;
-  padding:13px;
-  border-radius:10px;
-  margin:7px 0;
-  display:flex;
-  justify-content:space-between;
-}
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-size: 30px;
+    }
 
-.character{
-  text-align:center;
-}
+    /* =====================================================
+       HOME
+    ===================================================== */
 
-#characterName{
-  font-size:31px;
-  font-weight:bold;
-  margin:12px 0;
-}
+    .home-card {
+      text-align: center;
+      padding: 35px 25px;
+    }
 
-#characterInfo{
-  color:#aaa;
-  line-height:1.5;
-}
+    .home-card h2 {
+      font-size: 32px;
+    }
 
-#auctionTimer{
-  font-size:52px;
-  font-weight:bold;
-  margin:18px 0;
-  color:#ff9800;
-}
+    /* =====================================================
+       INPUT
+    ===================================================== */
 
-.bid{
-  font-size:30px;
-  font-weight:bold;
-  margin:10px;
-}
+    .input {
+      width: 100%;
+      height: 62px;
+      padding: 0 20px;
+      border-radius: 18px;
+      border: 1px solid #555;
+      outline: none;
+      background: #292929;
+      color: white;
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
 
-#highestBidder{
-  color:#ffcc80;
-  margin:10px;
-}
+    .input:focus {
+      border-color: #2196f3;
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15);
+    }
 
-.message{
-  min-height:25px;
-  text-align:center;
-  margin:12px 0;
-  font-weight:bold;
-  color:#ffcc80;
-}
+    .input::placeholder {
+      color: #888;
+    }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
+    /* =====================================================
+       BUTTONS
+    ===================================================== */
 
-.stat{
-  background:#292929;
-  padding:13px;
-  border-radius:10px;
-  text-align:center;
-}
+    .btn {
+      width: 100%;
+      min-height: 62px;
+      border-radius: 18px;
+      padding: 14px 20px;
+      font-size: 20px;
+      font-weight: 900;
+      margin-top: 12px;
+      transition: transform 0.15s, opacity 0.15s;
+    }
 
-.stat-title{
-  color:#aaa;
-  font-size:13px;
-}
+    .btn:active {
+      transform: scale(0.98);
+    }
 
-.stat-value{
-  font-size:18px;
-  font-weight:bold;
-  margin-top:5px;
-}
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
-.team{
-  background:#292929;
-  padding:15px;
-  border-radius:12px;
-  margin:10px 0;
-}
+    .blue {
+      background: #2196f3;
+      color: white;
+    }
 
-.team-name{
-  font-size:20px;
-  font-weight:bold;
-  margin-bottom:8px;
-}
+    .orange {
+      background: #ff9800;
+      color: #111;
+    }
 
-.history-item{
-  background:#292929;
-  padding:12px;
-  border-radius:9px;
-  margin:7px 0;
-}
+    .green {
+      background: #16a34a;
+      color: white;
+    }
 
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:20px;
-  background:#333;
-  color:#ddd;
-  font-size:12px;
-}
+    .red {
+      background: #dc2626;
+      color: white;
+    }
 
-.copy-row{
-  display:flex;
-  gap:8px;
-}
+    .gray {
+      background: #555;
+      color: white;
+    }
 
-.copy-row button{
-  width:120px;
-  margin:7px 0;
-}
+    .dark {
+      background: #292929;
+      color: white;
+      border: 1px solid #444;
+    }
 
-.copy-row input{
-  margin:7px 0;
-}
+    /* =====================================================
+       ROOM CODE
+    ===================================================== */
 
-@media(max-width:500px){
-  h1{font-size:27px}
-  #characterName{font-size:25px}
-  #auctionTimer{font-size:44px}
-  .stats{grid-template-columns:1fr}
-}
-</style>
+    .room-code-box {
+      text-align: center;
+      background: #101010;
+      border: 2px dashed #444;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .room-code-label {
+      color: #999;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    #displayRoomCode {
+      font-size: 42px;
+      font-weight: 900;
+      letter-spacing: 7px;
+      color: #64b5f6;
+    }
+
+    .room-link {
+      word-break: break-all;
+      color: #aaa;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    /* =====================================================
+       PLAYERS
+    ===================================================== */
+
+    #lobbyPlayers {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .player-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #292929;
+      border-radius: 15px;
+      padding: 16px;
+      border: 1px solid #3b3b3b;
+    }
+
+    .player-card strong {
+      font-size: 17px;
+    }
+
+    .player-card span {
+      color: #ffc107;
+      font-size: 13px;
+    }
+
+    /* =====================================================
+       AUCTION
+    ===================================================== */
+
+    .auction-card {
+      text-align: center;
+    }
+
+    .auction-label {
+      color: #999;
+      text-transform: uppercase;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+
+    #characterName,
+    #currentCharacter {
+      font-size: clamp(30px, 8vw, 52px);
+      margin: 12px 0;
+      font-weight: 900;
+    }
+
+    #characterPower {
+      display: inline-block;
+      background: #302400;
+      color: #ffd54f;
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .timer {
+      width: 120px;
+      height: 120px;
+      margin: 15px auto;
+      border-radius: 50%;
+      background: #111;
+      border: 6px solid #2196f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 900;
+    }
+
+    .bid-box {
+      background: #111;
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .bid-label {
+      color: #999;
+      font-size: 14px;
+    }
+
+    #currentBid {
+      font-size: 42px;
+      font-weight: 900;
+      color: #4ade80;
+      margin: 8px 0;
+    }
+
+    #highestBidder {
+      color: #ffc107;
+      font-weight: bold;
+      min-height: 24px;
+    }
+
+    #nextBid {
+      color: #999;
+      margin-top: 8px;
+    }
+
+    #bidButton,
+    #placeBidButton {
+      margin-top: 20px;
+      min-height: 70px;
+      font-size: 24px;
+      background: #e91e63;
+      color: white;
+      border-radius: 18px;
+      width: 100%;
+      font-weight: 900;
+    }
+
+    #bidButton:disabled,
+    #placeBidButton:disabled {
+      background: #444;
+      color: #999;
+    }
+
+    /* =====================================================
+       TEAMS
+    ===================================================== */
+
+    #teamStats,
+    #teamsContainer {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .team-card {
+      background: #242424;
+      border: 1px solid #3a3a3a;
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .team-card.my-team {
+      border: 2px solid #2196f3;
+      background: #202b35;
+    }
+
+    .team-card h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
+
+    .team-card > div {
+      margin-top: 8px;
+      color: #aaa;
+    }
+
+    .team-card strong {
+      color: white;
+    }
+
+    .team-players {
+      margin-top: 15px !important;
+      border-top: 1px solid #444;
+      padding-top: 10px;
+    }
+
+    .team-players div {
+      color: #ddd;
+      margin: 7px 0;
+      font-size: 14px;
+    }
+
+    /* =====================================================
+       RANKING
+    ===================================================== */
+
+    #teamRanking,
+    #powerRanking {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #292929;
+      padding: 16px;
+      border-radius: 14px;
+    }
+
+    .ranking-item span {
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    /* =====================================================
+       HISTORY
+    ===================================================== */
+
+    #auctionHistory,
+    #history {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: #292929;
+      padding: 13px;
+      border-radius: 12px;
+      color: #ddd;
+      font-size: 14px;
+    }
+
+    /* =====================================================
+       MESSAGE
+    ===================================================== */
+
+    #gameMessage {
+      text-align: center;
+      color: #ffc107;
+      min-height: 25px;
+      margin: 12px 0;
+      font-weight: bold;
+    }
+
+    /* =====================================================
+       SECTION
+    ===================================================== */
+
+    .section-title {
+      font-size: 24px;
+      margin: 0 0 15px;
+    }
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 600px) {
+
+      .container {
+        padding: 15px 12px 40px;
+      }
+
+      .card {
+        padding: 20px 16px;
+        border-radius: 22px;
+      }
+
+      .logo {
+        font-size: 40px;
+      }
+
+      .title {
+        font-size: 30px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .card h2 {
+        font-size: 27px;
+      }
+
+      #displayRoomCode {
+        font-size: 34px;
+        letter-spacing: 5px;
+      }
+
+      #teamStats,
+      #teamsContainer {
+        grid-template-columns: 1fr;
+      }
+
+      #currentBid {
+        font-size: 36px;
+      }
+
+      .timer {
+        width: 105px;
+        height: 105px;
+        font-size: 32px;
+      }
+
+    }
+
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <div class="container">
 
-<h1>🍥 Naruto Shinobi Auction</h1>
-<div class="subtitle">Build the strongest Shinobi team!</div>
+    <!-- ===================================================
+         HEADER
+    ==================================================== -->
 
-<!-- HOME -->
-<section id="homeScreen">
+    <header class="header">
 
-<div class="card">
-  <div class="section-title">⚔️ Multiplayer Auction</div>
+      <div class="logo">🎯</div>
 
-  <button class="blue" onclick="showCreateRoom()">
-    🏠 CREATE ROOM
-  </button>
+      <h1 class="title">
+        Naruto Shinobi Auction
+      </h1>
 
-  <button class="orange" onclick="showJoinRoom()">
-    🚪 JOIN ROOM
-  </button>
+      <p class="subtitle">
+        Build the strongest Shinobi team!
+      </p>
 
-  <div id="homeMessage" class="message"></div>
-</div>
-
-</section>
+    </header>
 
 
-<!-- CREATE ROOM -->
-<section id="createScreen" class="hidden">
+    <!-- ===================================================
+         FIREBASE STATUS
+    ==================================================== -->
 
-<div class="card">
-  <div class="section-title">🏠 Create Room</div>
-
-  <input
-    id="createTeamName"
-    type="text"
-    maxlength="30"
-    placeholder="Enter your team name"
-  >
-
-  <button class="blue" onclick="createRoom()">
-    CREATE ROOM
-  </button>
-
-  <button class="gray" onclick="goHome()">
-    ← BACK
-  </button>
-
-  <div id="createMessage" class="message"></div>
-</div>
-
-</section>
-
-
-<!-- JOIN ROOM -->
-<section id="joinScreen" class="hidden">
-
-<div class="card">
-  <div class="section-title">🚪 Join Room</div>
-
-  <input
-    id="joinRoomCode"
-    type="text"
-    maxlength="6"
-    placeholder="ENTER ROOM CODE"
-  >
-
-  <input
-    id="joinTeamName"
-    type="text"
-    maxlength="30"
-    placeholder="Enter your team name"
-  >
-
-  <button class="orange" onclick="joinRoom()">
-    JOIN ROOM
-  </button>
-
-  <button class="gray" onclick="goHome()">
-    ← BACK
-  </button>
-
-  <div id="joinMessage" class="message"></div>
-</div>
-
-</section>
-
-
-<!-- LOBBY -->
-<section id="lobbyScreen" class="hidden">
-
-<div class="card">
-
-  <div class="section-title">🏠 Auction Room</div>
-
-  <div class="small center">
-    Share this code with the other players
-  </div>
-
-  <div id="roomCodeDisplay" class="room-code">
-    ------
-  </div>
-
-  <div class="copy-row">
-    <input id="roomLink" readonly>
-    <button class="blue" onclick="copyRoomLink()">COPY</button>
-  </div>
-
-</div>
-
-
-<div class="card">
-
-  <div class="section-title">👥 Players</div>
-
-  <div id="lobbyPlayers">
-    Waiting for players...
-  </div>
-
-  <button
-    id="startButton"
-    class="blue"
-    onclick="startAuction()"
-  >
-    🔥 START AUCTION
-  </button>
-
-  <button class="gray" onclick="leaveRoom()">
-    ← LEAVE ROOM
-  </button>
-
-  <div id="lobbyMessage" class="message"></div>
-
-</div>
-
-</section>
-
-
-<!-- GAME -->
-<section id="gameScreen" class="hidden">
-
-<div class="card">
-
-  <div class="section-title">👤 My Team</div>
-
-  <div class="stats">
-
-    <div class="stat">
-      <div class="stat-title">Team</div>
-      <div id="myTeam" class="stat-value">-</div>
+    <div id="connectionStatus">
+      ⏳ Connecting to Firebase...
     </div>
 
-    <div class="stat">
-      <div class="stat-title">Budget</div>
-      <div id="myBudget" class="stat-value">₹20 Cr</div>
-    </div>
 
-    <div class="stat">
-      <div class="stat-title">Players</div>
-      <div id="myPlayers" class="stat-value">0 / 4</div>
-    </div>
+    <!-- ===================================================
+         HOME SCREEN
+    ==================================================== -->
+
+    <section id="homeScreen" class="screen">
+
+      <div class="card home-card">
+
+        <h2>
+          ⚔️ Multiplayer Auction
+        </h2>
+
+        <p style="color:#999; margin-bottom:25px;">
+          Create a room or join your friend's room.
+        </p>
+
+        <button
+          class="btn blue"
+          onclick="showCreateRoom()"
+        >
+          🏠 CREATE ROOM
+        </button>
+
+        <button
+          class="btn orange"
+          onclick="showJoinRoom()"
+        >
+          🚪 JOIN ROOM
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         CREATE ROOM SCREEN
+    ==================================================== -->
+
+    <section
+      id="createRoomScreen"
+      class="screen"
+      style="display:none;"
+    >
+
+      <div class="card">
+
+        <h2>
+          🏠 Create Room
+        </h2>
+
+        <input
+          id="createTeamName"
+          class="input"
+          type="text"
+          maxlength="25"
+          placeholder="Enter your team name"
+          value=""
+        >
+
+        <button
+          id="createRoomButton"
+          class="btn blue"
+          onclick="createRoom()"
+        >
+          CREATE ROOM
+        </button>
+
+        <button
+          class="btn gray"
+          onclick="goHome()"
+        >
+          ← BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         JOIN ROOM SCREEN
+    ==================================================== -->
+
+    <section
+      id="joinRoomScreen"
+      class="screen"
+      style="display:none;"
+    >
+
+      <div class="card">
+
+        <h2>
+          🚪 Join Room
+        </h2>
+
+        <input
+          id="joinRoomCode"
+          class="input"
+          type="text"
+          maxlength="6"
+          autocomplete="off"
+          autocapitalize="characters"
+          placeholder="Enter 6-character room code"
+        >
+
+        <input
+          id="joinTeamName"
+          class="input"
+          type="text"
+          maxlength="25"
+          placeholder="Enter your team name"
+        >
+
+        <button
+          class="btn orange"
+          onclick="joinRoom()"
+        >
+          JOIN ROOM
+        </button>
+
+        <button
+          class="btn gray"
+          onclick="goHome()"
+        >
+          ← BACK
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         LOBBY SCREEN
+    ==================================================== -->
+
+    <section
+      id="lobbyScreen"
+      class="screen"
+      style="display:none;"
+    >
+
+      <div class="card">
+
+        <h2>
+          👥 Waiting Lobby
+        </h2>
+
+        <div class="room-code-box">
+
+          <div class="room-code-label">
+            ROOM CODE
+          </div>
+
+          <div id="displayRoomCode">
+            ------
+          </div>
+
+          <div
+            id="roomLink"
+            class="room-link"
+          >
+          </div>
+
+        </div>
+
+        <button
+          class="btn blue"
+          onclick="copyRoomLink()"
+        >
+          🔗 COPY ROOM LINK
+        </button>
+
+      </div>
+
+
+      <div class="card">
+
+        <h2 class="section-title">
+          👥 Players
+        </h2>
+
+        <div id="lobbyPlayers">
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <button
+          id="startAuctionButton"
+          class="btn green"
+          onclick="startAuction()"
+          style="display:none;"
+        >
+          ⚔️ START AUCTION
+        </button>
+
+        <button
+          class="btn red"
+          onclick="leaveRoom()"
+        >
+          🚪 LEAVE ROOM
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         GAME SCREEN
+    ==================================================== -->
+
+    <section
+      id="gameScreen"
+      class="screen"
+      style="display:none;"
+    >
+
+
+      <!-- AUCTION -->
+
+      <div class="card auction-card">
+
+        <div class="auction-label">
+          CURRENT AUCTION
+        </div>
+
+        <h2 id="characterName">
+          Waiting...
+        </h2>
+
+        <div id="characterPower">
+          Power --
+        </div>
+
+        <div class="timer">
+          <span id="auctionTimer">
+            10s
+          </span>
+        </div>
+
+        <div class="bid-box">
+
+          <div class="bid-label">
+            CURRENT BID
+          </div>
+
+          <div id="currentBid">
+            ₹1 Cr
+          </div>
+
+          <div id="highestBidder">
+            No bids yet
+          </div>
+
+          <div id="nextBid">
+            Starting bid: ₹1 Cr
+          </div>
+
+        </div>
+
+        <div id="gameMessage">
+        </div>
+
+        <button
+          id="bidButton"
+          onclick="placeBid()"
+        >
+          BID ₹1 Cr
+        </button>
+
+      </div>
+
+
+      <!-- TEAM STATS -->
+
+      <div class="card">
+
+        <h2 class="section-title">
+          👥 Teams
+        </h2>
+
+        <div id="teamStats">
+        </div>
+
+      </div>
+
+
+      <!-- POWER RANKING -->
+
+      <div class="card">
+
+        <h2 class="section-title">
+          🏆 Team Power Ranking
+        </h2>
+
+        <div id="teamRanking">
+        </div>
+
+      </div>
+
+
+      <!-- AUCTION HISTORY -->
+
+      <div class="card">
+
+        <h2 class="section-title">
+          📜 Auction History
+        </h2>
+
+        <div id="auctionHistory">
+        </div>
+
+      </div>
+
+
+      <!-- GAME CONTROLS -->
+
+      <div class="card">
+
+        <button
+          class="btn green"
+          onclick="restartGame()"
+        >
+          🔄 START NEW GAME
+        </button>
+
+        <button
+          class="btn red"
+          onclick="leaveRoom()"
+        >
+          🚪 LEAVE ROOM
+        </button>
+
+      </div>
+
+    </section>
 
   </div>
 
-</div>
 
+  <!-- =====================================================
+       FIREBASE / GAME JAVASCRIPT
+  ====================================================== -->
 
-<!-- AUCTION -->
-<div class="card character">
-
-  <div class="section-title">🔥 LIVE AUCTION</div>
-
-  <div id="characterName">
-    Waiting...
-  </div>
-
-  <div id="characterInfo">
-    -
-  </div>
-
-  <div id="auctionTimer">
-    ⏱️ 10s
-  </div>
-
-  <div id="currentBid" class="bid">
-    ₹1 Cr
-  </div>
-
-  <div id="highestBidder">
-    No bids yet
-  </div>
-
-  <div id="gameMessage" class="message"></div>
-
-  <button
-    id="bidButton"
-    class="red"
-    onclick="placeBid()"
-  >
-    🔥 BID
-  </button>
-
-</div>
-
-
-<!-- TEAMS -->
-<div class="card">
-
-  <div class="section-title">
-    🏆 TEAM POWER RANKING
-  </div>
-
-  <div id="teams">
-    Waiting...
-  </div>
-
-</div>
-
-
-<!-- HISTORY -->
-<div class="card">
-
-  <div class="section-title">
-    📜 CURRENT GAME HISTORY
-  </div>
-
-  <div id="history">
-    No history yet.
-  </div>
-
-</div>
-
-
-<!-- NEW GAME -->
-<div class="card">
-
-  <button
-    id="newGameButton"
-    class="purple"
-    onclick="restartGame()"
-  >
-    🔄 START NEW GAME
-  </button>
-
-</div>
-
-</section>
-
-</div>
-
-
-<script type="module" src="game.js"></script>
+  <script
+    type="module"
+    src="game.js"
+  ></script>
 
 </body>
-    </html>
+  </html>
