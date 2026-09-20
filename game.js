@@ -76,7 +76,7 @@ const STARTING_BUDGET = 2000; // ₹20 Cr
 
 const MAX_TEAMS = 4;
 
-const MAX_CHARACTERS = 4;
+const MAX_CHARACTERS = 10;
 
 const AUCTION_TIME = 10;
 
@@ -170,20 +170,20 @@ function character(id,name,power){
 const characters = [
 
   character("isshiki","Isshiki Otsutsuki",950),
-  character("shibai","Shibai Otsutsuki",948),
+  character("shibai","Shibai Otsutsuki",999),
   character("juubidara","Juubidara — Ten Tails Madara",942),
   character("kaguya","Kaguya Otsutsuki",936),
   character("hagoromo","Hagoromo Otsutsuki",925),
   character("hamura","Hamura Otsutsuki",920),
   character("narutoso6p","Naruto Six Paths",918),
   character("sasuke6p","Sasuke Six Paths",914),
-  character("madara","Madara Uchiha",905),
+  character("madara","Madara Uchiha",925),
   character("momoshiki","Momoshiki Otsutsuki",902),
 
   character("indura","Indra Otsutsuki",895),
   character("obitojuubi","Juubito — Ten Tails Obito",897),
   character("ashura","Ashura Otsutsuki",890),
-  character("hashirama","Hashirama Senju",875),
+  character("hashirama","Hashirama Senju",915),
   character("narutokcm2","Naruto KCM 2",868),
   character("hashiramaedo","Edo Hashirama",865),
   character("sasukems2","Sasuke Eternal Mangekyo",862),
