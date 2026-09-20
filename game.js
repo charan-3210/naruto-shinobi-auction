@@ -26,31 +26,14 @@ import {
 // ============================================================
 
 const firebaseConfig = {
-
-  apiKey:
-    "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
-
-  authDomain:
-    "naruto-shinobi-auction.firebaseapp.com",
-
-  databaseURL:
-    "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
-
-  projectId:
-    "naruto-shinobi-auction",
-
-  storageBucket:
-    "naruto-shinobi-auction.firebasestorage.app",
-
-  messagingSenderId:
-    "187952563869",
-
-  appId:
-    "1:187952563869:web:839ac2add9ae0f5835f674",
-
-  measurementId:
-    "G-N3QGHDB240"
-
+  apiKey: "AIzaSyB4PSLZ0ZhVGGtfZ1hcluOWsTbvJDxxxTg",
+  authDomain: "naruto-shinobi-auction.firebaseapp.com",
+  databaseURL: "https://naruto-shinobi-auction-default-rtdb.firebaseio.com",
+  projectId: "naruto-shinobi-auction",
+  storageBucket: "naruto-shinobi-auction.firebasestorage.app",
+  messagingSenderId: "187952563869",
+  appId: "1:187952563869:web:839ac2add9ae0f5835f674",
+  measurementId: "G-N3QGHDB240"
 };
 
 
@@ -58,21 +41,16 @@ const firebaseConfig = {
 // FIREBASE
 // ============================================================
 
-const app =
-  initializeApp(firebaseConfig);
-
-const db =
-  getDatabase(app);
-
-const auth =
-  getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 
 // ============================================================
 // GAME SETTINGS
 // ============================================================
 
-const STARTING_BUDGET = 2000; // ₹20 Cr
+const STARTING_BUDGET = 7500; // ₹75 Cr = 7500 Lakhs
 
 const MAX_TEAMS = 4;
 
@@ -82,7 +60,7 @@ const AUCTION_TIME = 10;
 
 const START_BID = 100; // ₹1 Cr
 
-const SMALL_INCREMENT = 50; // ₹50 L
+const SMALL_INCREMENT = 50; // ₹50 Lakhs
 
 const BIG_INCREMENT = 100; // ₹1 Cr
 
@@ -91,61 +69,37 @@ const BIG_INCREMENT = 100; // ₹1 Cr
 // CHARACTER FUNCTION
 // ============================================================
 
-function character(id,name,power){
+function character(id, name, power) {
 
   const attack =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 37) - 18)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 37) - 18)
+    ));
 
   const defense =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 43) - 21)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 43) - 21)
+    ));
 
   const speed =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 31) - 15)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 31) - 15)
+    ));
 
   const hax =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 47) - 23)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 47) - 23)
+    ));
 
   const intelligence =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 29) - 14)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 29) - 14)
+    ));
 
   const synergy =
-    Math.max(
-      500,
-      Math.min(
-        949,
-        power + ((power % 41) - 20)
-      )
-    );
+    Math.max(500, Math.min(949,
+      power + ((power % 41) - 20)
+    ));
 
   return {
     id,
@@ -163,27 +117,25 @@ function character(id,name,power){
 
 // ============================================================
 // 100 CHARACTERS
-// POWER RANGE: 550–950
-// EVERY POWER VALUE IS DIFFERENT
 // ============================================================
 
 const characters = [
 
   character("isshiki","Isshiki Otsutsuki",950),
-  character("shibai","Shibai Otsutsuki",999),
+  character("shibai","Shibai Otsutsuki",948),
   character("juubidara","Juubidara — Ten Tails Madara",942),
   character("kaguya","Kaguya Otsutsuki",936),
   character("hagoromo","Hagoromo Otsutsuki",925),
   character("hamura","Hamura Otsutsuki",920),
   character("narutoso6p","Naruto Six Paths",918),
   character("sasuke6p","Sasuke Six Paths",914),
-  character("madara","Madara Uchiha",925),
+  character("madara","Madara Uchiha",905),
   character("momoshiki","Momoshiki Otsutsuki",902),
 
   character("indura","Indra Otsutsuki",895),
   character("obitojuubi","Juubito — Ten Tails Obito",897),
   character("ashura","Ashura Otsutsuki",890),
-  character("hashirama","Hashirama Senju",915),
+  character("hashirama","Hashirama Senju",875),
   character("narutokcm2","Naruto KCM 2",868),
   character("hashiramaedo","Edo Hashirama",865),
   character("sasukems2","Sasuke Eternal Mangekyo",862),
@@ -281,15 +233,7 @@ const characters = [
 
 ];
 
-
-// ============================================================
-// CHECK CHARACTER COUNT
-// ============================================================
-
-console.log(
-  "Characters loaded:",
-  characters.length
-);
+console.log("Characters loaded:", characters.length);
 
 
 // ============================================================
@@ -309,7 +253,7 @@ let finishingAuction = false;
 let authResolve;
 
 const authReady =
-  new Promise(resolve=>{
+  new Promise(resolve => {
     authResolve = resolve;
   });
 
@@ -318,45 +262,39 @@ const authReady =
 // HELPERS
 // ============================================================
 
-function $(id){
+function $(id) {
   return document.getElementById(id);
 }
 
 
-function showConnection(message){
+function showConnection(message) {
 
-  const element =
-    $("connectionStatus");
+  const element = $("connectionStatus");
 
-  if(element){
-    element.textContent =
-      message;
+  if (element) {
+    element.textContent = message;
   }
-
 }
 
 
-function formatMoney(lakhs){
+function formatMoney(lakhs) {
 
-  lakhs =
-    Number(lakhs || 0);
+  lakhs = Number(lakhs || 0);
 
-  if(lakhs >= 100){
+  if (lakhs >= 100) {
 
-    const crores =
-      lakhs / 100;
+    const crores = lakhs / 100;
 
     return Number.isInteger(crores)
       ? `₹${crores} Cr`
       : `₹${crores.toFixed(2)} Cr`;
-
   }
 
   return `₹${lakhs} L`;
 }
 
 
-function escapeHtml(value){
+function escapeHtml(value) {
 
   return String(value ?? "")
     .replaceAll("&","&amp;")
@@ -367,79 +305,66 @@ function escapeHtml(value){
 }
 
 
-function shuffle(array){
+function shuffle(array) {
 
-  const result =
-    [...array];
+  const result = [...array];
 
-  for(
-    let i=result.length-1;
-    i>0;
-    i--
-  ){
+  for (let i = result.length - 1; i > 0; i--) {
 
     const j =
-      Math.floor(
-        Math.random()*(i+1)
-      );
+      Math.floor(Math.random() * (i + 1));
 
-    [
-      result[i],
-      result[j]
-    ]=[
-      result[j],
-      result[i]
-    ];
+    [result[i], result[j]] =
+      [result[j], result[i]];
   }
 
   return result;
 }
 
 
-function randomRoomCode(){
+function randomRoomCode() {
 
   const chars =
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-  let code="";
+  let code = "";
 
-  for(
-    let i=0;
-    i<6;
-    i++
-  ){
+  for (let i = 0; i < 6; i++) {
 
-    code +=
-      chars[
-        Math.floor(
-          Math.random()*chars.length
-        )
-      ];
-
+    code += chars[
+      Math.floor(Math.random() * chars.length)
+    ];
   }
 
   return code;
 }
 
 
-function getCharacter(id){
+function getCharacter(id) {
 
-  return characters.find(
-    c=>c.id===id
-  );
+  return characters.find(c => c.id === id);
 }
 
 
-function getNextBid(currentBid){
+// ============================================================
+// BIDDING
+// ============================================================
 
-  currentBid =
-    Number(currentBid || 0);
+function getNextBid(currentBid) {
 
-  if(currentBid < START_BID){
+  currentBid = Number(currentBid || 0);
+
+  if (currentBid < START_BID) {
     return START_BID;
   }
 
-  if(currentBid < 1000){
+  /*
+    ₹1 Cr → ₹1.5 Cr → ₹2 Cr ... → ₹10 Cr
+    After ₹10 Cr:
+    ₹11 Cr → ₹12 Cr → ₹13 Cr ...
+  */
+
+  if (currentBid < 1000) {
     return currentBid + SMALL_INCREMENT;
   }
 
@@ -447,30 +372,18 @@ function getNextBid(currentBid){
 }
 
 
-function roomRef(code=currentRoomCode){
-
-  return ref(
-    db,
-    `rooms/${code}`
-  );
+function roomRef(code = currentRoomCode) {
+  return ref(db, `rooms/${code}`);
 }
 
 
-function auctionRef(code=currentRoomCode){
-
-  return ref(
-    db,
-    `rooms/${code}/auction`
-  );
+function auctionRef(code = currentRoomCode) {
+  return ref(db, `rooms/${code}/auction`);
 }
 
 
-function teamRef(uid,code=currentRoomCode){
-
-  return ref(
-    db,
-    `rooms/${code}/teams/${uid}`
-  );
+function teamRef(uid, code = currentRoomCode) {
+  return ref(db, `rooms/${code}/teams/${uid}`);
 }
 
 
@@ -478,54 +391,41 @@ function teamRef(uid,code=currentRoomCode){
 // AUTH
 // ============================================================
 
-onAuthStateChanged(
-  auth,
-  user=>{
+onAuthStateChanged(auth, user => {
 
-    if(user){
+  if (user) {
 
-      currentUser =
-        user;
+    currentUser = user;
 
-      showConnection(
-        "🟢 Connected to Firebase"
-      );
+    showConnection("🟢 Connected to Firebase");
 
-      authResolve(user);
+    authResolve(user);
 
-      checkURLRoom();
+    checkURLRoom();
 
-    }else{
+  } else {
 
-      showConnection(
-        "⏳ Signing in..."
-      );
+    showConnection("⏳ Signing in...");
 
-      signInAnonymously(auth)
-        .catch(error=>{
+    signInAnonymously(auth)
+      .catch(error => {
 
-          console.error(error);
+        console.error(error);
 
-          showConnection(
-            "❌ Authentication failed"
-          );
+        showConnection("❌ Authentication failed");
 
-          alert(
-            "Firebase authentication failed:\n\n"+
-            error.message
-          );
-
-        });
-
-    }
-
+        alert(
+          "Firebase authentication failed:\n\n" +
+          error.message
+        );
+      });
   }
-);
+});
 
 
-async function waitForAuth(){
+async function waitForAuth() {
 
-  if(currentUser){
+  if (currentUser) {
     return currentUser;
   }
 
@@ -537,64 +437,53 @@ async function waitForAuth(){
 // SCREEN SYSTEM
 // ============================================================
 
-function hideScreens(){
+function hideScreens() {
 
   [
     "homeScreen",
     "createRoomScreen",
     "joinRoomScreen",
     "lobbyScreen",
-    "gameScreen"
-  ].forEach(id=>{
+    "gameScreen",
+    "resultsScreen"
+  ].forEach(id => {
 
-    const element =
-      $(id);
+    const element = $(id);
 
-    if(element){
-      element.style.display =
-        "none";
+    if (element) {
+      element.style.display = "none";
     }
-
   });
 }
 
 
-function showScreen(id){
+function showScreen(id) {
 
   hideScreens();
 
-  const element =
-    $(id);
+  const element = $(id);
 
-  if(element){
-    element.style.display =
-      "block";
+  if (element) {
+    element.style.display = "block";
   }
-
 }
 
 
-function showCreateRoom(){
+function showCreateRoom() {
   showScreen("createRoomScreen");
 }
 
 
-function showJoinRoom(){
+function showJoinRoom() {
   showScreen("joinRoomScreen");
 }
 
 
-function goHome(){
+function goHome() {
 
-  if(timerInterval){
-
-    clearInterval(
-      timerInterval
-    );
-
-    timerInterval =
-      null;
-
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
   }
 
   showScreen("homeScreen");
@@ -602,19 +491,15 @@ function goHome(){
 
 
 // ============================================================
-// URL ROOM
+// URL
 // ============================================================
 
-function updateRoomURL(code){
+function updateRoomURL(code) {
 
-  const url =
-    `${window.location.origin}${window.location.pathname}?room=${code}`;
-
-  $("displayRoomCode").textContent =
-    code;
+  $("displayRoomCode").textContent = code;
 
   $("roomLink").textContent =
-    url;
+    `${window.location.origin}${window.location.pathname}?room=${code}`;
 
   window.history.replaceState(
     {},
@@ -624,20 +509,15 @@ function updateRoomURL(code){
 }
 
 
-function checkURLRoom(){
+function checkURLRoom() {
 
   const params =
-    new URLSearchParams(
-      window.location.search
-    );
+    new URLSearchParams(window.location.search);
 
-  const code =
-    params.get("room");
+  const code = params.get("room");
 
-  if(!code){
-
+  if (!code) {
     showScreen("homeScreen");
-
     return;
   }
 
@@ -652,156 +532,106 @@ function checkURLRoom(){
 // CREATE ROOM
 // ============================================================
 
-async function createRoom(){
+async function createRoom() {
 
-  try{
+  try {
 
-    const user =
-      await waitForAuth();
+    const user = await waitForAuth();
 
     const teamName =
-      $("createTeamName")
-        .value
-        .trim();
+      $("createTeamName").value.trim();
 
-    if(!teamName){
-
-      alert(
-        "Enter your team name."
-      );
-
+    if (!teamName) {
+      alert("Enter your team name.");
       return;
     }
 
-    const button =
-      $("createRoomButton");
+    const button = $("createRoomButton");
 
-    button.disabled =
-      true;
-
-    button.textContent =
-      "CREATING...";
+    button.disabled = true;
+    button.textContent = "CREATING...";
 
     let code = null;
 
-    for(
-      let attempt=0;
-      attempt<10;
-      attempt++
-    ){
+    for (let attempt = 0; attempt < 10; attempt++) {
 
-      const candidate =
-        randomRoomCode();
+      const candidate = randomRoomCode();
 
       const existing =
-        await get(
-          roomRef(candidate)
-        );
+        await get(roomRef(candidate));
 
-      if(!existing.exists()){
+      if (!existing.exists()) {
 
-        code =
-          candidate;
-
+        code = candidate;
         break;
-
       }
-
     }
 
-    if(!code){
-
-      throw new Error(
-        "Could not create room."
-      );
-
+    if (!code) {
+      throw new Error("Could not create room.");
     }
 
     const room = {
 
-      hostUid:
-        user.uid,
+      hostUid: user.uid,
 
-      status:
-        "LOBBY",
+      status: "LOBBY",
 
-      createdAt:
-        Date.now(),
+      createdAt: Date.now(),
 
-      teams:{
+      teams: {
 
-        [user.uid]:{
+        [user.uid]: {
 
-          name:
-            teamName,
+          name: teamName,
 
-          budget:
-            STARTING_BUDGET,
+          budget: STARTING_BUDGET,
 
-          players:[],
+          players: [],
 
-          joinedAt:
-            Date.now()
-
+          joinedAt: Date.now()
         }
-
       },
 
-      auction:null,
+      auction: null,
 
-      characterOrder:[],
+      characterOrder: [],
 
-      history:[],
+      history: [],
 
-      finalResults:null
-
+      finalResults: null
     };
 
-    await set(
-      roomRef(code),
-      room
-    );
+    await set(roomRef(code), room);
 
-    currentRoomCode =
-      code;
-
-    currentRoom =
-      room;
+    currentRoomCode = code;
+    currentRoom = room;
 
     updateRoomURL(code);
 
-    showScreen(
-      "lobbyScreen"
-    );
+    showScreen("lobbyScreen");
 
     listenToRoom();
 
-  }catch(error){
+  } catch (error) {
 
     console.error(error);
 
     alert(
-      "Could not create room:\n\n"+
+      "Could not create room:\n\n" +
       error.message
     );
 
-  }finally{
+  } finally {
 
-    const button =
-      $("createRoomButton");
+    const button = $("createRoomButton");
 
-    if(button){
+    if (button) {
 
-      button.disabled =
-        false;
-
-      button.textContent =
-        "CREATE ROOM";
-
+      button.disabled = false;
+      button.textContent = "CREATE ROOM";
     }
-
   }
-
 }
 
 
@@ -809,12 +639,11 @@ async function createRoom(){
 // JOIN ROOM
 // ============================================================
 
-async function joinRoom(){
+async function joinRoom() {
 
-  try{
+  try {
 
-    const user =
-      await waitForAuth();
+    const user = await waitForAuth();
 
     const code =
       $("joinRoomCode")
@@ -827,77 +656,52 @@ async function joinRoom(){
         .value
         .trim();
 
-    if(code.length!==6){
-
-      alert(
-        "Enter the correct 6-character room code."
-      );
-
+    if (code.length !== 6) {
+      alert("Enter the correct 6-character room code.");
       return;
     }
 
-    if(!teamName){
-
-      alert(
-        "Enter your team name."
-      );
-
+    if (!teamName) {
+      alert("Enter your team name.");
       return;
     }
 
     const snapshot =
-      await get(
-        roomRef(code)
-      );
+      await get(roomRef(code));
 
-    if(!snapshot.exists()){
-
-      alert(
-        "Room not found."
-      );
-
+    if (!snapshot.exists()) {
+      alert("Room not found.");
       return;
     }
 
-    const room =
-      snapshot.val();
+    const room = snapshot.val();
 
-    if(room.status!=="LOBBY"){
-
-      alert(
-        "The auction has already started."
-      );
-
+    if (room.status !== "LOBBY") {
+      alert("The auction has already started.");
       return;
     }
 
-    const teams =
-      room.teams || {};
+    const teams = room.teams || {};
 
-    const ids =
-      Object.keys(teams);
+    const ids = Object.keys(teams);
 
-    if(
+    if (
       !teams[user.uid] &&
-      ids.length>=MAX_TEAMS
-    ){
+      ids.length >= MAX_TEAMS
+    ) {
 
       alert(
-        "Room is full. Maximum 4 teams."
+        `Room is full. Maximum ${MAX_TEAMS} teams.`
       );
 
       return;
     }
 
     await set(
-      teamRef(
-        user.uid,
-        code
-      ),
+      teamRef(user.uid, code),
       {
 
-        name:
-          teamName,
+        name: teamName,
 
         budget:
           teams[user.uid]
@@ -914,35 +718,28 @@ async function joinRoom(){
 
         joinedAt:
           teams[user.uid]
-            ? teams[user.uid].joinedAt ||
-              Date.now()
+            ? teams[user.uid].joinedAt || Date.now()
             : Date.now()
-
       }
     );
 
-    currentRoomCode =
-      code;
+    currentRoomCode = code;
 
     updateRoomURL(code);
 
-    showScreen(
-      "lobbyScreen"
-    );
+    showScreen("lobbyScreen");
 
     listenToRoom();
 
-  }catch(error){
+  } catch (error) {
 
     console.error(error);
 
     alert(
-      "Could not join room:\n\n"+
+      "Could not join room:\n\n" +
       error.message
     );
-
   }
-
 }
 
 
@@ -950,32 +747,23 @@ async function joinRoom(){
 // COPY ROOM LINK
 // ============================================================
 
-async function copyRoomLink(){
+async function copyRoomLink() {
 
-  if(!currentRoomCode){
-    return;
-  }
+  if (!currentRoomCode) return;
 
   const url =
     `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
 
-  try{
+  try {
 
     await navigator.clipboard.writeText(url);
 
-    alert(
-      "Room link copied!"
-    );
+    alert("Room link copied!");
 
-  }catch{
+  } catch {
 
-    prompt(
-      "Copy room link:",
-      url
-    );
-
+    prompt("Copy room link:", url);
   }
-
 }
 
 
@@ -983,64 +771,42 @@ async function copyRoomLink(){
 // LISTEN TO ROOM
 // ============================================================
 
-function listenToRoom(){
+function listenToRoom() {
 
-  if(!currentRoomCode){
-    return;
-  }
+  if (!currentRoomCode) return;
 
-  if(roomListener){
-    roomListener();
-  }
+  if (roomListener) roomListener();
 
-  if(auctionListener){
-    auctionListener();
-  }
+  if (auctionListener) auctionListener();
 
   roomListener =
-    onValue(
-      roomRef(),
-      snapshot=>{
+    onValue(roomRef(), snapshot => {
 
-        if(!snapshot.exists()){
+      if (!snapshot.exists()) {
 
-          alert(
-            "Room no longer exists."
-          );
+        alert("Room no longer exists.");
 
-          currentRoomCode =
-            null;
+        currentRoomCode = null;
 
-          goHome();
+        goHome();
 
-          return;
-        }
-
-        currentRoom =
-          snapshot.val();
-
-        renderRoom(
-          currentRoom
-        );
-
+        return;
       }
-    );
+
+      currentRoom = snapshot.val();
+
+      renderRoom(currentRoom);
+    });
+
 
   auctionListener =
-    onValue(
-      auctionRef(),
-      snapshot=>{
+    onValue(auctionRef(), snapshot => {
 
-        if(snapshot.exists()){
+      if (snapshot.exists()) {
 
-          displayAuction(
-            snapshot.val()
-          );
-
-        }
-
+        displayAuction(snapshot.val());
       }
-    );
+    });
 }
 
 
@@ -1048,61 +814,37 @@ function listenToRoom(){
 // RENDER ROOM
 // ============================================================
 
-function renderRoom(room){
+function renderRoom(room) {
 
-  if(room.status==="LOBBY"){
+  if (room.status === "LOBBY") {
 
     renderLobby(room);
 
     return;
   }
 
-  if(room.status==="PLAYING"){
+  if (room.status === "PLAYING") {
 
     showScreen("gameScreen");
 
     renderTeams(room);
-
     renderHistory(room);
-
-    $("finalResultsCard").style.display =
-      "none";
 
     return;
   }
 
-  if(room.status==="FINISHED"){
+  if (room.status === "FINISHED") {
 
-    showScreen("gameScreen");
+    if (timerInterval) {
 
-    renderTeams(room);
-
-    renderHistory(room);
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
 
     renderFinalResults(room);
 
-    const bid =
-      $("bidButton");
-
-    bid.disabled =
-      true;
-
-    bid.textContent =
-      "🏁 AUCTION FINISHED";
-
-    if(timerInterval){
-
-      clearInterval(
-        timerInterval
-      );
-
-      timerInterval =
-        null;
-
-    }
-
+    return;
   }
-
 }
 
 
@@ -1110,7 +852,7 @@ function renderRoom(room){
 // LOBBY
 // ============================================================
 
-function renderLobby(room){
+function renderLobby(room) {
 
   showScreen("lobbyScreen");
 
@@ -1120,34 +862,28 @@ function renderLobby(room){
   $("roomLink").textContent =
     `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
 
-  const container =
-    $("lobbyPlayers");
+  const container = $("lobbyPlayers");
 
   container.innerHTML = "";
 
-  Object.entries(
-    room.teams || {}
-  ).forEach(
-    ([uid,team],index)=>{
+  Object.entries(room.teams || {})
+    .forEach(([uid, team], index) => {
 
       const div =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
-      div.className =
-        "player-card";
+      div.className = "player-card";
 
       div.innerHTML = `
 
         <strong>
-          ${index+1}.
+          ${index + 1}.
           ${escapeHtml(team.name)}
         </strong>
 
         <span>
           ${
-            uid===room.hostUid
+            uid === room.hostUid
               ? "👑 HOST"
               : ""
           }
@@ -1156,29 +892,22 @@ function renderLobby(room){
       `;
 
       container.appendChild(div);
+    });
 
-    }
-  );
 
-  const start =
-    $("startAuctionButton");
+  const start = $("startAuctionButton");
 
-  if(
+  if (
     currentUser &&
-    currentUser.uid===
-    room.hostUid
-  ){
+    currentUser.uid === room.hostUid
+  ) {
 
-    start.style.display =
-      "block";
+    start.style.display = "block";
 
-  }else{
+  } else {
 
-    start.style.display =
-      "none";
-
+    start.style.display = "none";
   }
-
 }
 
 
@@ -1186,24 +915,17 @@ function renderLobby(room){
 // START AUCTION
 // ============================================================
 
-async function startAuction(){
+async function startAuction() {
 
-  const user =
-    await waitForAuth();
+  const user = await waitForAuth();
 
-  const snapshot =
-    await get(
-      roomRef()
-    );
+  const snapshot = await get(roomRef());
 
-  if(!snapshot.exists()){
-    return;
-  }
+  if (!snapshot.exists()) return;
 
-  const room =
-    snapshot.val();
+  const room = snapshot.val();
 
-  if(room.hostUid!==user.uid){
+  if (room.hostUid !== user.uid) {
 
     alert(
       "Only the host can start the auction."
@@ -1214,59 +936,48 @@ async function startAuction(){
 
   const order =
     shuffle(
-      characters.map(
-        c=>c.id
-      )
+      characters.map(c => c.id)
     );
 
   const first =
-    getCharacter(
-      order[0]
-    );
+    getCharacter(order[0]);
 
   await update(
     roomRef(),
     {
 
-      status:
-        "PLAYING",
+      status: "PLAYING",
 
-      characterOrder:
-        order,
+      characterOrder: order,
 
-      history:[],
+      history: [],
 
-      finalResults:null,
+      finalResults: null,
 
-      auction:{
+      auction: {
 
-        status:
-          "ACTIVE",
+        status: "ACTIVE",
 
-        characterIndex:
-          0,
+        characterIndex: 0,
 
-        characterId:
-          first.id,
+        characterId: first.id,
 
-        currentBid:
-          START_BID,
+        currentBid: START_BID,
 
-        highestBidder:
-          null,
+        highestBidder: null,
 
-        highestBidderName:
-          null,
+        highestBidderName: null,
+
+        lastBidder: null,
+
+        skips: {},
 
         endTime:
-          Date.now()+
-          AUCTION_TIME*1000
-
+          Date.now() +
+          AUCTION_TIME * 1000
       }
-
     }
   );
-
 }
 
 
@@ -1274,31 +985,23 @@ async function startAuction(){
 // DISPLAY AUCTION
 // ============================================================
 
-function displayAuction(auction){
+function displayAuction(auction) {
 
-  if(!auction){
-    return;
-  }
+  if (!auction) return;
 
   const c =
-    getCharacter(
-      auction.characterId
-    );
+    getCharacter(auction.characterId);
 
-  if(!c){
-    return;
-  }
+  if (!c) return;
 
   $("characterName").textContent =
     c.name;
 
   $("characterPower").textContent =
-    `⚡ Power ${c.power}/1000`;
+    `⚡ Power ${c.power}/950`;
 
   $("currentBid").textContent =
-    formatMoney(
-      auction.currentBid
-    );
+    formatMoney(auction.currentBid);
 
   $("highestBidder").textContent =
     auction.highestBidderName
@@ -1307,22 +1010,17 @@ function displayAuction(auction){
 
   const next =
     auction.highestBidder
-      ? getNextBid(
-          auction.currentBid
-        )
+      ? getNextBid(auction.currentBid)
       : START_BID;
 
   $("nextBid").textContent =
     `Next bid: ${formatMoney(next)}`;
 
-  updateBidButton(
-    auction
-  );
+  updateSkipDisplay(auction);
 
-  startTimer(
-    auction
-  );
+  updateBidButton(auction);
 
+  startTimer(auction);
 }
 
 
@@ -1330,74 +1028,80 @@ function displayAuction(auction){
 // BID BUTTON
 // ============================================================
 
-function updateBidButton(auction){
+function updateBidButton(auction) {
 
-  const button =
-    $("bidButton");
+  const button = $("bidButton");
 
-  if(!currentUser ||
-     !currentRoom ||
-     auction.status!=="ACTIVE"){
+  if (
+    !currentUser ||
+    !currentRoom ||
+    auction.status !== "ACTIVE"
+  ) {
 
-    button.disabled=true;
-
+    button.disabled = true;
     return;
   }
 
   const team =
     currentRoom.teams &&
-    currentRoom.teams[
-      currentUser.uid
-    ];
+    currentRoom.teams[currentUser.uid];
 
-  if(!team){
+  if (!team) {
 
-    button.disabled=true;
-
-    button.textContent =
-      "NOT IN ROOM";
+    button.disabled = true;
+    button.textContent = "NOT IN ROOM";
 
     return;
   }
 
-  const players =
-    team.players || [];
+  const players = team.players || [];
 
-  if(players.length>=MAX_CHARACTERS){
+  if (players.length >= MAX_CHARACTERS) {
 
-    button.disabled=true;
-
-    button.textContent =
-      "TEAM FULL";
+    button.disabled = true;
+    button.textContent = "TEAM FULL";
 
     return;
   }
+
+
+  // ========================================================
+  // NEW RULE:
+  // A bidder cannot bid twice consecutively.
+  // ========================================================
+
+  if (
+    auction.lastBidder === currentUser.uid
+  ) {
+
+    button.disabled = true;
+
+    button.textContent =
+      "WAIT FOR ANOTHER TEAM";
+
+    return;
+  }
+
 
   const nextBid =
     auction.highestBidder
-      ? getNextBid(
-          auction.currentBid
-        )
+      ? getNextBid(auction.currentBid)
       : START_BID;
 
-  if(
-    Number(team.budget||0)<
-    nextBid
-  ){
+  if (
+    Number(team.budget || 0) < nextBid
+  ) {
 
-    button.disabled=true;
-
-    button.textContent =
-      "OUT OF MONEY";
+    button.disabled = true;
+    button.textContent = "OUT OF MONEY";
 
     return;
   }
 
-  button.disabled=false;
+  button.disabled = false;
 
   button.textContent =
     `BID ${formatMoney(nextBid)}`;
-
 }
 
 
@@ -1405,30 +1109,23 @@ function updateBidButton(auction){
 // PLACE BID
 // ============================================================
 
-async function placeBid(){
+async function placeBid() {
 
-  const user =
-    await waitForAuth();
+  const user = await waitForAuth();
 
   const snapshot =
-    await get(
-      roomRef()
-    );
+    await get(roomRef());
 
-  if(!snapshot.exists()){
-    return;
-  }
+  if (!snapshot.exists()) return;
 
-  const room =
-    snapshot.val();
+  const room = snapshot.val();
 
-  const auction =
-    room.auction;
+  const auction = room.auction;
 
-  if(
+  if (
     !auction ||
-    auction.status!=="ACTIVE"
-  ){
+    auction.status !== "ACTIVE"
+  ) {
     return;
   }
 
@@ -1436,33 +1133,43 @@ async function placeBid(){
     room.teams &&
     room.teams[user.uid];
 
-  if(!team){
+  if (!team) {
+
+    alert("You are not in this room.");
+
+    return;
+  }
+
+  if (
+    (team.players || []).length >=
+    MAX_CHARACTERS
+  ) {
+    return;
+  }
+
+
+  // Cannot bid twice consecutively
+  if (
+    auction.lastBidder === user.uid
+  ) {
 
     alert(
-      "You are not in this room."
+      "You cannot bid twice consecutively. Wait for another team to bid."
     );
 
     return;
   }
 
-  if(
-    (team.players||[]).length>=
-    MAX_CHARACTERS
-  ){
-    return;
-  }
 
   const nextBid =
     auction.highestBidder
-      ? getNextBid(
-          auction.currentBid
-        )
+      ? getNextBid(auction.currentBid)
       : START_BID;
 
-  if(
-    Number(team.budget||0)<
+  if (
+    Number(team.budget || 0) <
     nextBid
-  ){
+  ) {
 
     alert(
       "You don't have enough money."
@@ -1471,54 +1178,294 @@ async function placeBid(){
     return;
   }
 
+
   await runTransaction(
     auctionRef(),
-    current=>{
+    current => {
 
-      if(!current){
+      if (!current) return;
+
+      if (current.status !== "ACTIVE") {
         return;
       }
 
-      if(current.status!=="ACTIVE"){
-        return;
-      }
-
-      if(
-        Date.now()>=
+      if (
+        Date.now() >=
         Number(current.endTime)
-      ){
+      ) {
         return;
       }
+
+
+      // Server-side consecutive bid protection
+      if (
+        current.lastBidder === user.uid
+      ) {
+        return;
+      }
+
 
       const bid =
         current.highestBidder
-          ? getNextBid(
-              current.currentBid
-            )
+          ? getNextBid(current.currentBid)
           : START_BID;
+
 
       return {
 
         ...current,
 
-        currentBid:
-          bid,
+        currentBid: bid,
 
-        highestBidder:
-          user.uid,
+        highestBidder: user.uid,
 
-        highestBidderName:
-          team.name,
+        highestBidderName: team.name,
+
+        lastBidder: user.uid,
+
+        skips: {},
 
         endTime:
-          Date.now()+
-          AUCTION_TIME*1000
-
+          Date.now() +
+          AUCTION_TIME * 1000
       };
-
     }
   );
+}
 
+
+// ============================================================
+// SKIP SYSTEM
+// ============================================================
+
+function getActiveTeams(room) {
+
+  return Object.entries(room.teams || {})
+    .filter(([uid, team]) =>
+      teamCanContinue(team)
+    );
+}
+
+
+function everyoneSkipped(room, auction) {
+
+  const activeTeams =
+    getActiveTeams(room);
+
+  if (!activeTeams.length) {
+    return true;
+  }
+
+  const skips =
+    auction.skips || {};
+
+  return activeTeams.every(
+    ([uid]) => skips[uid] === true
+  );
+}
+
+
+function updateSkipDisplay(auction) {
+
+  const button =
+    $("skipButton");
+
+  if (!button || !currentUser) return;
+
+  const skips =
+    auction.skips || {};
+
+  if (skips[currentUser.uid]) {
+
+    button.disabled = true;
+
+    button.textContent =
+      "✓ SKIPPED";
+
+  } else {
+
+    button.disabled =
+      auction.status !== "ACTIVE";
+
+    button.textContent =
+      "⏭️ SKIP";
+  }
+
+
+  const activeTeams =
+    Object.keys(
+      currentRoom?.teams || {}
+    ).filter(uid =>
+      teamCanContinue(
+        currentRoom.teams[uid]
+      )
+    );
+
+  const count =
+    activeTeams.filter(
+      uid => skips[uid]
+    ).length;
+
+  const message =
+    $("skipStatus");
+
+  if (message) {
+
+    message.textContent =
+      `Skip votes: ${count}/${activeTeams.length}`;
+  }
+}
+
+
+async function placeSkip() {
+
+  const user = await waitForAuth();
+
+  const snapshot =
+    await get(roomRef());
+
+  if (!snapshot.exists()) return;
+
+  const room = snapshot.val();
+
+  const auction = room.auction;
+
+  if (
+    !auction ||
+    auction.status !== "ACTIVE"
+  ) {
+    return;
+  }
+
+  const team =
+    room.teams?.[user.uid];
+
+  if (!team) return;
+
+  if (!teamCanContinue(team)) return;
+
+
+  const result =
+    await runTransaction(
+      auctionRef(),
+      current => {
+
+        if (!current) return;
+
+        if (current.status !== "ACTIVE") {
+          return;
+        }
+
+        const skips =
+          current.skips || {};
+
+        if (skips[user.uid]) {
+          return;
+        }
+
+        return {
+          ...current,
+          skips: {
+            ...skips,
+            [user.uid]: true
+          }
+        };
+      }
+    );
+
+
+  if (!result.committed) return;
+
+
+  // Check whether everyone skipped.
+  const latest =
+    await get(roomRef());
+
+  if (!latest.exists()) return;
+
+  const latestRoom =
+    latest.val();
+
+  const latestAuction =
+    latestRoom.auction;
+
+  if (
+    latestAuction &&
+    latestAuction.status === "ACTIVE" &&
+    everyoneSkipped(
+      latestRoom,
+      latestAuction
+    )
+  ) {
+
+    await skipCurrentCharacter();
+  }
+}
+
+
+async function skipCurrentCharacter() {
+
+  if (finishingAuction) return;
+
+  finishingAuction = true;
+
+  try {
+
+    const result =
+      await runTransaction(
+        auctionRef(),
+        current => {
+
+          if (!current) return;
+
+          if (
+            current.status !== "ACTIVE"
+          ) {
+            return;
+          }
+
+          return {
+            ...current,
+            status: "FINALIZING"
+          };
+        }
+      );
+
+    if (!result.committed) return;
+
+    const auction =
+      result.snapshot.val();
+
+    const c =
+      getCharacter(auction.characterId);
+
+    await addHistory({
+
+      type: "SKIPPED",
+
+      character: c?.name || "Unknown",
+
+      price: 0,
+
+      teamName: "All Teams",
+
+      timestamp: Date.now()
+    });
+
+
+    await nextCharacter(auction);
+
+  } catch (error) {
+
+    console.error(
+      "SKIP CHARACTER:",
+      error
+    );
+
+  } finally {
+
+    finishingAuction = false;
+  }
 }
 
 
@@ -1526,58 +1473,46 @@ async function placeBid(){
 // TIMER
 // ============================================================
 
-function startTimer(auction){
+function startTimer(auction) {
 
-  if(timerInterval){
+  if (timerInterval) {
 
-    clearInterval(
-      timerInterval
-    );
-
+    clearInterval(timerInterval);
   }
 
   const timer =
     $("auctionTimer");
 
-  function tick(){
+  function tick() {
 
     const remaining =
       Math.max(
         0,
         Math.ceil(
           (
-            Number(auction.endTime)-
+            Number(auction.endTime) -
             Date.now()
-          )/1000
+          ) / 1000
         )
       );
 
     timer.textContent =
       `${remaining}s`;
 
-    if(remaining<=0){
+    if (remaining <= 0) {
 
-      clearInterval(
-        timerInterval
-      );
+      clearInterval(timerInterval);
 
-      timerInterval =
-        null;
+      timerInterval = null;
 
       finishAuction();
-
     }
-
   }
 
   tick();
 
   timerInterval =
-    setInterval(
-      tick,
-      250
-    );
-
+    setInterval(tick, 250);
 }
 
 
@@ -1585,27 +1520,24 @@ function startTimer(auction){
 // TEAM CAN CONTINUE
 // ============================================================
 
-function teamCanContinue(team){
+function teamCanContinue(team) {
 
   const players =
     team.players || [];
 
   const budget =
-    Number(
-      team.budget || 0
-    );
+    Number(team.budget || 0);
 
-  if(
-    players.length>=
+  if (
+    players.length >=
     MAX_CHARACTERS
-  ){
+  ) {
     return false;
   }
 
-  if(
-    budget<
-    START_BID
-  ){
+  if (
+    budget < START_BID
+  ) {
     return false;
   }
 
@@ -1613,19 +1545,17 @@ function teamCanContinue(team){
 }
 
 
-function canAuctionContinue(room){
+function canAuctionContinue(room) {
 
   const teams =
-    Object.values(
-      room.teams || {}
-    );
+    Object.values(room.teams || {});
 
-  if(!teams.length){
+  if (!teams.length) {
     return false;
   }
 
   return teams.some(
-    team=>
+    team =>
       teamCanContinue(team)
   );
 }
@@ -1635,224 +1565,177 @@ function canAuctionContinue(room){
 // FINISH AUCTION
 // ============================================================
 
-async function finishAuction(){
+async function finishAuction() {
 
-  if(
+  if (
     finishingAuction ||
     !currentRoomCode
-  ){
+  ) {
     return;
   }
 
-  finishingAuction=true;
+  finishingAuction = true;
 
-  try{
+  try {
 
     const result =
       await runTransaction(
         auctionRef(),
-        current=>{
+        current => {
 
-          if(!current){
+          if (!current) return;
+
+          if (
+            current.status !== "ACTIVE"
+          ) {
             return;
           }
 
-          if(
-            current.status!=="ACTIVE"
-          ){
-            return;
-          }
-
-          if(
-            Date.now()<
+          if (
+            Date.now() <
             Number(current.endTime)
-          ){
+          ) {
             return;
           }
 
           return {
-
             ...current,
-
-            status:
-              "FINALIZING"
-
+            status: "FINALIZING"
           };
-
         }
       );
 
-    if(!result.committed){
+
+    if (!result.committed) {
       return;
     }
+
 
     const auction =
       result.snapshot.val();
 
     const c =
-      getCharacter(
-        auction.characterId
-      );
+      getCharacter(auction.characterId);
 
-    if(!auction.highestBidder){
+
+    // Nobody bid
+    if (!auction.highestBidder) {
 
       await addHistory({
 
-        type:"SKIP",
+        type: "SKIP",
 
-        character:
-          c.name,
+        character: c.name,
 
-        price:0,
+        price: 0,
 
-        teamName:
-          "No Bid",
+        teamName: "No Bid",
 
-        timestamp:
-          Date.now()
-
+        timestamp: Date.now()
       });
 
-    }else{
+
+    } else {
 
       const winner =
         auction.highestBidder;
 
       const price =
-        Number(
-          auction.currentBid
-        );
+        Number(auction.currentBid);
+
 
       const winnerResult =
         await runTransaction(
           teamRef(winner),
-          team=>{
+          team => {
 
-            if(!team){
-              return;
-            }
+            if (!team) return;
 
             const players =
               team.players || [];
 
             const budget =
-              Number(
-                team.budget||0
-              );
+              Number(team.budget || 0);
 
-            if(
-              players.length>=
+            if (
+              players.length >=
               MAX_CHARACTERS
-            ){
+            ) {
               return;
             }
 
-            if(
-              budget<
-              price
-            ){
+            if (
+              budget < price
+            ) {
               return;
             }
+
 
             return {
 
               ...team,
 
               budget:
-                budget-price,
+                budget - price,
 
-              players:[
+              players: [
 
                 ...players,
 
                 {
 
-                  id:
-                    c.id,
-
-                  name:
-                    c.name,
-
-                  price:
-                    price,
-
-                  power:
-                    c.power,
-
-                  attack:
-                    c.attack,
-
-                  defense:
-                    c.defense,
-
-                  speed:
-                    c.speed,
-
-                  hax:
-                    c.hax,
-
-                  intelligence:
-                    c.intelligence,
-
-                  synergy:
-                    c.synergy,
-
-                  purchasedAt:
-                    Date.now()
-
+                  id: c.id,
+                  name: c.name,
+                  price,
+                  power: c.power,
+                  attack: c.attack,
+                  defense: c.defense,
+                  speed: c.speed,
+                  hax: c.hax,
+                  intelligence: c.intelligence,
+                  synergy: c.synergy,
+                  purchasedAt: Date.now()
                 }
-
               ]
-
             };
-
           }
         );
 
-      if(winnerResult.committed){
+
+      if (winnerResult.committed) {
 
         await addHistory({
 
-          type:"SOLD",
+          type: "SOLD",
 
-          character:
-            c.name,
+          character: c.name,
 
-          price:
-            price,
+          price,
 
           teamName:
             auction.highestBidderName,
 
-          teamUid:
-            winner,
+          teamUid: winner,
 
-          timestamp:
-            Date.now()
-
+          timestamp: Date.now()
         });
-
       }
-
     }
 
-    await nextCharacter(
-      auction
-    );
 
-  }catch(error){
+    await nextCharacter(auction);
+
+  } catch (error) {
 
     console.error(
       "FINISH AUCTION:",
       error
     );
 
-  }finally{
+  } finally {
 
-    finishingAuction=false;
-
+    finishingAuction = false;
   }
-
 }
 
 
@@ -1860,28 +1743,26 @@ async function finishAuction(){
 // HISTORY
 // ============================================================
 
-async function addHistory(item){
+async function addHistory(item) {
 
   await runTransaction(
     ref(
       db,
       `rooms/${currentRoomCode}/history`
     ),
-    history=>{
+    history => {
 
       const list =
         Array.isArray(history)
           ? history
           : [];
 
-      return[
+      return [
         ...list,
         item
       ];
-
     }
   );
-
 }
 
 
@@ -1889,45 +1770,37 @@ async function addHistory(item){
 // GAME END
 // ============================================================
 
-async function checkGameEnd(){
+async function checkGameEnd() {
 
   const snapshot =
-    await get(
-      roomRef()
-    );
+    await get(roomRef());
 
-  if(!snapshot.exists()){
+  if (!snapshot.exists()) {
     return true;
   }
 
   const room =
     snapshot.val();
 
-  if(!canAuctionContinue(room)){
+  if (!canAuctionContinue(room)) {
 
     const finalResults =
-      calculateFinalResults(
-        room
-      );
+      calculateFinalResults(room);
 
     await update(
       roomRef(),
       {
 
-        status:
-          "FINISHED",
+        status: "FINISHED",
 
         finalResults,
 
-        auction:{
+        auction: {
 
-          ...(room.auction||{}),
+          ...(room.auction || {}),
 
-          status:
-            "FINISHED"
-
+          status: "FINISHED"
         }
-
       }
     );
 
@@ -1942,29 +1815,21 @@ async function checkGameEnd(){
 // NEXT CHARACTER
 // ============================================================
 
-async function nextCharacter(previous){
+async function nextCharacter(previous) {
 
-  if(
-    await checkGameEnd()
-  ){
+  if (await checkGameEnd()) {
     return;
   }
 
   const snapshot =
-    await get(
-      roomRef()
-    );
+    await get(roomRef());
 
-  if(!snapshot.exists()){
-    return;
-  }
+  if (!snapshot.exists()) return;
 
   const room =
     snapshot.val();
 
-  if(
-    !canAuctionContinue(room)
-  ){
+  if (!canAuctionContinue(room)) {
 
     const finalResults =
       calculateFinalResults(room);
@@ -1972,33 +1837,31 @@ async function nextCharacter(previous){
     await update(
       roomRef(),
       {
-
-        status:
-          "FINISHED",
-
+        status: "FINISHED",
         finalResults
-
       }
     );
 
     return;
   }
+
 
   const order =
     room.characterOrder || [];
 
   const currentIndex =
     Number(
-      previous.characterIndex||0
+      previous.characterIndex || 0
     );
 
   const nextIndex =
-    currentIndex+1;
+    currentIndex + 1;
 
-  if(
-    nextIndex>=
+
+  if (
+    nextIndex >=
     order.length
-  ){
+  ) {
 
     const finalResults =
       calculateFinalResults(room);
@@ -2007,68 +1870,59 @@ async function nextCharacter(previous){
       roomRef(),
       {
 
-        status:
-          "FINISHED",
+        status: "FINISHED",
 
         finalResults,
 
-        auction:{
+        auction: {
 
-          ...(room.auction||{}),
+          ...(room.auction || {}),
 
-          status:
-            "FINISHED"
-
+          status: "FINISHED"
         }
-
       }
     );
 
     return;
   }
+
 
   const next =
     getCharacter(
       order[nextIndex]
     );
 
-  if(!next){
-    return;
-  }
+  if (!next) return;
+
 
   await update(
     roomRef(),
     {
 
-      auction:{
+      auction: {
 
-        status:
-          "ACTIVE",
+        status: "ACTIVE",
 
-        characterIndex:
-          nextIndex,
+        characterIndex: nextIndex,
 
-        characterId:
-          next.id,
+        characterId: next.id,
 
-        currentBid:
-          START_BID,
+        currentBid: START_BID,
 
-        highestBidder:
-          null,
+        highestBidder: null,
 
-        highestBidderName:
-          null,
+        highestBidderName: null,
+
+        lastBidder: null,
+
+        skips: {},
 
         endTime:
-          Date.now()+
-          AUCTION_TIME*1000
-
+          Date.now() +
+          AUCTION_TIME * 1000
       }
-
     }
   );
-
 }
 
 
@@ -2076,42 +1930,39 @@ async function nextCharacter(previous){
 // TEAM DISPLAY
 // ============================================================
 
-function renderTeams(room){
+function renderTeams(room) {
 
   const container =
     $("teamStats");
 
-  container.innerHTML="";
+  container.innerHTML = "";
 
-  Object.entries(
-    room.teams||{}
-  ).forEach(
-    ([uid,team])=>{
+  Object.entries(room.teams || {})
+    .forEach(([uid, team]) => {
 
       const players =
-        team.players||[];
+        team.players || [];
 
       const out =
         !teamCanContinue(team);
 
       const div =
-        document.createElement(
-          "div"
-        );
+        document.createElement("div");
 
       div.className =
-        "team-card"+
+        "team-card" +
         (
           currentUser &&
-          uid===currentUser.uid
+          uid === currentUser.uid
             ? " my-team"
             : ""
-        )+
+        ) +
         (
           out
             ? " out"
             : ""
         );
+
 
       div.innerHTML = `
 
@@ -2121,7 +1972,7 @@ function renderTeams(room){
 
           ${
             currentUser &&
-            uid===currentUser.uid
+            uid === currentUser.uid
               ? " ⭐"
               : ""
           }
@@ -2138,7 +1989,7 @@ function renderTeams(room){
         <div>
           Characters:
           <strong>
-            ${players.length}/4
+            ${players.length}/${MAX_CHARACTERS}
           </strong>
         </div>
 
@@ -2159,7 +2010,7 @@ function renderTeams(room){
             players.length
 
               ? players.map(
-                  p=>`
+                  p => `
 
                     <div>
                       ${escapeHtml(p.name)}
@@ -2176,16 +2027,10 @@ function renderTeams(room){
           }
 
         </div>
-
       `;
 
-      container.appendChild(
-        div
-      );
-
-    }
-  );
-
+      container.appendChild(div);
+    });
 }
 
 
@@ -2193,15 +2038,15 @@ function renderTeams(room){
 // HISTORY DISPLAY
 // ============================================================
 
-function renderHistory(room){
+function renderHistory(room) {
 
   const container =
     $("auctionHistory");
 
   const history =
-    room.history||[];
+    room.history || [];
 
-  if(!history.length){
+  if (!history.length) {
 
     container.innerHTML =
       "<div>No auction history yet.</div>";
@@ -2209,110 +2054,670 @@ function renderHistory(room){
     return;
   }
 
+
   container.innerHTML =
     [...history]
       .reverse()
-      .map(item=>{
+      .map(item => {
 
-        if(
-          item.type==="SKIP"
-        ){
+        if (
+          item.type === "SKIP" ||
+          item.type === "SKIPPED"
+        ) {
 
           return `
 
             <div class="history-item">
 
               ⏭️
-              ${escapeHtml(
-                item.character
-              )}
+              ${escapeHtml(item.character)}
 
-              — No bids
+              —
+              Skipped
 
             </div>
-
           `;
-
         }
+
 
         return `
 
           <div class="history-item">
 
             🔥
-            ${escapeHtml(
-              item.character
-            )}
+            ${escapeHtml(item.character)}
 
             —
 
-            ${escapeHtml(
-              item.teamName
-            )}
+            ${escapeHtml(item.teamName)}
 
             —
 
             <strong>
-              ${formatMoney(
-                item.price
-              )}
+              ${formatMoney(item.price)}
             </strong>
 
           </div>
-
         `;
-
       })
       .join("");
-
 }
 
 
 // ============================================================
-// FINAL SCORE
+// TEAM COMBINATION ENGINE
 // ============================================================
 
-function calculateFinalTeamScore(team){
+function clamp(value, min, max) {
 
-  const players =
-    team.players||[];
+  return Math.max(
+    min,
+    Math.min(max, value)
+  );
+}
 
-  let score=0;
 
-  players.forEach(p=>{
+function average(players, key) {
 
-    score +=
-      Number(p.power||0)*0.30;
+  if (!players.length) return 0;
 
-    score +=
-      Number(p.attack||0)*0.12;
+  return players.reduce(
+    (sum, p) =>
+      sum + Number(p[key] || 0),
+    0
+  ) / players.length;
+}
 
-    score +=
-      Number(p.defense||0)*0.12;
 
-    score +=
-      Number(p.speed||0)*0.12;
+/*
+  The final result is NOT simply:
 
-    score +=
-      Number(p.hax||0)*0.14;
+  power + power + power.
 
-    score +=
-      Number(p.intelligence||0)*0.10;
+  The engine examines:
 
-    score +=
-      Number(p.synergy||0)*0.10;
+  • individual ability
+  • intelligence
+  • battle experience
+  • leadership
+  • offensive balance
+  • defensive balance
+  • speed
+  • hax
+  • support
+  • tactical knowledge
+  • ability diversity
+  • team synergy
+  • role coverage
+  • budget management
+  • character combinations
+*/
 
-  });
 
-  if(
-    players.length===4
-  ){
+function getCharacterProfile(p) {
 
-    score+=10;
+  const name =
+    String(p.name || "").toLowerCase();
 
+  let attackRole = 0;
+  let defenseRole = 0;
+  let supportRole = 0;
+  let strategyRole = 0;
+  let speedRole = 0;
+  let haxRole = 0;
+  let leadership = 0;
+  let experience = 0;
+  let knowledge = 0;
+
+
+  // Base values from character statistics
+
+  attackRole =
+    Number(p.attack || 0);
+
+  defenseRole =
+    Number(p.defense || 0);
+
+  speedRole =
+    Number(p.speed || 0);
+
+  haxRole =
+    Number(p.hax || 0);
+
+  strategyRole =
+    Number(p.intelligence || 0);
+
+
+  knowledge =
+    Number(p.intelligence || 0);
+
+
+  experience =
+    Number(p.power || 0);
+
+
+  // Leadership / tactical characters
+
+  const leaders = [
+    "naruto",
+    "sasuke",
+    "hashirama",
+    "madara",
+    "minato",
+    "tobirama",
+    "kakashi",
+    "jiraiya",
+    "hiruzen",
+    "shikamaru",
+    "shikaku",
+    "inoichi",
+    "gaara",
+    "tsunade",
+    "pain",
+    "nagato",
+    "itachi",
+    "danzo",
+    "onoki",
+    "raikage",
+    "hanzo"
+  ];
+
+  if (
+    leaders.some(x => name.includes(x))
+  ) {
+
+    leadership += 80;
+    knowledge += 35;
+    strategyRole += 35;
   }
 
-  return Math.round(score);
+
+  // Healing / support
+
+  if (
+    /sakura|tsunade|karin|kabuto|hashirama/.test(name)
+  ) {
+
+    supportRole += 100;
+    defenseRole += 35;
+  }
+
+
+  // Sensor / information
+
+  if (
+    /hinata|neji|shino|ino|inoichi|karin|kabuto|naruto/.test(name)
+  ) {
+
+    supportRole += 70;
+    knowledge += 45;
+  }
+
+
+  // Space-time / teleportation / mobility
+
+  if (
+    /minato|obito|kakashi|sasuke|isshiki|kaguya|momoshiki|urashiki/.test(name)
+  ) {
+
+    speedRole += 70;
+    haxRole += 80;
+  }
+
+
+  // Genjutsu / mental abilities
+
+  if (
+    /itachi|shisui|kurenai|sasuke|madara/.test(name)
+  ) {
+
+    haxRole += 70;
+    strategyRole += 35;
+  }
+
+
+  // Sealing / special knowledge
+
+  if (
+    /naruto|minato|hashirama|tobirama|kushina|jiraiya|orochimaru|chiyo|gaara/.test(name)
+  ) {
+
+    knowledge += 55;
+    haxRole += 35;
+  }
+
+
+  // Massive destructive power
+
+  if (
+    /isshiki|shibai|kaguya|madara|naruto|sasuke|momoshiki|juubidara|obito|hashirama|guy/.test(name)
+  ) {
+
+    attackRole += 70;
+  }
+
+
+  // Defense / durability
+
+  if (
+    /gaara|hashirama|kakuzu|third raikage|raikage|kimimaro|kaguya|isshiki|juubidara/.test(name)
+  ) {
+
+    defenseRole += 70;
+  }
+
+
+  return {
+
+    attack: clamp(attackRole, 0, 1100),
+
+    defense: clamp(defenseRole, 0, 1100),
+
+    support: clamp(supportRole, 0, 1100),
+
+    strategy: clamp(strategyRole, 0, 1100),
+
+    speed: clamp(speedRole, 0, 1100),
+
+    hax: clamp(haxRole, 0, 1100),
+
+    leadership: clamp(leadership, 0, 1100),
+
+    experience: clamp(experience, 0, 1100),
+
+    knowledge: clamp(knowledge, 0, 1100)
+  };
+}
+
+
+// ============================================================
+// COMBINATION SCORE
+// ============================================================
+
+function calculateTeamCombination(team) {
+
+  const players =
+    team.players || [];
+
+  if (!players.length) {
+
+    return {
+
+      characterStrength: 0,
+      coordination: 0,
+      planning: 0,
+      intelligence: 0,
+      experience: 0,
+      abilityDiversity: 0,
+      leadership: 0,
+      adaptability: 0,
+      synergy: 0,
+      auctionStrategy: 0,
+      finalScore: 0
+    };
+  }
+
+
+  const profiles =
+    players.map(getCharacterProfile);
+
+
+  // ----------------------------------------------------------
+  // Character strength
+  // ----------------------------------------------------------
+
+  const characterStrength =
+    clamp(
+      average(players, "power") * 0.65 +
+      average(players, "attack") * 0.15 +
+      average(players, "defense") * 0.10 +
+      average(players, "hax") * 0.10,
+      0,
+      950
+    );
+
+
+  // ----------------------------------------------------------
+  // Team role coverage
+  // ----------------------------------------------------------
+
+  const hasAttack =
+    profiles.some(p => p.attack >= 700);
+
+  const hasDefense =
+    profiles.some(p => p.defense >= 700);
+
+  const hasSupport =
+    profiles.some(p => p.support >= 600);
+
+  const hasStrategy =
+    profiles.some(p => p.strategy >= 700);
+
+  const hasSpeed =
+    profiles.some(p => p.speed >= 700);
+
+  const hasHax =
+    profiles.some(p => p.hax >= 700);
+
+
+  const rolesCovered =
+    [
+      hasAttack,
+      hasDefense,
+      hasSupport,
+      hasStrategy,
+      hasSpeed,
+      hasHax
+    ].filter(Boolean).length;
+
+
+  // ----------------------------------------------------------
+  // Coordination
+  // ----------------------------------------------------------
+
+  let coordination =
+    500 +
+    rolesCovered * 65;
+
+
+  // Multiple characters create more combination possibilities.
+
+  if (players.length >= 5) {
+    coordination += 50;
+  }
+
+  if (players.length >= 8) {
+    coordination += 40;
+  }
+
+
+  // ----------------------------------------------------------
+  // Ability combinations
+  // ----------------------------------------------------------
+
+  let combinations = 0;
+
+
+  for (let i = 0; i < profiles.length; i++) {
+
+    for (
+      let j = i + 1;
+      j < profiles.length;
+      j++
+    ) {
+
+      const a = profiles[i];
+      const b = profiles[j];
+
+
+      // attacker + support
+
+      combinations +=
+        Math.min(
+          70,
+          (a.attack * b.support) / 10000
+        );
+
+
+      // attacker + strategist
+
+      combinations +=
+        Math.min(
+          60,
+          (a.attack * b.strategy) / 12000
+        );
+
+
+      // speed + hax
+
+      combinations +=
+        Math.min(
+          60,
+          (a.speed * b.hax) / 12000
+        );
+
+
+      // defense + support
+
+      combinations +=
+        Math.min(
+          60,
+          (a.defense * b.support) / 12000
+        );
+
+
+      // leadership + strategy
+
+      combinations +=
+        Math.min(
+          50,
+          (a.leadership * b.strategy) / 12000
+        );
+    }
+  }
+
+
+  const synergy =
+    clamp(
+      400 +
+      combinations +
+      average(players, "synergy") * 0.30,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Planning
+  // ----------------------------------------------------------
+
+  const planning =
+    clamp(
+      average(players, "intelligence") * 0.55 +
+      average(players, "defense") * 0.15 +
+      average(players, "hax") * 0.15 +
+      synergy * 0.15,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Intelligence / knowledge
+  // ----------------------------------------------------------
+
+  const intelligence =
+    clamp(
+      average(players, "intelligence") * 0.55 +
+      average(
+        profiles,
+        "knowledge"
+      ) * 0.25 +
+      average(
+        profiles,
+        "strategy"
+      ) * 0.20,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Experience
+  // ----------------------------------------------------------
+
+  const experience =
+    clamp(
+      average(players, "power") * 0.55 +
+      average(
+        profiles,
+        "experience"
+      ) * 0.45,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Ability diversity
+  // ----------------------------------------------------------
+
+  let diversity = 0;
+
+  if (hasAttack) diversity += 150;
+  if (hasDefense) diversity += 150;
+  if (hasSupport) diversity += 150;
+  if (hasStrategy) diversity += 150;
+  if (hasSpeed) diversity += 150;
+  if (hasHax) diversity += 150;
+
+  diversity +=
+    Math.min(
+      100,
+      players.length * 8
+    );
+
+
+  // ----------------------------------------------------------
+  // Leadership
+  // ----------------------------------------------------------
+
+  const leadership =
+    clamp(
+      average(
+        profiles,
+        "leadership"
+      ) +
+      profiles.filter(
+        p => p.leadership >= 600
+      ).length * 60,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Adaptability
+  // ----------------------------------------------------------
+
+  const adaptability =
+    clamp(
+      diversity * 0.45 +
+      average(players, "defense") * 0.15 +
+      average(players, "speed") * 0.15 +
+      average(players, "hax") * 0.15 +
+      intelligence * 0.10,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // Auction strategy
+  // ----------------------------------------------------------
+
+  const spent =
+    STARTING_BUDGET -
+    Number(team.budget || 0);
+
+  const characterCount =
+    players.length;
+
+
+  let auctionStrategy = 500;
+
+
+  // More characters with money remaining
+
+  if (characterCount >= 5) {
+    auctionStrategy += 60;
+  }
+
+  if (characterCount >= 8) {
+    auctionStrategy += 50;
+  }
+
+
+  // Remaining money matters
+
+  const remainingRatio =
+    Number(team.budget || 0) /
+    STARTING_BUDGET;
+
+  auctionStrategy +=
+    remainingRatio * 250;
+
+
+  // Avoid spending everything too early
+
+  if (
+    spent > STARTING_BUDGET * 0.90 &&
+    characterCount < MAX_CHARACTERS
+  ) {
+
+    auctionStrategy -= 100;
+  }
+
+
+  auctionStrategy =
+    clamp(
+      auctionStrategy,
+      0,
+      1000
+    );
+
+
+  // ----------------------------------------------------------
+  // FINAL TEAM SCORE
+  // ----------------------------------------------------------
+
+  const finalScore =
+      characterStrength * 0.25
+    + synergy            * 0.15
+    + planning           * 0.15
+    + intelligence      * 0.10
+    + experience        * 0.10
+    + diversity         * 0.10
+    + leadership        * 0.05
+    + adaptability      * 0.05
+    + auctionStrategy   * 0.05;
+
+
+  return {
+
+    characterStrength:
+      Math.round(characterStrength),
+
+    coordination:
+      Math.round(coordination),
+
+    planning:
+      Math.round(planning),
+
+    intelligence:
+      Math.round(intelligence),
+
+    experience:
+      Math.round(experience),
+
+    abilityDiversity:
+      Math.round(diversity),
+
+    leadership:
+      Math.round(leadership),
+
+    adaptability:
+      Math.round(adaptability),
+
+    synergy:
+      Math.round(synergy),
+
+    auctionStrategy:
+      Math.round(auctionStrategy),
+
+    finalScore:
+      Math.round(finalScore)
+  };
 }
 
 
@@ -2320,17 +2725,19 @@ function calculateFinalTeamScore(team){
 // FINAL RESULTS
 // ============================================================
 
-function calculateFinalResults(room){
+function calculateFinalResults(room) {
 
-  const teams=[];
+  const teams = [];
 
-  Object.entries(
-    room.teams||{}
-  ).forEach(
-    ([uid,team])=>{
+  Object.entries(room.teams || {})
+    .forEach(([uid, team]) => {
 
       const players =
-        team.players||[];
+        team.players || [];
+
+      const combination =
+        calculateTeamCombination(team);
+
 
       teams.push({
 
@@ -2345,110 +2752,107 @@ function calculateFinalResults(room){
           players.length,
 
         budget:
-          Number(
-            team.budget||0
-          ),
+          Number(team.budget || 0),
 
         score:
-          calculateFinalTeamScore(
-            team
-          ),
+          combination.finalScore,
+
+        characterStrength:
+          combination.characterStrength,
+
+        coordination:
+          combination.coordination,
+
+        planning:
+          combination.planning,
+
+        intelligence:
+          combination.intelligence,
+
+        experience:
+          combination.experience,
+
+        abilityDiversity:
+          combination.abilityDiversity,
+
+        leadership:
+          combination.leadership,
+
+        adaptability:
+          combination.adaptability,
+
+        synergy:
+          combination.synergy,
+
+        auctionStrategy:
+          combination.auctionStrategy,
 
         totalPower:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.power||0),
+            (sum,p) =>
+              sum + Number(p.power || 0),
             0
           ),
 
         totalAttack:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.attack||0),
+            (sum,p) =>
+              sum + Number(p.attack || 0),
             0
           ),
 
         totalDefense:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.defense||0),
+            (sum,p) =>
+              sum + Number(p.defense || 0),
             0
           ),
 
         totalSpeed:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.speed||0),
+            (sum,p) =>
+              sum + Number(p.speed || 0),
             0
           ),
 
         totalHax:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.hax||0),
+            (sum,p) =>
+              sum + Number(p.hax || 0),
             0
           ),
 
         totalIntelligence:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.intelligence||0),
+            (sum,p) =>
+              sum + Number(p.intelligence || 0),
             0
           ),
 
         totalSynergy:
           players.reduce(
-            (sum,p)=>
-              sum+
-              Number(p.synergy||0),
+            (sum,p) =>
+              sum + Number(p.synergy || 0),
             0
           )
-
       });
+    });
 
-    }
-  );
 
   teams.sort(
-    (a,b)=>{
-
-      if(
-        b.score!==a.score
-      ){
-        return b.score-a.score;
-      }
-
-      if(
-        b.totalPower!==
-        a.totalPower
-      ){
-        return b.totalPower-a.totalPower;
-      }
-
-      if(
-        b.characters!==
-        a.characters
-      ){
-        return b.characters-a.characters;
-      }
-
-      return b.budget-a.budget;
-
-    }
+    (a,b) =>
+      b.score - a.score
   );
+
 
   teams.forEach(
-    (team,index)=>{
+    (team,index) => {
+
       team.rank =
-        index+1;
+        index + 1;
     }
   );
+
 
   return teams;
 }
@@ -2458,110 +2862,81 @@ function calculateFinalResults(room){
 // RANK SUFFIX
 // ============================================================
 
-function rankSuffix(rank){
+function rankSuffix(rank) {
 
-  if(
-    rank>=11 &&
-    rank<=13
-  ){
+  if (
+    rank >= 11 &&
+    rank <= 13
+  ) {
     return "th";
   }
 
-  if(rank%10===1){
-    return "st";
-  }
-
-  if(rank%10===2){
-    return "nd";
-  }
-
-  if(rank%10===3){
-    return "rd";
-  }
+  if (rank % 10 === 1) return "st";
+  if (rank % 10 === 2) return "nd";
+  if (rank % 10 === 3) return "rd";
 
   return "th";
 }
 
 
 // ============================================================
-// FINAL RESULTS DISPLAY
+// FINAL RESULTS SCREEN
 // ============================================================
 
-function renderFinalResults(room){
-
-  const card =
-    $("finalResultsCard");
-
-  const container =
-    $("finalResults");
-
-  if(room.status!=="FINISHED"){
-
-    card.style.display =
-      "none";
-
-    return;
-  }
-
-  card.style.display =
-    "block";
+function renderFinalResults(room) {
 
   const results =
     room.finalResults ||
     calculateFinalResults(room);
 
-  container.innerHTML="";
+  showScreen("resultsScreen");
 
-  results.forEach(team=>{
+  const container =
+    $("finalResults");
 
-    let medal="🏅";
+  if (!container) return;
 
-    if(team.rank===1){
-      medal="🥇";
-    }
+  container.innerHTML = "";
 
-    if(team.rank===2){
-      medal="🥈";
-    }
 
-    if(team.rank===3){
-      medal="🥉";
-    }
+  results.forEach(team => {
+
+    let medal = "🏅";
+
+    if (team.rank === 1) medal = "🥇";
+    if (team.rank === 2) medal = "🥈";
+    if (team.rank === 3) medal = "🥉";
+
 
     const div =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     div.className =
       "final-team-result";
+
 
     const players =
       team.players.length
 
         ? team.players.map(
-            p=>`
+            p => `
 
               <div class="final-player">
 
-                <span style="color:#fff;">
-                  ${escapeHtml(
-                    p.name
-                  )}
+                <span>
+                  ${escapeHtml(p.name)}
                 </span>
 
                 <span>
-                  ${formatMoney(
-                    p.price
-                  )}
+                  ${formatMoney(p.price)}
                 </span>
 
               </div>
-
             `
           ).join("")
 
         : "<div>No characters</div>";
+
 
     div.innerHTML = `
 
@@ -2572,15 +2947,11 @@ function renderFinalResults(room){
         </span>
 
         <strong>
-          ${team.rank}${rankSuffix(
-            team.rank
-          )}
+          ${team.rank}${rankSuffix(team.rank)}
         </strong>
 
         <span class="final-team-name">
-          ${escapeHtml(
-            team.name
-          )}
+          ${escapeHtml(team.name)}
         </span>
 
       </div>
@@ -2588,10 +2959,10 @@ function renderFinalResults(room){
 
       <div class="final-score">
 
-        Final Score:
+        TEAM PERFORMANCE SCORE
 
         <strong>
-          ${team.score}
+          ${team.score}/1000
         </strong>
 
       </div>
@@ -2602,65 +2973,84 @@ function renderFinalResults(room){
         <div>
           Characters
           <strong>
-            ${team.characters}/4
+            ${team.characters}/${MAX_CHARACTERS}
           </strong>
         </div>
 
         <div>
-          Total Power
+          Character Strength
           <strong>
-            ${team.totalPower}
+            ${team.characterStrength}
           </strong>
         </div>
 
         <div>
-          Attack
+          Team Synergy
           <strong>
-            ${team.totalAttack}
+            ${team.synergy}
           </strong>
         </div>
 
         <div>
-          Defense
+          Coordination
           <strong>
-            ${team.totalDefense}
+            ${team.coordination}
           </strong>
         </div>
 
         <div>
-          Speed
+          Battle Planning
           <strong>
-            ${team.totalSpeed}
-          </strong>
-        </div>
-
-        <div>
-          Hax
-          <strong>
-            ${team.totalHax}
+            ${team.planning}
           </strong>
         </div>
 
         <div>
           Intelligence
           <strong>
-            ${team.totalIntelligence}
+            ${team.intelligence}
           </strong>
         </div>
 
         <div>
-          Synergy
+          Experience
           <strong>
-            ${team.totalSynergy}
+            ${team.experience}
+          </strong>
+        </div>
+
+        <div>
+          Ability Diversity
+          <strong>
+            ${team.abilityDiversity}
+          </strong>
+        </div>
+
+        <div>
+          Leadership
+          <strong>
+            ${team.leadership}
+          </strong>
+        </div>
+
+        <div>
+          Adaptability
+          <strong>
+            ${team.adaptability}
+          </strong>
+        </div>
+
+        <div>
+          Auction Strategy
+          <strong>
+            ${team.auctionStrategy}
           </strong>
         </div>
 
         <div>
           Remaining Budget
           <strong>
-            ${formatMoney(
-              team.budget
-            )}
+            ${formatMoney(team.budget)}
           </strong>
         </div>
 
@@ -2679,12 +3069,8 @@ function renderFinalResults(room){
 
     `;
 
-    container.appendChild(
-      div
-    );
-
+    container.appendChild(div);
   });
-
 }
 
 
@@ -2692,27 +3078,20 @@ function renderFinalResults(room){
 // START NEW GAME
 // ============================================================
 
-async function restartGame(){
+async function restartGame() {
 
   const user =
     await waitForAuth();
 
   const snapshot =
-    await get(
-      roomRef()
-    );
+    await get(roomRef());
 
-  if(!snapshot.exists()){
-    return;
-  }
+  if (!snapshot.exists()) return;
 
   const room =
     snapshot.val();
 
-  if(
-    room.hostUid!==
-    user.uid
-  ){
+  if (room.hostUid !== user.uid) {
 
     alert(
       "Only the host can start a new game."
@@ -2721,84 +3100,71 @@ async function restartGame(){
     return;
   }
 
-  const teams={};
 
-  Object.entries(
-    room.teams||{}
-  ).forEach(
-    ([uid,team])=>{
+  const teams = {};
 
-      teams[uid]={
+  Object.entries(room.teams || {})
+    .forEach(([uid, team]) => {
+
+      teams[uid] = {
 
         ...team,
 
         budget:
           STARTING_BUDGET,
 
-        players:[]
-
+        players: []
       };
+    });
 
-    }
-  );
 
   const order =
     shuffle(
-      characters.map(
-        c=>c.id
-      )
+      characters.map(c => c.id)
     );
 
   const first =
-    getCharacter(
-      order[0]
-    );
+    getCharacter(order[0]);
+
 
   await update(
     roomRef(),
     {
 
-      status:
-        "PLAYING",
+      status: "PLAYING",
 
       teams,
 
-      characterOrder:
-        order,
+      characterOrder: order,
 
-      history:[],
+      history: [],
 
-      finalResults:null,
+      finalResults: null,
 
-      auction:{
+      auction: {
 
-        status:
-          "ACTIVE",
+        status: "ACTIVE",
 
-        characterIndex:
-          0,
+        characterIndex: 0,
 
-        characterId:
-          first.id,
+        characterId: first.id,
 
-        currentBid:
-          START_BID,
+        currentBid: START_BID,
 
-        highestBidder:
-          null,
+        highestBidder: null,
 
-        highestBidderName:
-          null,
+        highestBidderName: null,
+
+        lastBidder: null,
+
+        skips: {},
 
         endTime:
-          Date.now()+
-          AUCTION_TIME*1000
-
+          Date.now() +
+          AUCTION_TIME * 1000
       }
-
     }
   );
-
 }
 
 
@@ -2806,97 +3172,91 @@ async function restartGame(){
 // LEAVE ROOM
 // ============================================================
 
-async function leaveRoom(){
+async function leaveRoom() {
 
-  if(
+  if (
     !currentUser ||
     !currentRoomCode
-  ){
+  ) {
 
     goHome();
 
     return;
   }
 
-  if(
-    !confirm(
-      "Leave this room?"
-    )
-  ){
+
+  if (
+    !confirm("Leave this room?")
+  ) {
     return;
   }
 
-  try{
+
+  try {
 
     const snapshot =
-      await get(
-        roomRef()
-      );
+      await get(roomRef());
 
-    if(snapshot.exists()){
+    if (snapshot.exists()) {
 
       const room =
         snapshot.val();
 
-      if(
-        room.hostUid===
+      if (
+        room.hostUid ===
         currentUser.uid
-      ){
+      ) {
 
         const ids =
           Object.keys(
-            room.teams||{}
+            room.teams || {}
           ).filter(
-            id=>
-              id!==currentUser.uid
+            id =>
+              id !== currentUser.uid
           );
 
-        if(ids.length){
+
+        if (ids.length) {
 
           await update(
             roomRef(),
             {
-              hostUid:
-                ids[0]
+              hostUid: ids[0]
             }
           );
-
         }
-
       }
-
     }
 
+
     await remove(
-      teamRef(
-        currentUser.uid
-      )
+      teamRef(currentUser.uid)
     );
 
-  }catch(error){
+  } catch (error) {
 
     console.error(error);
-
   }
 
-  if(timerInterval){
 
-    clearInterval(
-      timerInterval
-    );
+  if (timerInterval) {
 
-    timerInterval=null;
+    clearInterval(timerInterval);
 
+    timerInterval = null;
   }
 
-  currentRoomCode=null;
-  currentRoom=null;
+
+  currentRoomCode = null;
+  currentRoom = null;
+
 
   window.history.replaceState(
     {},
     document.title,
     window.location.pathname
   );
+
 
   goHome();
 }
@@ -2930,6 +3290,9 @@ window.startAuction =
 window.placeBid =
   placeBid;
 
+window.placeSkip =
+  placeSkip;
+
 window.restartGame =
   restartGame;
 
@@ -2943,7 +3306,7 @@ window.leaveRoom =
 
 document.addEventListener(
   "DOMContentLoaded",
-  ()=>{
+  () => {
     checkURLRoom();
   }
 );
