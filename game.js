@@ -1,6 +1,5 @@
 // ============================================================
-// NARUTO SHINOBI AUCTION
-// Firebase + GitHub Pages
+// NARUTO SHINOBI AUCTION - MULTIPLAYER
 // ============================================================
 
 import { initializeApp } from
@@ -9,12 +8,12 @@ import { initializeApp } from
 import {
   getDatabase,
   ref,
-  set,
   get,
+  set,
   update,
+  remove,
   onValue,
-  runTransaction,
-  remove
+  runTransaction
 } from
   "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
@@ -43,64 +42,55 @@ const firebaseConfig = {
 
 
 // ============================================================
-// FIREBASE INITIALIZATION
+// FIREBASE
 // ============================================================
 
-let app;
-let db;
-let auth;
-
-try {
-  app = initializeApp(firebaseConfig);
-  db = getDatabase(app);
-  auth = getAuth(app);
-} catch (error) {
-  console.error("Firebase initialization error:", error);
-  showConnection("❌ Firebase initialization failed");
-}
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
 
 // ============================================================
-// GLOBAL STATE
+// GLOBAL VARIABLES
 // ============================================================
 
 let currentUser = null;
 let currentRoomCode = null;
-let currentTeamName = "";
 let currentRoom = null;
 
 let roomListener = null;
 let auctionListener = null;
-
 let timerInterval = null;
 let finishingAuction = false;
+
+let authReadyResolve;
+
+const authReady = new Promise(resolve => {
+  authReadyResolve = resolve;
+});
 
 
 // ============================================================
 // GAME SETTINGS
 // ============================================================
 
-const STARTING_BUDGET = 2000; // ₹20 Cr = 2000 Lakhs
+const STARTING_BUDGET = 2000;
 const MAX_TEAMS = 4;
 const MAX_CHARACTERS = 4;
 
 const AUCTION_TIME = 10;
 
-const START_BID = 100; // ₹1 Cr
-const SMALL_INCREMENT = 50; // ₹50 Lakhs
-const BIG_INCREMENT = 100; // ₹1 Cr
-
-const STARTER_CHARACTER_DELAY = 1200;
+const START_BID = 100;
+const SMALL_INCREMENT = 50;
+const BIG_INCREMENT = 100;
 
 
 // ============================================================
 // CHARACTERS
-// Power is used for team ranking.
 // ============================================================
 
 const characters = [
 
-  // OTSUTSUKI
   {
     id: "kaguya",
     name: "Kaguya Otsutsuki",
@@ -185,7 +175,6 @@ const characters = [
     synergy: 88
   },
 
-  // NARUTO / SASUKE
   {
     id: "naruto",
     name: "Naruto Uzumaki",
@@ -343,30 +332,6 @@ const characters = [
   },
 
   {
-    id: "lee",
-    name: "Rock Lee",
-    power: 83,
-    attack: 91,
-    defense: 79,
-    speed: 92,
-    hax: 65,
-    intelligence: 72,
-    synergy: 84
-  },
-
-  {
-    id: "neji",
-    name: "Neji Hyuga",
-    power: 84,
-    attack: 83,
-    defense: 80,
-    speed: 87,
-    hax: 86,
-    intelligence: 88,
-    synergy: 89
-  },
-
-  {
     id: "gaara",
     name: "Gaara",
     power: 86,
@@ -499,66 +464,6 @@ const characters = [
   },
 
   {
-    id: "shino",
-    name: "Shino Aburame",
-    power: 72,
-    attack: 72,
-    defense: 71,
-    speed: 68,
-    hax: 82,
-    intelligence: 88,
-    synergy: 84
-  },
-
-  {
-    id: "temari",
-    name: "Temari",
-    power: 72,
-    attack: 77,
-    defense: 67,
-    speed: 70,
-    hax: 77,
-    intelligence: 82,
-    synergy: 82
-  },
-
-  {
-    id: "kankuro",
-    name: "Kankuro",
-    power: 70,
-    attack: 73,
-    defense: 72,
-    speed: 64,
-    hax: 79,
-    intelligence: 81,
-    synergy: 80
-  },
-
-  {
-    id: "choji",
-    name: "Choji Akimichi",
-    power: 71,
-    attack: 86,
-    defense: 80,
-    speed: 60,
-    hax: 69,
-    intelligence: 65,
-    synergy: 78
-  },
-
-  {
-    id: "ino",
-    name: "Ino Yamanaka",
-    power: 68,
-    attack: 61,
-    defense: 64,
-    speed: 68,
-    hax: 79,
-    intelligence: 84,
-    synergy: 90
-  },
-
-  {
     id: "sakura",
     name: "Sakura Haruno",
     power: 84,
@@ -607,18 +512,6 @@ const characters = [
   },
 
   {
-    id: "jiraiya2",
-    name: "Jiraiya Sage Mode",
-    power: 93,
-    attack: 92,
-    defense: 89,
-    speed: 85,
-    hax: 94,
-    intelligence: 96,
-    synergy: 97
-  },
-
-  {
     id: "naruto_sage",
     name: "Naruto Sage Mode",
     power: 92,
@@ -646,7 +539,7 @@ const characters = [
 
 
 // ============================================================
-// HELPERS
+// BASIC HELPERS
 // ============================================================
 
 function $(id) {
@@ -655,31 +548,27 @@ function $(id) {
 
 
 function showConnection(message) {
-  const el = $("connectionStatus");
 
-  if (el) {
-    el.textContent = message;
+  const element = $("connectionStatus");
+
+  if (element) {
+    element.textContent = message;
   }
 
-  const allMessages = document.querySelectorAll(
-    "#connectionStatus, #firebaseStatus"
-  );
-
-  allMessages.forEach(item => {
-    item.textContent = message;
-  });
 }
 
 
 function formatMoney(lakhs) {
+
+  lakhs = Number(lakhs || 0);
+
   if (lakhs >= 100) {
+
     const crores = lakhs / 100;
 
-    if (Number.isInteger(crores)) {
-      return `₹${crores} Cr`;
-    }
-
-    return `₹${crores.toFixed(2)} Cr`;
+    return Number.isInteger(crores)
+      ? `₹${crores} Cr`
+      : `₹${crores.toFixed(2)} Cr`;
   }
 
   return `₹${lakhs} L`;
@@ -687,48 +576,79 @@ function formatMoney(lakhs) {
 
 
 function escapeHtml(value) {
+
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+
 }
 
 
 function randomRoomCode() {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-  let code = "";
+  const chars =
+    "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  let result = "";
 
   for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
+
+    result +=
+      chars[Math.floor(Math.random() * chars.length)];
+
   }
 
-  return code;
+  return result;
+
 }
 
 
-function shuffleArray(array) {
-  const copy = [...array];
+function shuffle(array) {
 
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+  const result = [...array];
 
-    [copy[i], copy[j]] = [copy[j], copy[i]];
+  for (
+    let i = result.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(Math.random() * (i + 1));
+
+    [
+      result[i],
+      result[j]
+    ] =
+    [
+      result[j],
+      result[i]
+    ];
+
   }
 
-  return copy;
+  return result;
+
 }
 
 
 function getCharacter(id) {
-  return characters.find(character => character.id === id);
+
+  return characters.find(
+    character => character.id === id
+  );
+
 }
 
 
 function getNextBid(currentBid) {
-  if (!currentBid || currentBid < START_BID) {
+
+  currentBid = Number(currentBid || 0);
+
+  if (currentBid < START_BID) {
     return START_BID;
   }
 
@@ -737,38 +657,7 @@ function getNextBid(currentBid) {
   }
 
   return currentBid + BIG_INCREMENT;
-}
 
-
-function getRoomRef() {
-  return ref(db, `rooms/${currentRoomCode}`);
-}
-
-
-function getAuctionRef() {
-  return ref(db, `rooms/${currentRoomCode}/auction`);
-}
-
-
-function getTeamRef(uid) {
-  return ref(db, `rooms/${currentRoomCode}/teams/${uid}`);
-}
-
-
-function getTeamsArray(room) {
-  if (!room || !room.teams) {
-    return [];
-  }
-
-  return Object.entries(room.teams).map(([uid, team]) => ({
-    uid,
-    ...team
-  }));
-}
-
-
-function isMyTeam(uid) {
-  return currentUser && uid === currentUser.uid;
 }
 
 
@@ -776,100 +665,120 @@ function isMyTeam(uid) {
 // AUTHENTICATION
 // ============================================================
 
-function startFirebaseAuth() {
+onAuthStateChanged(auth, user => {
 
-  if (!auth) {
-    showConnection("❌ Firebase not initialized");
-    return;
+  if (user) {
+
+    currentUser = user;
+
+    console.log(
+      "Firebase authentication ready:",
+      user.uid
+    );
+
+    showConnection(
+      "🟢 Connected to Firebase"
+    );
+
+    authReadyResolve(user);
+
+    checkRoomURL();
+
+  } else {
+
+    showConnection(
+      "⏳ Signing in..."
+    );
+
+    signInAnonymously(auth)
+      .catch(error => {
+
+        console.error(
+          "Anonymous sign-in failed:",
+          error
+        );
+
+        showConnection(
+          "❌ Firebase authentication failed"
+        );
+
+        alert(
+          "Firebase authentication failed:\n\n" +
+          error.message
+        );
+
+      });
+
   }
 
-  showConnection("⏳ Connecting to Firebase...");
+});
 
-  onAuthStateChanged(auth, user => {
 
-    if (user) {
+// ============================================================
+// WAIT FOR AUTH
+// ============================================================
 
-      currentUser = user;
+async function waitForAuth() {
 
-      showConnection("🟢 Connected to Firebase");
+  if (currentUser) {
+    return currentUser;
+  }
 
-      console.log("Firebase user:", user.uid);
+  showConnection(
+    "⏳ Connecting to Firebase..."
+  );
 
-      autoJoinFromURL();
-
-    } else {
-
-      signInAnonymously(auth)
-        .then(() => {
-          console.log("Anonymous sign-in started");
-        })
-        .catch(error => {
-
-          console.error("Anonymous authentication error:", error);
-
-          showConnection(
-            "❌ Authentication failed: " + error.message
-          );
-
-          alert(
-            "Firebase Authentication failed.\n\n" +
-            error.message
-          );
-        });
-
-    }
-
-  });
+  return await authReady;
 
 }
 
 
-if (auth) {
-  startFirebaseAuth();
-}
-
-
 // ============================================================
-// URL ROOM HANDLING
+// URL ROOM
 // ============================================================
 
-function autoJoinFromURL() {
+function checkRoomURL() {
 
-  const params = new URLSearchParams(window.location.search);
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
 
-  const room = params.get("room");
+  const room =
+    params.get("room");
 
   if (!room) {
     return;
   }
 
-  const roomCode = room.toUpperCase();
+  const input =
+    $("joinRoomCode");
 
-  const roomInput = $("joinRoomCode");
+  if (input) {
 
-  if (roomInput) {
-    roomInput.value = roomCode;
+    input.value =
+      room.trim().toUpperCase();
+
   }
 
   showJoinRoom();
+
 }
 
 
 // ============================================================
-// HOME / SCREEN NAVIGATION
+// SCREENS
 // ============================================================
 
-function hideAllScreens() {
+function hideScreens() {
 
-  const screens = [
+  [
     "homeScreen",
     "createRoomScreen",
     "joinRoomScreen",
     "lobbyScreen",
     "gameScreen"
-  ];
-
-  screens.forEach(id => {
+  ].forEach(id => {
 
     const element = $(id);
 
@@ -884,48 +793,91 @@ function hideAllScreens() {
 
 function showScreen(id) {
 
-  hideAllScreens();
+  hideScreens();
 
-  const screen = $(id);
+  const element = $(id);
 
-  if (screen) {
-    screen.style.display = "block";
+  if (!element) {
+
+    console.error(
+      "Screen not found:",
+      id
+    );
+
+    return;
+
   }
+
+  element.style.display = "block";
 
 }
 
 
 function showCreateRoom() {
+
   showScreen("createRoomScreen");
+
 }
 
 
 function showJoinRoom() {
+
   showScreen("joinRoomScreen");
+
 }
 
 
 function goHome() {
 
   if (timerInterval) {
+
     clearInterval(timerInterval);
+
     timerInterval = null;
+
   }
 
-  currentRoomCode = null;
-  currentRoom = null;
-
   showScreen("homeScreen");
+
 }
 
 
-function showLobby() {
-  showScreen("lobbyScreen");
+// ============================================================
+// ROOM REFERENCES
+// ============================================================
+
+function roomRef(code = currentRoomCode) {
+
+  return ref(
+    db,
+    `rooms/${code}`
+  );
+
 }
 
 
-function showGame() {
-  showScreen("gameScreen");
+function teamRef(
+  uid,
+  code = currentRoomCode
+) {
+
+  return ref(
+    db,
+    `rooms/${code}/teams/${uid}`
+  );
+
+}
+
+
+function auctionRef(
+  code = currentRoomCode
+) {
+
+  return ref(
+    db,
+    `rooms/${code}/auction`
+  );
+
 }
 
 
@@ -935,61 +887,72 @@ function showGame() {
 
 async function createRoom() {
 
-  if (!currentUser) {
-    alert("Firebase is still connecting. Please wait a moment.");
-    return;
-  }
-
-  const input = $("createTeamName");
-
-  const teamName = input
-    ? input.value.trim()
-    : "";
-
-  if (!teamName) {
-    alert("Enter your team name.");
-    return;
-  }
-
-  const button = $("createRoomButton");
-
-  if (button) {
-    button.disabled = true;
-    button.textContent = "CREATING...";
-  }
-
   try {
 
-    let roomCode = null;
-    let roomExists = true;
+    const user =
+      await waitForAuth();
 
-    for (let attempt = 0; attempt < 10; attempt++) {
+    const input =
+      $("createTeamName");
 
-      const candidate = randomRoomCode();
+    const teamName =
+      input
+        ? input.value.trim()
+        : "";
 
-      const snapshot = await get(
-        ref(db, `rooms/${candidate}`)
+    if (!teamName) {
+
+      alert(
+        "Please enter your team name."
       );
 
-      if (!snapshot.exists()) {
+      return;
 
-        roomCode = candidate;
-        roomExists = false;
+    }
+
+    const button =
+      $("createRoomButton");
+
+    if (button) {
+
+      button.disabled = true;
+      button.textContent = "CREATING...";
+
+    }
+
+    let code = null;
+
+    for (let i = 0; i < 10; i++) {
+
+      const candidate =
+        randomRoomCode();
+
+      const existing =
+        await get(
+          roomRef(candidate)
+        );
+
+      if (!existing.exists()) {
+
+        code = candidate;
 
         break;
+
       }
+
     }
 
-    if (roomExists || !roomCode) {
-      throw new Error("Could not generate a room code.");
-    }
+    if (!code) {
 
-    currentRoomCode = roomCode;
-    currentTeamName = teamName;
+      throw new Error(
+        "Could not create a unique room."
+      );
+
+    }
 
     const room = {
 
-      hostUid: currentUser.uid,
+      hostUid: user.uid,
 
       status: "LOBBY",
 
@@ -997,7 +960,7 @@ async function createRoom() {
 
       teams: {
 
-        [currentUser.uid]: {
+        [user.uid]: {
 
           name: teamName,
 
@@ -1013,37 +976,48 @@ async function createRoom() {
 
       auction: null,
 
+      characterOrder: [],
+
       history: []
 
     };
 
     await set(
-      ref(db, `rooms/${roomCode}`),
+      roomRef(code),
       room
     );
 
-    setRoomURL(roomCode);
+    currentRoomCode = code;
+    currentRoom = room;
+
+    updateRoomURL(code);
 
     showLobby();
 
     listenToRoom();
 
-    updateLobbyUI(room);
-
   } catch (error) {
 
-    console.error("Create room error:", error);
+    console.error(
+      "CREATE ROOM ERROR:",
+      error
+    );
 
     alert(
-      "Could not create room.\n\n" +
+      "Could not create room:\n\n" +
       error.message
     );
 
   } finally {
 
+    const button =
+      $("createRoomButton");
+
     if (button) {
+
       button.disabled = false;
       button.textContent = "CREATE ROOM";
+
     }
 
   }
@@ -1057,90 +1031,189 @@ async function createRoom() {
 
 async function joinRoom() {
 
-  if (!currentUser) {
-    alert("Firebase is still connecting. Please wait.");
-    return;
-  }
-
-  const codeInput = $("joinRoomCode");
-  const nameInput = $("joinTeamName");
-
-  const roomCode = codeInput
-    ? codeInput.value.trim().toUpperCase()
-    : "";
-
-  const teamName = nameInput
-    ? nameInput.value.trim()
-    : "";
-
-  if (!roomCode) {
-    alert("Enter the room code.");
-    return;
-  }
-
-  if (!teamName) {
-    alert("Enter your team name.");
-    return;
-  }
-
   try {
 
-    const roomRef = ref(db, `rooms/${roomCode}`);
+    // IMPORTANT:
+    // Wait for Firebase authentication first.
+    const user =
+      await waitForAuth();
 
-    const snapshot = await get(roomRef);
+    const codeInput =
+      $("joinRoomCode");
+
+    const nameInput =
+      $("joinTeamName");
+
+    const code =
+      codeInput
+        ? codeInput.value.trim().toUpperCase()
+        : "";
+
+    const teamName =
+      nameInput
+        ? nameInput.value.trim()
+        : "";
+
+    if (!code) {
+
+      alert(
+        "Enter the room code."
+      );
+
+      return;
+
+    }
+
+    if (code.length !== 6) {
+
+      alert(
+        "Room code must contain 6 characters."
+      );
+
+      return;
+
+    }
+
+    if (!teamName) {
+
+      alert(
+        "Enter your team name."
+      );
+
+      return;
+
+    }
+
+    const button =
+      document.querySelector(
+        '#joinRoomScreen button[onclick="joinRoom()"]'
+      );
+
+    if (button) {
+
+      button.disabled = true;
+      button.textContent = "JOINING...";
+
+    }
+
+    console.log(
+      "Trying to join room:",
+      code
+    );
+
+    const snapshot =
+      await get(
+        roomRef(code)
+      );
 
     if (!snapshot.exists()) {
-      alert("Room not found.");
-      return;
-    }
 
-    const room = snapshot.val();
-
-    if (room.status !== "LOBBY") {
-      alert("This auction has already started.");
-      return;
-    }
-
-    const teams = room.teams || {};
-
-    const teamCount = Object.keys(teams).length;
-
-    if (teamCount >= MAX_TEAMS) {
-
-      if (!teams[currentUser.uid]) {
-        alert("Room is full. Maximum 4 teams.");
-        return;
-      }
+      throw new Error(
+        "Room not found. Check the room code."
+      );
 
     }
 
-    currentRoomCode = roomCode;
-    currentTeamName = teamName;
+    const room =
+      snapshot.val();
 
-    await update(
-      ref(db, `rooms/${roomCode}/teams/${currentUser.uid}`),
+    console.log(
+      "Room found:",
+      room
+    );
+
+    // Allow joining only before auction starts.
+    if (
+      room.status !== "LOBBY"
+    ) {
+
+      throw new Error(
+        "This auction has already started. Join before the host starts the auction."
+      );
+
+    }
+
+    const teams =
+      room.teams || {};
+
+    const teamIds =
+      Object.keys(teams);
+
+    // If this user is already inside,
+    // update their name instead of creating another team.
+    if (
+      !teams[user.uid] &&
+      teamIds.length >= MAX_TEAMS
+    ) {
+
+      throw new Error(
+        "This room already has 4 players."
+      );
+
+    }
+
+    await set(
+      teamRef(user.uid, code),
       {
+
         name: teamName,
-        budget: STARTING_BUDGET,
-        players: [],
-        joinedAt: Date.now()
+
+        budget: teams[user.uid]
+          ? Number(
+              teams[user.uid].budget ??
+              STARTING_BUDGET
+            )
+          : STARTING_BUDGET,
+
+        players: teams[user.uid]
+          ? teams[user.uid].players || []
+          : [],
+
+        joinedAt:
+          teams[user.uid]?.joinedAt ||
+          Date.now()
+
       }
     );
 
-    setRoomURL(roomCode);
+    currentRoomCode = code;
+
+    updateRoomURL(code);
 
     showLobby();
 
     listenToRoom();
 
+    console.log(
+      "Successfully joined:",
+      code
+    );
+
   } catch (error) {
 
-    console.error("Join room error:", error);
+    console.error(
+      "JOIN ROOM ERROR:",
+      error
+    );
 
     alert(
-      "Could not join room.\n\n" +
+      "Could not join room:\n\n" +
       error.message
     );
+
+  } finally {
+
+    const button =
+      document.querySelector(
+        '#joinRoomScreen button[onclick="joinRoom()"]'
+      );
+
+    if (button) {
+
+      button.disabled = false;
+      button.textContent = "JOIN ROOM";
+
+    }
 
   }
 
@@ -1151,27 +1224,39 @@ async function joinRoom() {
 // ROOM URL
 // ============================================================
 
-function setRoomURL(roomCode) {
+function updateRoomURL(code) {
 
   const url =
-    `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
+    `${window.location.origin}${window.location.pathname}?room=${code}`;
 
-  const linkElement = $("roomLink");
+  const display =
+    $("displayRoomCode");
 
-  if (linkElement) {
-    linkElement.textContent = url;
+  if (display) {
+    display.textContent = code;
   }
 
-  const codeElement = $("displayRoomCode");
+  const link =
+    $("roomLink");
 
-  if (codeElement) {
-    codeElement.textContent = roomCode;
+  if (link) {
+    link.textContent = url;
   }
+
+  window.history.replaceState(
+    {},
+    document.title,
+    `?room=${code}`
+  );
 
 }
 
 
 async function copyRoomLink() {
+
+  if (!currentRoomCode) {
+    return;
+  }
 
   const url =
     `${window.location.origin}${window.location.pathname}?room=${currentRoomCode}`;
@@ -1180,7 +1265,9 @@ async function copyRoomLink() {
 
     await navigator.clipboard.writeText(url);
 
-    alert("Room link copied!");
+    alert(
+      "Room link copied!"
+    );
 
   } catch {
 
@@ -1190,6 +1277,17 @@ async function copyRoomLink() {
     );
 
   }
+
+}
+
+
+// ============================================================
+// SHOW LOBBY
+// ============================================================
+
+function showLobby() {
+
+  showScreen("lobbyScreen");
 
 }
 
@@ -1206,77 +1304,93 @@ function listenToRoom() {
 
   if (roomListener) {
     roomListener();
-    roomListener = null;
   }
 
   if (auctionListener) {
     auctionListener();
-    auctionListener = null;
   }
 
-  const roomRef = getRoomRef();
+  roomListener =
+    onValue(
+      roomRef(),
+      snapshot => {
 
-  roomListener = onValue(
-    roomRef,
-    snapshot => {
+        if (!snapshot.exists()) {
 
-      if (!snapshot.exists()) {
+          alert(
+            "This room was deleted."
+          );
 
-        alert("This room no longer exists.");
+          currentRoomCode = null;
 
-        goHome();
+          goHome();
 
-        return;
+          return;
+
+        }
+
+        currentRoom =
+          snapshot.val();
+
+        renderRoom(currentRoom);
+
+      },
+
+      error => {
+
+        console.error(
+          "Room listener error:",
+          error
+        );
+
+        alert(
+          "Database connection error:\n\n" +
+          error.message
+        );
+
       }
+    );
 
-      currentRoom = snapshot.val();
 
-      updateLobbyUI(currentRoom);
+  auctionListener =
+    onValue(
+      auctionRef(),
+      snapshot => {
 
-      if (currentRoom.status === "PLAYING") {
+        if (!snapshot.exists()) {
+          return;
+        }
 
-        showGame();
-
-        renderGame(currentRoom);
-
-      } else if (currentRoom.status === "LOBBY") {
-
-        showLobby();
-
-      } else if (currentRoom.status === "FINISHED") {
-
-        showGame();
-
-        renderGame(currentRoom);
+        displayAuction(
+          snapshot.val()
+        );
 
       }
+    );
 
-    },
-
-    error => {
-
-      console.error("Room listener error:", error);
-
-      showConnection(
-        "❌ Database error: " + error.message
-      );
-
-    }
-  );
+}
 
 
-  auctionListener = onValue(
-    getAuctionRef(),
-    snapshot => {
+// ============================================================
+// RENDER ROOM
+// ============================================================
 
-      const auction = snapshot.val();
+function renderRoom(room) {
 
-      if (auction) {
-        displayAuction(auction);
-      }
+  renderLobby(room);
 
-    }
-  );
+  if (
+    room.status === "PLAYING" ||
+    room.status === "FINISHED"
+  ) {
+
+    showScreen("gameScreen");
+
+    renderTeams(room);
+    renderHistory(room);
+    renderRanking(room);
+
+  }
 
 }
 
@@ -1285,50 +1399,72 @@ function listenToRoom() {
 // LOBBY
 // ============================================================
 
-function updateLobbyUI(room) {
+function renderLobby(room) {
 
-  if (!room) {
+  if (
+    room.status !== "LOBBY"
+  ) {
     return;
   }
 
-  const codeElement = $("displayRoomCode");
+  showLobby();
 
-  if (codeElement) {
-    codeElement.textContent =
-      currentRoomCode || "------";
+  const display =
+    $("displayRoomCode");
+
+  if (display) {
+
+    display.textContent =
+      currentRoomCode;
+
   }
 
-  const list = $("lobbyPlayers");
+  const players =
+    $("lobbyPlayers");
 
-  if (!list) {
+  if (!players) {
     return;
   }
 
-  const teams = getTeamsArray(room);
+  players.innerHTML = "";
 
-  list.innerHTML = "";
+  const teams =
+    room.teams || {};
 
-  teams.forEach((team, index) => {
+  Object.entries(teams)
+    .forEach(
+      ([uid, team], index) => {
 
-    const div = document.createElement("div");
+        const div =
+          document.createElement("div");
 
-    div.className = "player-card";
+        div.className =
+          "player-card";
 
-    const hostText =
-      team.uid === room.hostUid
-        ? " 👑 HOST"
-        : "";
+        const host =
+          uid === room.hostUid
+            ? " 👑 HOST"
+            : "";
 
-    div.innerHTML = `
-      <strong>${index + 1}. ${escapeHtml(team.name)}</strong>
-      <span>${hostText}</span>
-    `;
+        div.innerHTML = `
+          <strong>
+            ${index + 1}.
+            ${escapeHtml(team.name)}
+          </strong>
 
-    list.appendChild(div);
+          <span>
+            ${host}
+          </span>
+        `;
 
-  });
+        players.appendChild(div);
 
-  const startButton = $("startAuctionButton");
+      }
+    );
+
+
+  const startButton =
+    $("startAuctionButton");
 
   if (startButton) {
 
@@ -1337,14 +1473,13 @@ function updateLobbyUI(room) {
       currentUser.uid === room.hostUid
     ) {
 
-      startButton.style.display = "block";
-
-      startButton.disabled =
-        teams.length < 1;
+      startButton.style.display =
+        "block";
 
     } else {
 
-      startButton.style.display = "none";
+      startButton.style.display =
+        "none";
 
     }
 
@@ -1359,59 +1494,77 @@ function updateLobbyUI(room) {
 
 async function startAuction() {
 
-  if (!currentUser || !currentRoomCode) {
-    return;
-  }
-
   try {
 
-    const snapshot = await get(getRoomRef());
+    const user =
+      await waitForAuth();
+
+    const snapshot =
+      await get(
+        roomRef()
+      );
 
     if (!snapshot.exists()) {
       return;
     }
 
-    const room = snapshot.val();
+    const room =
+      snapshot.val();
 
-    if (room.hostUid !== currentUser.uid) {
+    if (
+      room.hostUid !== user.uid
+    ) {
 
-      alert("Only the room host can start the auction.");
+      alert(
+        "Only the host can start the auction."
+      );
 
+      return;
+
+    }
+
+    if (
+      room.status !== "LOBBY"
+    ) {
       return;
     }
 
-    if (room.status !== "LOBBY") {
+    const teamCount =
+      Object.keys(
+        room.teams || {}
+      ).length;
+
+    if (teamCount < 1) {
       return;
     }
 
-    const teams = getTeamsArray(room);
+    const order =
+      shuffle(
+        characters.map(
+          character => character.id
+        )
+      );
 
-    if (teams.length < 1) {
-      alert("At least one team is required.");
-      return;
-    }
-
-    const order = shuffleArray(
-      characters.map(character => character.id)
-    );
-
-    const firstCharacter = getCharacter(order[0]);
-
-    const now = Date.now();
+    const first =
+      getCharacter(order[0]);
 
     await update(
-      getRoomRef(),
+      roomRef(),
       {
 
         status: "PLAYING",
 
-        "auction": {
+        characterOrder: order,
+
+        history: [],
+
+        auction: {
 
           status: "ACTIVE",
 
           characterIndex: 0,
 
-          characterId: firstCharacter.id,
+          characterId: first.id,
 
           currentBid: START_BID,
 
@@ -1419,25 +1572,23 @@ async function startAuction() {
 
           highestBidderName: null,
 
-          endTime: now + AUCTION_TIME * 1000,
+          endTime:
+            Date.now() +
+            AUCTION_TIME * 1000
 
-          round: 1
-
-        },
-
-        characterOrder: order,
-
-        history: []
+        }
 
       }
     );
 
   } catch (error) {
 
-    console.error("Start auction error:", error);
+    console.error(
+      "Start error:",
+      error
+    );
 
     alert(
-      "Could not start auction.\n\n" +
       error.message
     );
 
@@ -1447,100 +1598,7 @@ async function startAuction() {
 
 
 // ============================================================
-// DISPLAY GAME
-// ============================================================
-
-function renderGame(room) {
-
-  if (!room) {
-    return;
-  }
-
-  renderTeams(room);
-
-  renderHistory(room);
-
-  renderRanking(room);
-
-  if (room.auction) {
-    displayAuction(room.auction);
-  }
-
-}
-
-
-// ============================================================
-// TEAM DISPLAY
-// ============================================================
-
-function renderTeams(room) {
-
-  const container =
-    $("teamStats") ||
-    $("teamsContainer");
-
-  if (!container) {
-    return;
-  }
-
-  const teams = getTeamsArray(room);
-
-  container.innerHTML = "";
-
-  teams.forEach(team => {
-
-    const players = team.players || [];
-
-    const card = document.createElement("div");
-
-    card.className =
-      "team-card" +
-      (isMyTeam(team.uid) ? " my-team" : "");
-
-    card.innerHTML = `
-
-      <h3>
-        ${escapeHtml(team.name)}
-        ${isMyTeam(team.uid) ? " ⭐" : ""}
-      </h3>
-
-      <div>
-        Budget:
-        <strong>${formatMoney(team.budget || 0)}</strong>
-      </div>
-
-      <div>
-        Characters:
-        <strong>${players.length}/${MAX_CHARACTERS}</strong>
-      </div>
-
-      <div class="team-players">
-
-        ${
-          players.length
-            ? players.map(p => `
-                <div>
-                  ${escapeHtml(p.name)}
-                  —
-                  ${formatMoney(p.price)}
-                </div>
-              `).join("")
-            : "<div>No characters yet</div>"
-        }
-
-      </div>
-
-    `;
-
-    container.appendChild(card);
-
-  });
-
-}
-
-
-// ============================================================
-// AUCTION DISPLAY
+// DISPLAY AUCTION
 // ============================================================
 
 function displayAuction(auction) {
@@ -1550,72 +1608,76 @@ function displayAuction(auction) {
   }
 
   const character =
-    getCharacter(auction.characterId);
+    getCharacter(
+      auction.characterId
+    );
 
   if (!character) {
     return;
   }
 
-  const nameElement =
-    $("characterName") ||
-    $("currentCharacter");
+  const name =
+    $("characterName");
 
-  if (nameElement) {
-    nameElement.textContent = character.name;
+  if (name) {
+    name.textContent =
+      character.name;
   }
 
-  const powerElement =
+  const power =
     $("characterPower");
 
-  if (powerElement) {
-    powerElement.textContent =
+  if (power) {
+
+    power.textContent =
       `Power ${character.power}`;
+
   }
 
-  const bidElement =
+  const bid =
     $("currentBid");
 
-  if (bidElement) {
+  if (bid) {
 
-    bidElement.textContent =
-      formatMoney(auction.currentBid || START_BID);
+    bid.textContent =
+      formatMoney(
+        auction.currentBid
+      );
 
   }
 
-  const bidderElement =
+  const bidder =
     $("highestBidder");
 
-  if (bidderElement) {
+  if (bidder) {
 
-    bidderElement.textContent =
+    bidder.textContent =
       auction.highestBidderName
         ? `Highest Bidder: ${auction.highestBidderName}`
         : "No bids yet";
 
   }
 
-  const nextBidElement =
+  const next =
     $("nextBid");
 
-  if (nextBidElement) {
+  if (next) {
 
-    if (auction.highestBidder) {
+    const nextAmount =
+      auction.highestBidder
+        ? getNextBid(
+            auction.currentBid
+          )
+        : START_BID;
 
-      nextBidElement.textContent =
-        `Next bid: ${formatMoney(getNextBid(auction.currentBid))}`;
-
-    } else {
-
-      nextBidElement.textContent =
-        `Starting bid: ${formatMoney(START_BID)}`;
-
-    }
+    next.textContent =
+      `Next bid: ${formatMoney(nextAmount)}`;
 
   }
 
   updateBidButton(auction);
 
-  updateTimer(auction);
+  startTimer(auction);
 
 }
 
@@ -1627,8 +1689,7 @@ function displayAuction(auction) {
 function updateBidButton(auction) {
 
   const button =
-    $("bidButton") ||
-    $("placeBidButton");
+    $("bidButton");
 
   if (!button) {
     return;
@@ -1646,44 +1707,53 @@ function updateBidButton(auction) {
 
   }
 
-  const myTeam =
+  const team =
     currentRoom.teams &&
     currentRoom.teams[currentUser.uid];
 
-  if (!myTeam) {
+  if (!team) {
 
     button.disabled = true;
+
+    button.textContent =
+      "NOT IN ROOM";
 
     return;
 
   }
 
   const players =
-    myTeam.players || [];
+    team.players || [];
 
-  const budget =
-    Number(myTeam.budget || 0);
-
-  const nextBid =
-    auction.highestBidder
-      ? getNextBid(Number(auction.currentBid))
-      : START_BID;
-
-  if (players.length >= MAX_CHARACTERS) {
+  if (
+    players.length >= MAX_CHARACTERS
+  ) {
 
     button.disabled = true;
 
-    button.textContent = "MAX 4 CHARACTERS";
+    button.textContent =
+      "MAX 4 CHARACTERS";
 
     return;
 
   }
 
-  if (budget < nextBid) {
+  const nextBid =
+    auction.highestBidder
+      ? getNextBid(
+          auction.currentBid
+        )
+      : START_BID;
+
+  if (
+    Number(team.budget || 0) <
+    nextBid
+  ) {
 
     button.disabled = true;
 
-    button.textContent = "NOT ENOUGH BUDGET";
+    button.textContent =
+      "NOT ENOUGH BUDGET";
 
     return;
 
@@ -1703,14 +1773,19 @@ function updateBidButton(auction) {
 
 async function placeBid() {
 
-  if (!currentUser || !currentRoomCode) {
-    return;
-  }
-
   try {
 
+    const user =
+      await waitForAuth();
+
+    if (!currentRoomCode) {
+      return;
+    }
+
     const roomSnapshot =
-      await get(getRoomRef());
+      await get(
+        roomRef()
+      );
 
     if (!roomSnapshot.exists()) {
       return;
@@ -1722,17 +1797,22 @@ async function placeBid() {
     const auction =
       room.auction;
 
-    if (!auction || auction.status !== "ACTIVE") {
+    if (
+      !auction ||
+      auction.status !== "ACTIVE"
+    ) {
       return;
     }
 
     const team =
       room.teams &&
-      room.teams[currentUser.uid];
+      room.teams[user.uid];
 
     if (!team) {
 
-      alert("You are not in this room.");
+      alert(
+        "You are not part of this room."
+      );
 
       return;
 
@@ -1741,61 +1821,60 @@ async function placeBid() {
     const players =
       team.players || [];
 
-    if (players.length >= MAX_CHARACTERS) {
-
-      alert("Your team already has 4 characters.");
-
+    if (
+      players.length >= MAX_CHARACTERS
+    ) {
       return;
-
     }
 
     const nextBid =
       auction.highestBidder
-        ? getNextBid(Number(auction.currentBid))
+        ? getNextBid(
+            auction.currentBid
+          )
         : START_BID;
 
-    const budget =
-      Number(team.budget || 0);
-
-    if (budget < nextBid) {
+    if (
+      Number(team.budget || 0) <
+      nextBid
+    ) {
 
       alert(
-        `You need ${formatMoney(nextBid)} to bid.`
+        "Not enough budget."
       );
 
       return;
 
     }
 
-    const auctionRef =
-      getAuctionRef();
-
     const result =
       await runTransaction(
-        auctionRef,
+        auctionRef(),
         current => {
 
           if (!current) {
             return;
           }
 
-          if (current.status !== "ACTIVE") {
-            return;
-          }
-
           if (
-            current.endTime &&
-            Date.now() >= current.endTime
+            current.status !==
+            "ACTIVE"
           ) {
             return;
           }
 
-          const currentBid =
-            Number(current.currentBid || START_BID);
+          if (
+            Date.now() >=
+            Number(current.endTime)
+          ) {
+            return;
+          }
 
           const bid =
             current.highestBidder
-              ? getNextBid(currentBid)
+              ? getNextBid(
+                  current.currentBid
+                )
               : START_BID;
 
           return {
@@ -1805,29 +1884,34 @@ async function placeBid() {
             currentBid: bid,
 
             highestBidder:
-              currentUser.uid,
+              user.uid,
 
             highestBidderName:
               team.name,
 
             endTime:
-              Date.now() + AUCTION_TIME * 1000
+              Date.now() +
+              AUCTION_TIME * 1000
 
           };
 
         }
       );
 
-    if (!result.committed) {
-      return;
-    }
+    console.log(
+      "Bid result:",
+      result.committed
+    );
 
   } catch (error) {
 
-    console.error("Bid error:", error);
+    console.error(
+      "Bid error:",
+      error
+    );
 
     alert(
-      "Bid failed.\n\n" +
+      "Bid failed:\n\n" +
       error.message
     );
 
@@ -1840,44 +1924,44 @@ async function placeBid() {
 // TIMER
 // ============================================================
 
-function updateTimer(auction) {
+function startTimer(auction) {
 
   if (timerInterval) {
-    clearInterval(timerInterval);
+
+    clearInterval(
+      timerInterval
+    );
+
   }
 
-  const timerElement =
-    $("auctionTimer") ||
-    $("timer");
+  const timer =
+    $("auctionTimer");
 
-  if (!timerElement) {
+  if (!timer) {
     return;
   }
 
-  function tick() {
-
-    if (!auction || auction.status !== "ACTIVE") {
-
-      timerElement.textContent = "0";
-
-      return;
-
-    }
+  function updateTimer() {
 
     const remaining =
       Math.max(
         0,
         Math.ceil(
-          (Number(auction.endTime) - Date.now()) / 1000
+          (
+            Number(auction.endTime) -
+            Date.now()
+          ) / 1000
         )
       );
 
-    timerElement.textContent =
+    timer.textContent =
       `${remaining}s`;
 
     if (remaining <= 0) {
 
-      clearInterval(timerInterval);
+      clearInterval(
+        timerInterval
+      );
 
       timerInterval = null;
 
@@ -1887,21 +1971,19 @@ function updateTimer(auction) {
 
   }
 
-  tick();
+  updateTimer();
 
   timerInterval =
-    setInterval(tick, 250);
+    setInterval(
+      updateTimer,
+      250
+    );
 
 }
 
 
 // ============================================================
 // FINISH AUCTION
-// ============================================================
-//
-// A transaction changes ACTIVE -> FINALIZING.
-// Only the client that successfully changes the state
-// continues the sale/skip process.
 // ============================================================
 
 async function finishAuction() {
@@ -1917,98 +1999,86 @@ async function finishAuction() {
 
   try {
 
-    const auctionRef =
-      getAuctionRef();
-
-    const claim =
+    const result =
       await runTransaction(
-        auctionRef,
-        current => {
+        auctionRef(),
+        auction => {
 
-          if (!current) {
-            return;
-          }
-
-          if (current.status !== "ACTIVE") {
+          if (!auction) {
             return;
           }
 
           if (
-            current.endTime &&
-            Date.now() < Number(current.endTime)
+            auction.status !==
+            "ACTIVE"
+          ) {
+            return;
+          }
+
+          if (
+            Date.now() <
+            Number(auction.endTime)
           ) {
             return;
           }
 
           return {
-
-            ...current,
-
+            ...auction,
             status: "FINALIZING"
-
           };
 
         }
       );
 
-    if (!claim.committed) {
-
-      finishingAuction = false;
-
+    if (!result.committed) {
       return;
-
     }
 
     const auction =
-      claim.snapshot.val();
+      result.snapshot.val();
 
     const character =
-      getCharacter(auction.characterId);
+      getCharacter(
+        auction.characterId
+      );
 
     if (!character) {
-      finishingAuction = false;
       return;
     }
 
-    // --------------------------------------------------------
-    // NO BID = SKIP
-    // --------------------------------------------------------
-
-    if (!auction.highestBidder) {
+    // No bidder
+    if (
+      !auction.highestBidder
+    ) {
 
       await addHistory({
 
         type: "SKIP",
 
-        character: character.name,
-
-        characterId: character.id,
+        character:
+          character.name,
 
         price: 0,
 
-        teamName: "No Bid",
+        teamName:
+          "No Bid",
 
-        timestamp: Date.now()
+        timestamp:
+          Date.now()
 
       });
 
     }
 
-    // --------------------------------------------------------
-    // SOLD
-    // --------------------------------------------------------
-
+    // Winner
     else {
 
-      const winnerUid =
+      const winner =
         auction.highestBidder;
-
-      const winnerRef =
-        getTeamRef(winnerUid);
 
       const winnerResult =
         await runTransaction(
-          winnerRef,
+          teamRef(winner),
           team => {
 
             if (!team) {
@@ -2018,17 +2088,26 @@ async function finishAuction() {
             const players =
               team.players || [];
 
-            if (players.length >= MAX_CHARACTERS) {
+            const price =
+              Number(
+                auction.currentBid
+              );
+
+            const budget =
+              Number(
+                team.budget || 0
+              );
+
+            if (
+              players.length >=
+              MAX_CHARACTERS
+            ) {
               return;
             }
 
-            const budget =
-              Number(team.budget || 0);
-
-            const price =
-              Number(auction.currentBid || START_BID);
-
-            if (budget < price) {
+            if (
+              budget < price
+            ) {
               return;
             }
 
@@ -2045,27 +2124,36 @@ async function finishAuction() {
 
                 {
 
-                  id: character.id,
+                  id:
+                    character.id,
 
-                  name: character.name,
+                  name:
+                    character.name,
 
-                  price,
+                  price:
 
-                  power: character.power,
+                    price,
 
-                  attack: character.attack,
+                  power:
+                    character.power,
 
-                  defense: character.defense,
+                  attack:
+                    character.attack,
 
-                  speed: character.speed,
+                  defense:
+                    character.defense,
 
-                  hax: character.hax,
+                  speed:
+                    character.speed,
 
-                  intelligence: character.intelligence,
+                  hax:
+                    character.hax,
 
-                  synergy: character.synergy,
+                  intelligence:
+                    character.intelligence,
 
-                  purchasedAt: Date.now()
+                  synergy:
+                    character.synergy
 
                 }
 
@@ -2082,19 +2170,19 @@ async function finishAuction() {
 
           type: "SOLD",
 
-          character: character.name,
+          character:
+            character.name,
 
-          characterId: character.id,
-
-          price: Number(auction.currentBid),
+          price:
+            Number(
+              auction.currentBid
+            ),
 
           teamName:
             auction.highestBidderName,
 
-          teamUid:
-            auction.highestBidder,
-
-          timestamp: Date.now()
+          timestamp:
+            Date.now()
 
         });
 
@@ -2102,16 +2190,14 @@ async function finishAuction() {
 
     }
 
-    // --------------------------------------------------------
-    // NEXT CHARACTER
-    // --------------------------------------------------------
-
-    await advanceAuction(auction);
+    await nextCharacter(
+      auction
+    );
 
   } catch (error) {
 
     console.error(
-      "Finish auction error:",
+      "Finish error:",
       error
     );
 
@@ -2125,16 +2211,16 @@ async function finishAuction() {
 
 
 // ============================================================
-// ADD HISTORY
+// HISTORY
 // ============================================================
 
-async function addHistory(entry) {
-
-  const historyRef =
-    ref(db, `rooms/${currentRoomCode}/history`);
+async function addHistory(item) {
 
   await runTransaction(
-    historyRef,
+    ref(
+      db,
+      `rooms/${currentRoomCode}/history`
+    ),
     history => {
 
       const list =
@@ -2144,7 +2230,7 @@ async function addHistory(entry) {
 
       return [
         ...list,
-        entry
+        item
       ];
 
     }
@@ -2157,103 +2243,189 @@ async function addHistory(entry) {
 // NEXT CHARACTER
 // ============================================================
 
-async function advanceAuction(previousAuction) {
+async function nextCharacter(
+  previous
+) {
 
-  const roomSnapshot =
-    await get(getRoomRef());
+  const snapshot =
+    await get(
+      roomRef()
+    );
 
-  if (!roomSnapshot.exists()) {
+  if (!snapshot.exists()) {
     return;
   }
 
   const room =
-    roomSnapshot.val();
+    snapshot.val();
 
   const order =
     room.characterOrder || [];
 
-  const oldIndex =
-    Number(previousAuction.characterIndex || 0);
+  const currentIndex =
+    Number(
+      previous.characterIndex || 0
+    );
 
   const nextIndex =
-    oldIndex + 1;
+    currentIndex + 1;
 
-  // No more characters
   if (
-    nextIndex >= order.length
+    nextIndex >=
+    order.length
   ) {
 
     await update(
-      getRoomRef(),
+      roomRef(),
       {
 
-        status: "FINISHED",
+        status:
+          "FINISHED",
 
         auction: {
-
-          ...previousAuction,
-
-          status: "FINISHED"
-
+          ...previous,
+          status:
+            "FINISHED"
         }
 
       }
     );
 
-    if (timerInterval) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-    }
-
     return;
+
   }
 
   const nextId =
     order[nextIndex];
 
-  const nextCharacter =
+  const next =
     getCharacter(nextId);
 
-  if (!nextCharacter) {
+  if (!next) {
     return;
   }
 
-  await new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        STARTER_CHARACTER_DELAY
-      )
-  );
-
   await update(
-    getRoomRef(),
+    roomRef(),
     {
 
       auction: {
 
-        status: "ACTIVE",
+        status:
+          "ACTIVE",
 
-        characterIndex: nextIndex,
+        characterIndex:
+          nextIndex,
 
-        characterId: nextId,
+        characterId:
+          next.id,
 
-        currentBid: START_BID,
+        currentBid:
+          START_BID,
 
-        highestBidder: null,
+        highestBidder:
+          null,
 
-        highestBidderName: null,
+        highestBidderName:
+          null,
 
         endTime:
           Date.now() +
-          AUCTION_TIME * 1000,
-
-        round: nextIndex + 1
+          AUCTION_TIME * 1000
 
       }
 
     }
   );
+
+}
+
+
+// ============================================================
+// TEAMS
+// ============================================================
+
+function renderTeams(room) {
+
+  const container =
+    $("teamStats");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = "";
+
+  const teams =
+    room.teams || {};
+
+  Object.entries(teams)
+    .forEach(
+      ([uid, team]) => {
+
+        const players =
+          team.players || [];
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "team-card" +
+          (
+            currentUser &&
+            uid === currentUser.uid
+              ? " my-team"
+              : ""
+          );
+
+        card.innerHTML = `
+
+          <h3>
+            ${escapeHtml(team.name)}
+            ${
+              currentUser &&
+              uid === currentUser.uid
+                ? " ⭐"
+                : ""
+            }
+          </h3>
+
+          <div>
+            Budget:
+            <strong>
+              ${formatMoney(team.budget)}
+            </strong>
+          </div>
+
+          <div>
+            Characters:
+            <strong>
+              ${players.length}/4
+            </strong>
+          </div>
+
+          <div class="team-players">
+
+            ${
+              players.length
+                ? players.map(player => `
+                    <div>
+                      ${escapeHtml(player.name)}
+                      —
+                      ${formatMoney(player.price)}
+                    </div>
+                  `).join("")
+                : "<div>No characters</div>"
+            }
+
+          </div>
+
+        `;
+
+        container.appendChild(card);
+
+      }
+    );
 
 }
 
@@ -2265,8 +2437,7 @@ async function advanceAuction(previousAuction) {
 function renderHistory(room) {
 
   const container =
-    $("auctionHistory") ||
-    $("history");
+    $("auctionHistory");
 
   if (!container) {
     return;
@@ -2289,14 +2460,14 @@ function renderHistory(room) {
       .reverse()
       .map(item => {
 
-        if (item.type === "SKIP") {
+        if (
+          item.type === "SKIP"
+        ) {
 
           return `
             <div class="history-item">
               ⏭️
-              <strong>
-                ${escapeHtml(item.character)}
-              </strong>
+              ${escapeHtml(item.character)}
               — No bids
             </div>
           `;
@@ -2306,16 +2477,10 @@ function renderHistory(room) {
         return `
           <div class="history-item">
             🔥
-            <strong>
-              ${escapeHtml(item.character)}
-            </strong>
-
+            ${escapeHtml(item.character)}
             —
-
             ${escapeHtml(item.teamName)}
-
             —
-
             <strong>
               ${formatMoney(item.price)}
             </strong>
@@ -2329,10 +2494,10 @@ function renderHistory(room) {
 
 
 // ============================================================
-// TEAM POWER RANKING
+// POWER RANKING
 // ============================================================
 
-function calculateTeamPower(team) {
+function teamPower(team) {
 
   const players =
     team.players || [];
@@ -2345,49 +2510,30 @@ function calculateTeamPower(team) {
 
   players.forEach(player => {
 
-    const base =
-      Number(player.power || 0);
+    total +=
+      Number(player.power || 0) * 0.30;
 
-    const attack =
-      Number(player.attack || 0);
+    total +=
+      Number(player.attack || 0) * 0.12;
 
-    const defense =
-      Number(player.defense || 0);
+    total +=
+      Number(player.defense || 0) * 0.12;
 
-    const speed =
-      Number(player.speed || 0);
+    total +=
+      Number(player.speed || 0) * 0.12;
 
-    const hax =
-      Number(player.hax || 0);
+    total +=
+      Number(player.hax || 0) * 0.14;
 
-    const intelligence =
-      Number(player.intelligence || 0);
+    total +=
+      Number(player.intelligence || 0) * 0.10;
 
-    const synergy =
-      Number(player.synergy || 0);
-
-    const characterScore =
-      (
-        base * 0.30 +
-        attack * 0.12 +
-        defense * 0.12 +
-        speed * 0.12 +
-        hax * 0.14 +
-        intelligence * 0.10 +
-        synergy * 0.10
-      );
-
-    total += characterScore;
+    total +=
+      Number(player.synergy || 0) * 0.10;
 
   });
 
-  // Small team-completeness bonus
-  const sizeBonus =
-    players.length * 2;
-
-  return Math.round(
-    total + sizeBonus
-  );
+  return Math.round(total);
 
 }
 
@@ -2395,42 +2541,35 @@ function calculateTeamPower(team) {
 function renderRanking(room) {
 
   const container =
-    $("teamRanking") ||
-    $("powerRanking");
+    $("teamRanking");
 
   if (!container) {
     return;
   }
 
   const teams =
-    getTeamsArray(room)
-      .map(team => ({
+    Object.entries(
+      room.teams || {}
+    )
+      .map(
+        ([uid, team]) => ({
 
-        ...team,
+          uid,
+          ...team,
 
-        power:
-          calculateTeamPower(team)
+          power:
+            teamPower(team)
 
-      }));
-
-  teams.sort(
-    (a, b) =>
-      b.power - a.power
-  );
-
-  if (!teams.length) {
-
-    container.innerHTML =
-      "<div>No teams yet.</div>";
-
-    return;
-
-  }
+        })
+      )
+      .sort(
+        (a, b) =>
+          b.power - a.power
+      );
 
   container.innerHTML =
-    teams.map((team, index) => {
-
-      return `
+    teams.map(
+      (team, index) => `
 
         <div class="ranking-item">
 
@@ -2440,32 +2579,32 @@ function renderRanking(room) {
           </strong>
 
           <span>
-            Power: ${team.power}
+            Power ${team.power}
           </span>
 
         </div>
 
-      `;
-
-    }).join("");
+      `
+    ).join("");
 
 }
 
 
 // ============================================================
-// START NEW GAME
+// RESTART GAME
 // ============================================================
 
 async function restartGame() {
 
-  if (!currentUser || !currentRoomCode) {
-    return;
-  }
-
   try {
 
+    const user =
+      await waitForAuth();
+
     const snapshot =
-      await get(getRoomRef());
+      await get(
+        roomRef()
+      );
 
     if (!snapshot.exists()) {
       return;
@@ -2475,24 +2614,23 @@ async function restartGame() {
       snapshot.val();
 
     if (
-      room.hostUid !== currentUser.uid
+      room.hostUid !== user.uid
     ) {
 
       alert(
-        "Only the room host can start a new game."
+        "Only the host can start a new game."
       );
 
       return;
 
     }
 
-    const teams =
-      room.teams || {};
-
     const resetTeams = {};
 
-    Object.entries(teams)
-      .forEach(([uid, team]) => {
+    Object.entries(
+      room.teams || {}
+    ).forEach(
+      ([uid, team]) => {
 
         resetTeams[uid] = {
 
@@ -2501,57 +2639,61 @@ async function restartGame() {
           budget:
             STARTING_BUDGET,
 
-          players: [],
-
-          joinedAt:
-            team.joinedAt || Date.now()
+          players: []
 
         };
 
-      });
+      }
+    );
 
     const order =
-      shuffleArray(
+      shuffle(
         characters.map(
           character => character.id
         )
       );
 
-    const firstCharacter =
+    const first =
       getCharacter(order[0]);
 
     await update(
-      getRoomRef(),
+      roomRef(),
       {
 
-        status: "PLAYING",
+        status:
+          "PLAYING",
 
-        teams: resetTeams,
+        teams:
+          resetTeams,
 
-        characterOrder: order,
+        characterOrder:
+          order,
 
         history: [],
 
         auction: {
 
-          status: "ACTIVE",
+          status:
+            "ACTIVE",
 
-          characterIndex: 0,
+          characterIndex:
+            0,
 
           characterId:
-            firstCharacter.id,
+            first.id,
 
-          currentBid: START_BID,
+          currentBid:
+            START_BID,
 
-          highestBidder: null,
+          highestBidder:
+            null,
 
-          highestBidderName: null,
+          highestBidderName:
+            null,
 
           endTime:
             Date.now() +
-            AUCTION_TIME * 1000,
-
-          round: 1
+            AUCTION_TIME * 1000
 
         }
 
@@ -2561,12 +2703,11 @@ async function restartGame() {
   } catch (error) {
 
     console.error(
-      "Restart game error:",
+      "Restart error:",
       error
     );
 
     alert(
-      "Could not start new game.\n\n" +
       error.message
     );
 
@@ -2581,77 +2722,92 @@ async function restartGame() {
 
 async function leaveRoom() {
 
-  if (!currentRoomCode || !currentUser) {
+  if (!currentUser || !currentRoomCode) {
+
     goHome();
+
     return;
+
   }
 
-  const confirmLeave =
-    confirm("Leave this room?");
-
-  if (!confirmLeave) {
+  if (
+    !confirm(
+      "Leave this room?"
+    )
+  ) {
     return;
   }
 
   try {
 
     const snapshot =
-      await get(getRoomRef());
+      await get(
+        roomRef()
+      );
 
     if (snapshot.exists()) {
 
       const room =
         snapshot.val();
 
-      const teams =
-        room.teams || {};
-
-      const teamIds =
-        Object.keys(teams);
-
       if (
-        room.hostUid === currentUser.uid &&
-        teamIds.length > 1
+        room.hostUid ===
+        currentUser.uid
       ) {
 
-        const nextHost =
-          teamIds.find(
-            id =>
-              id !== currentUser.uid
+        const ids =
+          Object.keys(
+            room.teams || {}
+          )
+            .filter(
+              id =>
+                id !==
+                currentUser.uid
+            );
+
+        if (ids.length) {
+
+          await update(
+            roomRef(),
+            {
+              hostUid:
+                ids[0]
+            }
           );
 
-        await update(
-          getRoomRef(),
-          {
-            hostUid: nextHost
-          }
-        );
+        }
 
       }
 
     }
 
     await remove(
-      getTeamRef(currentUser.uid)
+      teamRef(
+        currentUser.uid
+      )
     );
 
   } catch (error) {
 
     console.error(
-      "Leave room error:",
+      "Leave error:",
       error
     );
 
   }
 
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-
   currentRoomCode = null;
   currentRoom = null;
-  currentTeamName = "";
+
+  if (timerInterval) {
+
+    clearInterval(
+      timerInterval
+    );
+
+    timerInterval = null;
+
+  }
 
   window.history.replaceState(
     {},
@@ -2668,38 +2824,53 @@ async function leaveRoom() {
 // EXPOSE FUNCTIONS TO HTML
 // ============================================================
 
-window.showCreateRoom = showCreateRoom;
-window.showJoinRoom = showJoinRoom;
-window.goHome = goHome;
+window.showCreateRoom =
+  showCreateRoom;
 
-window.createRoom = createRoom;
-window.joinRoom = joinRoom;
+window.showJoinRoom =
+  showJoinRoom;
 
-window.copyRoomLink = copyRoomLink;
+window.goHome =
+  goHome;
 
-window.startAuction = startAuction;
-window.placeBid = placeBid;
+window.createRoom =
+  createRoom;
 
-window.restartGame = restartGame;
-window.leaveRoom = leaveRoom;
+window.joinRoom =
+  joinRoom;
+
+window.copyRoomLink =
+  copyRoomLink;
+
+window.startAuction =
+  startAuction;
+
+window.placeBid =
+  placeBid;
+
+window.restartGame =
+  restartGame;
+
+window.leaveRoom =
+  leaveRoom;
 
 
 // ============================================================
-// INITIAL UI
+// INITIAL SCREEN
 // ============================================================
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
 
-    hideAllScreens();
-
     const params =
       new URLSearchParams(
         window.location.search
       );
 
-    if (params.get("room")) {
+    if (
+      params.get("room")
+    ) {
 
       showJoinRoom();
 
