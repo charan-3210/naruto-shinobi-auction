@@ -1,193 +1,306 @@
-* {
-  box-sizing: border-box;
+/* ============================================================
+   NARUTO SHINOBI AUCTION
+   CINEMATIC INTRO
+============================================================ */
+
+#shinobiIntro {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      #260000 0%,
+      #090000 35%,
+      #000 75%
+    );
+
+  overflow: hidden;
+
+  opacity: 1;
+
+  transition:
+    opacity 1.2s ease,
+    visibility 1.2s ease;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b0f0c;
-  color: white;
+#shinobiIntro.introFinished {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-header {
-  text-align: center;
-  padding: 25px 15px;
-  background: linear-gradient(135deg, #151515, #251300);
-  border-bottom: 2px solid #ff9800;
-}
+#introCanvas {
+  position: absolute;
 
-header h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-header p {
-  margin: 8px 0 0;
-  color: #bbb;
-}
-
-main {
-  width: 95%;
-  max-width: 900px;
-  margin: 20px auto;
-}
-
-.card {
-  background: #171717;
-  border: 1px solid #333;
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 5px 20px rgba(0,0,0,.35);
-}
-
-.card h2,
-.card h3 {
-  margin-top: 0;
-}
-
-input {
   width: 100%;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 1px solid #555;
-  background: #222;
-  color: white;
-  font-size: 16px;
+  height: 100%;
+
+  inset: 0;
+
+  display: block;
 }
 
-button {
-  border: none;
-  border-radius: 10px;
-  padding: 14px 20px;
-  margin: 5px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #ff9800;
-  color: black;
+#introVignette {
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 25%,
+      rgba(0,0,0,.18) 48%,
+      rgba(0,0,0,.72) 100%
+    );
+
+  z-index: 4;
 }
 
-button:active {
-  transform: scale(.97);
+#introLetterboxTop,
+#introLetterboxBottom {
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  height: 8vh;
+
+  background: #000;
+
+  z-index: 10;
 }
 
-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
+#introLetterboxTop {
+  top: 0;
 }
 
-.top-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+#introLetterboxBottom {
+  bottom: 0;
 }
 
-.bid-card {
+
+/* ============================================================
+   FLASH
+============================================================ */
+
+#introFlash {
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,255,255,.95),
+      rgba(255,40,40,.65) 25%,
+      transparent 65%
+    );
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  z-index: 8;
+
+  mix-blend-mode: screen;
+}
+
+
+/* ============================================================
+   TITLE
+============================================================ */
+
+#introTitle {
+
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform:
+    translate(-50%, -50%)
+    scale(.75);
+
+  width: min(900px, 90vw);
+
   text-align: center;
+
+  opacity: 0;
+
+  z-index: 20;
+
+  pointer-events: none;
+
+  text-shadow:
+    0 0 10px #ff0000,
+    0 0 25px #ff0000,
+    0 0 60px rgba(255,0,0,.8);
 }
 
-#currentBid {
-  color: #ff9800;
-  font-size: 38px;
-}
+#introTitleSmall {
 
-.character-card {
-  text-align: center;
-}
+  font-size: clamp(12px, 2vw, 20px);
 
-.auction-label {
-  color: #ff4444;
-  font-weight: bold;
-}
+  letter-spacing:
+    clamp(5px, 1.5vw, 14px);
 
-.character-image {
-  width: 150px;
-  height: 150px;
-  margin: 20px auto;
-  border-radius: 50%;
-  background: #242424;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 65px;
-  border: 3px solid #ff9800;
-}
+  color: #ff7777;
 
-#characterName {
-  font-size: 32px;
-}
+  font-weight: 800;
 
-#characterInfo {
-  color: #aaa;
-  font-size: 17px;
-}
-
-.bid-buttons {
-  margin-top: 20px;
-}
-
-.bid-buttons button {
-  min-width: 120px;
-}
-
-.sold {
-  background: #e53935;
-  color: white;
-}
-
-.next {
-  background: #2196f3;
-  color: white;
-}
-
-#gameMessage {
-  min-height: 25px;
-  color: #ffcc66;
-  font-weight: bold;
-}
-
-.team {
-  background: #222;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 10px 0;
-  border-left: 4px solid #ff9800;
-}
-
-.team-name {
-  font-size: 20px;
-  font-weight: bold;
   margin-bottom: 8px;
 }
 
-.history-item {
-  padding: 12px;
-  border-bottom: 1px solid #333;
+#introTitleMain {
+
+  font-size:
+    clamp(60px, 14vw, 170px);
+
+  line-height: .82;
+
+  font-weight: 1000;
+
+  letter-spacing:
+    clamp(5px, 1vw, 15px);
+
+  color: #fff;
+
+  -webkit-text-stroke:
+    1px rgba(255,80,80,.6);
 }
 
-#joinMessage {
-  color: #ffcc66;
+#introTitleSub {
+
+  margin-top: 15px;
+
+  font-size:
+    clamp(20px, 4vw, 48px);
+
+  letter-spacing:
+    clamp(3px, 1vw, 10px);
+
+  color: #ff3333;
+
+  font-weight: 900;
 }
 
-@media (max-width: 650px) {
+.introTitleLine {
 
-  .top-grid {
-    grid-template-columns: 1fr;
+  width: min(500px, 70vw);
+
+  height: 2px;
+
+  margin: 25px auto 15px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #ff2020,
+      white,
+      #ff2020,
+      transparent
+    );
+
+  box-shadow:
+    0 0 15px #ff0000;
+}
+
+.introTitleHint {
+
+  font-size:
+    clamp(8px, 1.5vw, 13px);
+
+  letter-spacing:
+    clamp(3px, .8vw, 8px);
+
+  color: #aaa;
+}
+
+
+/* ============================================================
+   SKIP
+============================================================ */
+
+#introSkip {
+
+  position: absolute;
+
+  right: 25px;
+  bottom: 25px;
+
+  z-index: 30;
+
+  padding:
+    10px 17px;
+
+  border:
+    1px solid rgba(255,255,255,.25);
+
+  border-radius: 5px;
+
+  color: rgba(255,255,255,.6);
+
+  font-size: 11px;
+
+  letter-spacing: 2px;
+
+  cursor: pointer;
+
+  background:
+    rgba(0,0,0,.35);
+
+  backdrop-filter:
+    blur(8px);
+
+  transition:
+    .25s ease;
+}
+
+#introSkip:hover {
+
+  color: white;
+
+  border-color:
+    #ff3333;
+
+  background:
+    rgba(100,0,0,.35);
+
+  box-shadow:
+    0 0 20px rgba(255,0,0,.35);
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media(max-width:600px){
+
+  #introLetterboxTop,
+  #introLetterboxBottom {
+
+    height: 5vh;
+
   }
 
-  header h1 {
-    font-size: 23px;
-  }
+  #introSkip {
 
-  #characterName {
-    font-size: 25px;
-  }
+    right: 12px;
+    bottom: 12px;
 
-  .bid-buttons button {
-    width: 100%;
-    margin: 5px 0;
+    padding:
+      8px 12px;
+
+    font-size: 9px;
   }
 
 }
