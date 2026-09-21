@@ -121,8 +121,8 @@ function character(id, name, power) {
 
 const characters = [
 
-  character("isshiki","Isshiki Otsutsuki",999),
-  character("shibai","Shibai Otsutsuki",948),
+  character("isshiki","Isshiki Otsutsuki",950),
+  character("shibai","Shibai Otsutsuki",999),
   character("juubidara","Juubidara — Ten Tails Madara",942),
   character("kaguya","Kaguya Otsutsuki",936),
   character("hagoromo","Hagoromo Otsutsuki",925),
