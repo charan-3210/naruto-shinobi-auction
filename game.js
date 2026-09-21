@@ -139,7 +139,7 @@ const characters = [
   character("narutokcm2","Naruto KCM 2",868),
   character("hashiramaedo","Edo Hashirama",865),
   character("sasukems2","Sasuke Eternal Mangekyo",862),
-  character("madaraedo","Edo Madara",858),
+  character("madaraedo","Edo Madara",908),
   character("minatoedo","Edo Minato",852),
   character("kinshiki","Kinshiki Otsutsuki",850),
 
